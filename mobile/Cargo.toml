@@ -1,0 +1,34 @@
+[package]
+name = "mobile"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[lib]
+name = "mobile"
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+bevy_game = { path = ".." } # ToDo
+bevy = { version = "0.15", default-features = false, features = ["android-native-activity"] }
+
+# See https://github.com/bevyengine/bevy/pull/12052
+[target.aarch64-apple-ios-sim.dependencies]
+bevy = { version = "0.15", default-features = false, features = [
+    "ios_simulator",
+] }
+
+[package.metadata.android]
+package = "me.nikl.bevygame"  # ToDo
+apk_name = "BevyGame"  # ToDo same as GAME_OSX_APP_NAME in release workflow
+assets = "../assets"
+strip = "strip"
+resources = "../build/android/res"
+build_targets = ["aarch64-linux-android"]
+
+[package.metadata.android.sdk]
+target_sdk_version = 33
+
+[package.metadata.android.application]
+icon = "@mipmap/icon"
+label = "Bevy Game" # ToDo

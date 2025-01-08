@@ -1,0 +1,86 @@
+[package]
+name = "bevy_game" # ToDo
+version = "0.1.0"
+publish = false
+authors = ["Niklas Eicker <git@nikl.me>"] # ToDo: you are the author ;)
+edition = "2021"
+exclude = ["dist", "build", "assets", "credits"]
+
+[workspace]
+members = ["mobile"]
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[profile.dev]
+opt-level = 1
+
+# This is used by trunk as it doesn't support custom profiles: https://github.com/trunk-rs/trunk/issues/605
+# xbuild also uses this profile for building android AABs because I couldn't find a configuration for it
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+
+# Profile for distribution
+[profile.dist]
+inherits = "release"
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[features]
+dev = [
+    "bevy/dynamic_linking",
+]
+
+# All of Bevy's default features exept for the audio related ones (bevy_audio, vorbis), since they clash with bevy_kira_audio
+#   and android_shared_stdcxx/android-game-activity, since those are covered in `mobile`
+[dependencies]
+bevy = { version = "0.15", default-features = false, features = [
+    "animation",
+    "bevy_asset",
+    "bevy_color",
+    "bevy_core_pipeline",
+    "bevy_gilrs",
+    "bevy_gizmos",
+    "bevy_gltf",
+    "bevy_mesh_picking_backend",
+    "bevy_pbr",
+    "bevy_picking",
+    "bevy_render",
+    "bevy_scene",
+    "bevy_sprite",
+    "bevy_sprite_picking_backend",
+    "bevy_state",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_ui_picking_backend",
+    "bevy_window",
+    "bevy_winit",
+    "custom_cursor",
+    "default_font",
+    "hdr",
+    "multi_threaded",
+    "png",
+    "smaa_luts",
+    "sysinfo_plugin",
+    "tonemapping_luts",
+    "webgl2",
+    "x11",
+] }
+bevy_kira_audio = { version = "0.22.0", features = ["android_shared_stdcxx"] }
+bevy_asset_loader = { version = "0.22" }
+rand = { version = "0.8.3" }
+webbrowser = { version = "1", features = ["hardened"] }
+
+# keep the following in sync with Bevy's dependencies
+winit = { version = "0.30", default-features = false }
+image = { version = "0.25", default-features = false }
+## This greatly improves WGPU's performance due to its heavy use of trace! calls
+log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
+
+[build-dependencies]
+embed-resource = "1"
