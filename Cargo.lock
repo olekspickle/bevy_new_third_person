@@ -317,6 +317,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_3pv_shooter"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "bevy_asset_loader",
+ "bevy_kira_audio",
+ "embed-resource",
+ "image",
+ "log",
+ "rand",
+ "webbrowser",
+ "winit",
+]
+
+[[package]]
 name = "bevy_a11y"
 version = "0.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -587,21 +602,6 @@ checksum = "46db3d4ebc2ab23045a7d32fa1afb4be78894ec3fbe2f52b28f6cd6e4011e400"
 dependencies = [
  "bevy_macro_utils",
  "encase_derive_impl",
-]
-
-[[package]]
-name = "bevy_game"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_asset_loader",
- "bevy_kira_audio",
- "embed-resource",
- "image",
- "log",
- "rand",
- "webbrowser",
- "winit",
 ]
 
 [[package]]
@@ -2865,7 +2865,7 @@ name = "mobile"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bevy_game",
+ "bevy_3pv_shooter",
 ]
 
 [[package]]
