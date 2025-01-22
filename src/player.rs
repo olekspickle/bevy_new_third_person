@@ -1,16 +1,15 @@
-use crate::actions::Actions;
-use crate::loading::TextureAssets;
-use crate::GameState;
 use bevy::prelude::*;
+use bevy_third_person_camera::*;
+
+use crate::{actions::Actions, loading::TextureAssets, GameState};
 
 pub struct PlayerPlugin;
 
-/// This plugin handles player related stuff like movement
+/// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `GameState::Playing`
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Playing), Player::spawn)
-            .add_systems(Update, Player::r#move.run_if(in_state(GameState::Playing)));
+        app.add_systems(OnEnter(GameState::Playing), Player::spawn);
     }
 }
 
@@ -18,15 +17,22 @@ impl Plugin for PlayerPlugin {
 pub struct Player;
 
 impl Player {
-    fn spawn(mut commands: Commands, textures: Res<TextureAssets>) {
-        commands.spawn((
-            Sprite::from_image(textures.bevy.clone()),
-            Transform::from_translation(Vec3::new(0., 0., 1.)),
-            Player,
-        ));
+    fn spawn(
+        mut commands: Commands,
+        mut meshes: ResMut<Assets<Mesh>>,
+        mut materials: ResMut<Assets<StandardMaterial>>,
+        // TODO: add simple player model
+        //assets: Res<AssetServer>,
+    ) {
+        //let mesh = SceneRoot(assets.load("Player.gltf#Scene0"));
+        let mesh = Mesh3d(meshes.add(Mesh::from(Cuboid::new(1.0, 1.0, 1.0))));
+        let color: MeshMaterial3d<StandardMaterial> =
+            MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
+        let pos = Transform::from_translation(Vec3::new(0.0, 0.5, 0.0));
+        commands.spawn((color, mesh, pos, ThirdPersonCameraTarget, Player));
     }
 
-    fn r#move(
+    fn movement(
         time: Res<Time>,
         actions: Res<Actions>,
         mut player_query: Query<&mut Transform, With<Player>>,

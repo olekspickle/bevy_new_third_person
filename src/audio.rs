@@ -1,8 +1,7 @@
-use crate::actions::{set_movement_actions, Actions};
-use crate::loading::AudioAssets;
-use crate::GameState;
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
+
+use crate::{actions::Actions, loading::AudioAssets, GameState};
 
 pub struct InternalAudioPlugin;
 
@@ -14,7 +13,7 @@ impl Plugin for InternalAudioPlugin {
             .add_systems(
                 Update,
                 control_flying_sound
-                    .after(set_movement_actions)
+                    .after(Actions::set_movement)
                     .run_if(in_state(GameState::Playing)),
             );
     }

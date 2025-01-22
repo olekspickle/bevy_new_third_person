@@ -70,6 +70,7 @@ bevy = { version = "0.15", default-features = false, features = [
     "tonemapping_luts",
     "webgl2",
     "x11",
+    "wayland"
 ] }
 bevy_kira_audio = { version = "0.22.0", features = ["android_shared_stdcxx"] }
 bevy_asset_loader = { version = "0.22" }
@@ -81,6 +82,7 @@ winit = { version = "0.30", default-features = false }
 image = { version = "0.25", default-features = false }
 ## This greatly improves WGPU's performance due to its heavy use of trace! calls
 log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
+bevy_third_person_camera = "0.2.0"
 
 [build-dependencies]
 embed-resource = "1"
