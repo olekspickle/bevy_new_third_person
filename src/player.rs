@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_third_person_camera::*;
 
-use crate::{actions::Actions, loading::TextureAssets, GameState};
+use crate::{actions::Actions, loading::TextureAssets, Screen};
 
 pub struct PlayerPlugin;
 
@@ -9,7 +9,7 @@ pub struct PlayerPlugin;
 /// Player logic is only active during the State `GameState::Playing`
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Playing), Player::spawn);
+        app.add_systems(OnEnter(Screen::Playing), Player::spawn);
     }
 }
 

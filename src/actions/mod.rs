@@ -3,7 +3,7 @@ use bevy::prelude::*;
 
 use crate::actions::game_control::{get_movement, GameControl};
 use crate::player::Player;
-use crate::GameState;
+use crate::Screen;
 
 mod game_control;
 
@@ -17,7 +17,7 @@ impl Plugin for ActionsPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Actions>().add_systems(
             Update,
-            Actions::set_movement.run_if(in_state(GameState::Playing)),
+            Actions::set_movement.run_if(in_state(Screen::Playing)),
         );
     }
 }

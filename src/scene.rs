@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::GameState;
+use crate::Screen;
 
 pub struct ScenePlugin;
 
@@ -8,7 +8,7 @@ pub struct ScenePlugin;
 /// Scene logic is only active during the State `GameState::Playing`
 impl Plugin for ScenePlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Playing), Scene::setup);
+        app.add_systems(OnEnter(Screen::Playing), Scene::setup);
     }
 }
 

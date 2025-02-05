@@ -1,5 +1,5 @@
 use crate::loading::TextureAssets;
-use crate::GameState;
+use crate::Screen;
 use bevy::prelude::*;
 
 pub struct MenuPlugin;
@@ -8,9 +8,9 @@ pub struct MenuPlugin;
 /// The menu is only drawn during the State `GameState::Menu` and is removed when that state is exited
 impl Plugin for MenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(GameState::Menu), setup_menu)
-            .add_systems(Update, click_play_button.run_if(in_state(GameState::Menu)))
-            .add_systems(OnExit(GameState::Menu), cleanup_menu);
+        app.add_systems(OnEnter(Screen::Menu), setup_menu)
+            .add_systems(Update, click_play_button.run_if(in_state(Screen::Menu)))
+            .add_systems(OnExit(Screen::Menu), cleanup_menu);
     }
 }
 
@@ -61,7 +61,7 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
                     },
                     BackgroundColor(button_colors.normal),
                     button_colors,
-                    ChangeState(GameState::Playing),
+                    ChangeState(Screen::Playing),
                 ))
                 .with_child((
                     Text::new("Play"),
@@ -163,13 +163,13 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
 }
 
 #[derive(Component)]
-struct ChangeState(GameState);
+struct ChangeState(Screen);
 
 #[derive(Component)]
 struct OpenLink(&'static str);
 
 fn click_play_button(
-    mut next_state: ResMut<NextState<GameState>>,
+    mut next_state: ResMut<NextState<Screen>>,
     mut interaction_query: Query<
         (
             &Interaction,
