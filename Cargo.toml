@@ -1,10 +1,11 @@
 [package]
-name = "bevy_3pv_shooter" # ToDo
+name = "bevy_3rd_person_view" # ToDo
 version = "0.1.0"
 publish = false
 authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
 edition = "2021"
 exclude = ["dist", "build", "assets", "credits"]
+repository = "https://github.com/olekspickle/bevy_3rd_person_view"
 
 [workspace]
 members = ["mobile"]

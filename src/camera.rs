@@ -1,15 +1,11 @@
 use bevy::prelude::*;
 use bevy_third_person_camera::*;
 
-use crate::{actions::Actions, loading::TextureAssets, Screen};
-
-pub struct CameraPlugin;
+use crate::Screen;
 
 /// Camera logic is only active during the State `GameState::Playing`
-impl Plugin for CameraPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(Screen::Playing), Camera::spawn);
-    }
+pub fn plugin(app: &mut App) {
+    app.add_systems(OnEnter(Screen::Playing), Camera::spawn);
 }
 
 #[derive(Component)]

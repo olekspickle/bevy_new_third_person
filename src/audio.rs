@@ -1,40 +1,67 @@
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
 
-use crate::{actions::Actions, loading::AudioAssets, Screen};
-
-pub struct InternalAudioPlugin;
+use crate::{
+    actions::{self, Actions},
+    loading::AudioAssets,
+    Screen,
+};
 
 // This plugin is responsible to control the game audio
-impl Plugin for InternalAudioPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugins(AudioPlugin)
-            .add_systems(OnEnter(Screen::Playing), start_audio)
-            .add_systems(
-                Update,
-                control_flying_sound
-                    .after(Actions::set_movement)
-                    .run_if(in_state(Screen::Playing)),
-            );
-    }
+pub fn plugin(app: &mut App) {
+    app.add_plugins(AudioPlugin)
+        .add_systems(OnEnter(Screen::Playing), start_or_resume_audio)
+        .add_systems(OnExit(Screen::Playing), pause_audio)
+        .add_systems(
+            Update,
+            control_flying_sound
+                .after(actions::set_movement)
+                .run_if(in_state(Screen::Playing)),
+        );
 }
 
 #[derive(Resource)]
-struct FlyingAudio(Handle<AudioInstance>);
+struct MainTheme(Handle<AudioInstance>);
 
-fn start_audio(mut commands: Commands, audio_assets: Res<AudioAssets>, audio: Res<Audio>) {
-    audio.pause();
-    let handle = audio
-        .play(audio_assets.flying.clone())
-        .looped()
-        .with_volume(0.3)
-        .handle();
-    commands.insert_resource(FlyingAudio(handle));
+fn start_or_resume_audio(
+    mut commands: Commands,
+    bg_audio: Res<MainTheme>,
+    global_audio: Res<Audio>,
+    audio_assets: Res<AudioAssets>,
+    mut audio_instances: ResMut<Assets<AudioInstance>>,
+) {
+    //global_audio.resume();
+    if let Some(instance) = audio_instances.get_mut(&bg_audio.0) {
+        match instance.state() {
+            PlaybackState::Paused { .. } | PlaybackState::Pausing { .. } => {
+                instance.resume(AudioTween::default());
+            }
+            _ => {
+                let handle = global_audio
+                    .play(audio_assets.bg_play.clone())
+                    .looped()
+                    .with_volume(0.3)
+                    .handle();
+                commands.insert_resource(MainTheme(handle));
+            }
+        }
+    }
+}
+
+fn pause_audio(
+    //global_audio: Res<Audio>,
+    audio: Res<MainTheme>,
+    mut audio_instances: ResMut<Assets<AudioInstance>>,
+) {
+    //global_audio.pause();
+    if let Some(instance) = audio_instances.get_mut(&audio.0) {
+        instance.pause(AudioTween::default());
+    }
 }
 
 fn control_flying_sound(
     actions: Res<Actions>,
-    audio: Res<FlyingAudio>,
+    audio: Res<MainTheme>,
     mut audio_instances: ResMut<Assets<AudioInstance>>,
 ) {
     if let Some(instance) = audio_instances.get_mut(&audio.0) {

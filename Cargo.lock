@@ -333,7 +333,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "bevy_3pv_shooter"
+name = "bevy_3rd_person_view"
 version = "0.1.0"
 dependencies = [
  "bevy",
@@ -2903,7 +2903,7 @@ name = "mobile"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bevy_3pv_shooter",
+ "bevy_3rd_person_view",
 ]
 
 [[package]]

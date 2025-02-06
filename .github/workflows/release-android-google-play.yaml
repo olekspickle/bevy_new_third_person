@@ -19,7 +19,7 @@ env:
   # used for uploading the app to a GitHub release
   GAME_EXECUTABLE_NAME: bevy_game
   BUNDLE_PATH: "target/x/release/android/mobile.aab"
-  PACKAGE_NAME: "me.nikl.bevygame"
+  PACKAGE_NAME: "me.pickle.bevygame"
   # release track; you can promote a build to "higher" tracks in the play console or publish to a different track directly
   # see track at https://github.com/r0adkll/upload-google-play#inputs for more options
   TRACK: internal

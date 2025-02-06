@@ -1,17 +1,13 @@
-use crate::loading::TextureAssets;
-use crate::Screen;
 use bevy::prelude::*;
 
-pub struct MenuPlugin;
+use crate::{loading::TextureAssets, Screen};
 
 /// This plugin is responsible for the game menu (containing only one button...)
 /// The menu is only drawn during the State `GameState::Menu` and is removed when that state is exited
-impl Plugin for MenuPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(Screen::Menu), setup_menu)
-            .add_systems(Update, click_play_button.run_if(in_state(Screen::Menu)))
-            .add_systems(OnExit(Screen::Menu), cleanup_menu);
-    }
+pub fn plugin(app: &mut App) {
+    app.add_systems(OnEnter(Screen::Menu), setup_menu)
+        .add_systems(Update, click_play_button.run_if(in_state(Screen::Menu)))
+        .add_systems(OnExit(Screen::Menu), cleanup_menu);
 }
 
 #[derive(Component)]
@@ -33,20 +29,26 @@ impl Default for ButtonColors {
 struct Menu;
 
 fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
-    info!("menu");
-    commands.spawn((Camera2d, Msaa::Off));
+    commands.spawn((
+        Menu,
+        Camera2d,
+        Camera {
+            order: 1,
+            ..default()
+        },
+        Msaa::Off,
+    ));
+
+    //TODO: use bevy_hui for easier UI setup
     commands
-        .spawn((
-            Node {
-                width: Val::Percent(100.0),
-                height: Val::Percent(100.0),
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::Center,
-                justify_content: JustifyContent::Center,
-                ..default()
-            },
-            Menu,
-        ))
+        .spawn((Node {
+            width: Val::Percent(100.0),
+            height: Val::Percent(100.0),
+            flex_direction: FlexDirection::Column,
+            align_items: AlignItems::Center,
+            justify_content: JustifyContent::Center,
+            ..default()
+        },))
         .with_children(|children| {
             let button_colors = ButtonColors::default();
             children
@@ -72,6 +74,7 @@ fn setup_menu(mut commands: Commands, textures: Res<TextureAssets>) {
                     TextColor(Color::linear_rgb(0.9, 0.9, 0.9)),
                 ));
         });
+
     commands
         .spawn((
             Node {

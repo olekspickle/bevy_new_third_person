@@ -2,14 +2,10 @@ use bevy::prelude::*;
 
 use crate::Screen;
 
-pub struct ScenePlugin;
-
 /// This plugin handles loading and saving scenes
 /// Scene logic is only active during the State `GameState::Playing`
-impl Plugin for ScenePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_systems(OnEnter(Screen::Playing), Scene::setup);
-    }
+pub fn plugin(app: &mut App) {
+    app.add_systems(OnEnter(Screen::Playing), Scene::setup);
 }
 
 #[derive(Component)]
@@ -23,7 +19,7 @@ impl Scene {
     ) {
         // circular floor
         commands.spawn((
-            Mesh3d(meshes.add(Circle::new(40.0))),
+            Mesh3d(meshes.add(Circle::new(400.0))),
             MeshMaterial3d(materials.add(Color::srgb_u8(55, 200, 55))),
             Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
         ));
@@ -35,9 +31,14 @@ impl Scene {
         commands.spawn((mesh, color, Transform::from_xyz(0.0, 0.5, 0.0)));
 
         // light
+        commands.insert_resource(AmbientLight {
+            brightness: 1000.,
+            ..default()
+        });
         commands.spawn((
             PointLight {
                 shadows_enabled: true,
+                color: Color::srgb(0.3, 0.5, 0.5),
                 ..default()
             },
             Transform::from_xyz(4.0, 8.0, 4.0),

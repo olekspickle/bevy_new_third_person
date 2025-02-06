@@ -4,14 +4,14 @@
 use bevy::{
     asset::AssetMetaCheck, prelude::*, window::PrimaryWindow, winit::WinitWindows, DefaultPlugins,
 };
-use bevy_3pv_shooter::GamePlugin;
+use bevy_3rd_person_view::game;
 use std::io::Cursor;
 use winit::window::Icon;
 
 fn main() {
     let window = WindowPlugin {
         primary_window: Some(Window {
-            title: "Bevy 3rd person shooter game".to_string(), // ToDo
+            title: "Bevy 3rd person game".to_string(), // ToDo
             // Bind to canvas included in `index.html`
             canvas: Some("#bevy".to_owned()),
             fit_canvas_to_parent: true,
@@ -28,7 +28,7 @@ fn main() {
 
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(window).set(assets))
-        .add_plugins(GamePlugin)
+        .add_plugins(game)
         .add_systems(Startup, set_window_icon);
 
     // set any additional plugins/systems
