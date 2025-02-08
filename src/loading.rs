@@ -1,7 +1,8 @@
-use crate::Screen;
 use bevy::prelude::*;
 use bevy_asset_loader::prelude::*;
 use bevy_kira_audio::AudioSource;
+
+use crate::Screen;
 
 /// This plugin loads all assets using [`AssetLoader`] from a third party bevy plugin
 /// Alternatively you can write the logic to load assets yourself
@@ -30,6 +31,14 @@ pub struct TextureAssets {
     pub bevy: Handle<Image>,
     #[asset(path = "textures/github.png")]
     pub github: Handle<Image>,
+    #[asset(path = "textures/Ryfjallet_cubemap.png")]
+    pub skybox_image: Handle<Image>,
+    #[asset(path = "textures/Ryfjallet_cubemap_bc7.ktx2")]
+    pub skybox_bc7: Handle<Image>,
+    #[asset(path = "textures/Ryfjallet_cubemap_astc4x4.ktx2")]
+    pub skybox_astc: Handle<Image>,
+    #[asset(path = "textures/Ryfjallet_cubemap_etc2.ktx2")]
+    pub skybox_etc2: Handle<Image>,
 }
 
 #[derive(AssetCollection, Resource)]

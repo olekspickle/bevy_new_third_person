@@ -20,7 +20,7 @@ impl Scene {
         // circular floor
         commands.spawn((
             Mesh3d(meshes.add(Circle::new(400.0))),
-            MeshMaterial3d(materials.add(Color::srgb_u8(55, 200, 55))),
+            //MeshMaterial3d(materials.add(Color::srgb_u8(55, 200, 55))),
             Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
         ));
 
@@ -30,19 +30,19 @@ impl Scene {
             MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
         commands.spawn((mesh, color, Transform::from_xyz(0.0, 0.5, 0.0)));
 
-        // light
-        commands.insert_resource(AmbientLight {
-            brightness: 1000.,
-            ..default()
-        });
-        commands.spawn((
-            PointLight {
-                shadows_enabled: true,
-                color: Color::srgb(0.3, 0.5, 0.5),
-                ..default()
-            },
-            Transform::from_xyz(4.0, 8.0, 4.0),
-        ));
+        // TODO: at the moment light is declared in skybox module
+        //commands.insert_resource(AmbientLight {
+        //    brightness: 1000.,
+        //    ..default()
+        //});
+        //commands.spawn((
+        //    PointLight {
+        //        shadows_enabled: true,
+        //        color: Color::srgb(0.3, 0.5, 0.5),
+        //        ..default()
+        //    },
+        //    Transform::from_xyz(4.0, 8.0, 4.0),
+        //));
     }
 
     // This system logs all Mesh3d components in our world. Try making a change to a ComponentA in

@@ -13,6 +13,7 @@ mod loading;
 mod menu;
 mod player;
 mod scene;
+mod skybox;
 
 // This example game uses States to separate logic
 // See https://bevy-cheatbook.github.io/programming/states.html
@@ -39,6 +40,7 @@ pub fn game(app: &mut App) {
         loading::plugin,
         actions::plugin,
         audio::plugin,
+        skybox::plugin,
         ThirdPersonCameraPlugin,
     ));
 
