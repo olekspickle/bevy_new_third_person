@@ -25,27 +25,16 @@ struct MainTheme(Handle<AudioInstance>);
 
 fn start_or_resume_audio(
     mut commands: Commands,
-    bg_audio: Res<MainTheme>,
     global_audio: Res<Audio>,
     audio_assets: Res<AudioAssets>,
-    mut audio_instances: ResMut<Assets<AudioInstance>>,
 ) {
     //global_audio.resume();
-    if let Some(instance) = audio_instances.get_mut(&bg_audio.0) {
-        match instance.state() {
-            PlaybackState::Paused { .. } | PlaybackState::Pausing { .. } => {
-                instance.resume(AudioTween::default());
-            }
-            _ => {
-                let handle = global_audio
-                    .play(audio_assets.bg_play.clone())
-                    .looped()
-                    .with_volume(0.3)
-                    .handle();
-                commands.insert_resource(MainTheme(handle));
-            }
-        }
-    }
+    let handle = global_audio
+        .play(audio_assets.bg_play.clone())
+        .looped()
+        .with_volume(0.3)
+        .handle();
+    commands.insert_resource(MainTheme(handle));
 }
 
 fn pause_audio(
@@ -60,21 +49,21 @@ fn pause_audio(
 }
 
 fn control_flying_sound(
-    actions: Res<Actions>,
-    audio: Res<MainTheme>,
+    //actions: Res<Actions>,
+    bg_audio: Res<MainTheme>,
     mut audio_instances: ResMut<Assets<AudioInstance>>,
 ) {
-    if let Some(instance) = audio_instances.get_mut(&audio.0) {
+    if let Some(instance) = audio_instances.get_mut(&bg_audio.0) {
         match instance.state() {
             PlaybackState::Paused { .. } => {
-                if actions.player_movement.is_some() {
-                    instance.resume(AudioTween::default());
-                }
+                instance.resume(AudioTween::default());
+                //if actions.player_movement.is_some() {
+                //}
             }
             PlaybackState::Playing { .. } => {
-                if actions.player_movement.is_none() {
-                    instance.pause(AudioTween::default());
-                }
+                instance.pause(AudioTween::default());
+                //if actions.player_movement.is_none() {
+                //}
             }
             _ => {}
         }

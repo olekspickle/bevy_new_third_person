@@ -4,6 +4,7 @@ use bevy::app::App;
 #[cfg(debug_assertions)]
 use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
 use bevy::prelude::*;
+use bevy_atmosphere::plugin::AtmospherePlugin;
 use bevy_third_person_camera::ThirdPersonCameraPlugin;
 
 mod actions;
@@ -41,6 +42,7 @@ pub fn game(app: &mut App) {
         actions::plugin,
         audio::plugin,
         skybox::plugin,
+        AtmospherePlugin,
         ThirdPersonCameraPlugin,
     ));
 

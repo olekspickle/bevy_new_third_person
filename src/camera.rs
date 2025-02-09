@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_third_person_camera::*;
 
 use crate::Screen;
@@ -26,6 +27,9 @@ impl Camera {
                 zoom: Zoom::new(1.5, 30.0), // default
                 ..default()
             },
+            // Marks camera as having a skybox,
+            // by default it doesn't specify the render layers the skybox can be seen on
+            AtmosphereCamera::default(),
         );
         commands.spawn(camera);
     }

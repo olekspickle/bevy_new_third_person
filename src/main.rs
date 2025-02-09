@@ -2,7 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{
-    asset::AssetMetaCheck, prelude::*, window::PrimaryWindow, winit::WinitWindows, DefaultPlugins,
+    asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow, winit::WinitWindows,
+    DefaultPlugins,
 };
 use bevy_3rd_person_view::game;
 use std::io::Cursor;
@@ -25,9 +26,13 @@ fn main() {
         meta_check: AssetMetaCheck::Never,
         ..default()
     };
-
+    let log_level = log::LogPlugin {
+        level: log::Level::TRACE,
+        filter: "info,wgpu=warn".to_string(),
+        ..Default::default()
+    };
     let mut app = App::new();
-    app.add_plugins(DefaultPlugins.set(window).set(assets))
+    app.add_plugins(DefaultPlugins.set(window).set(assets).set(log_level))
         .add_plugins(game)
         .add_systems(Startup, set_window_icon);
 

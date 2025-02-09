@@ -1,7 +1,6 @@
-use bevy::{core_pipeline::Skybox, prelude::*};
-use std::f32::consts::PI;
+use bevy::prelude::*;
 
-use crate::{loading::TextureAssets, skybox::Cubemap, Screen};
+use crate::{skybox::Sun, Screen};
 
 /// This plugin handles loading and saving scenes
 /// Scene logic is only active during the State `GameState::Playing`
@@ -13,41 +12,23 @@ pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    textures: Res<TextureAssets>,
 ) {
-    // circular floor
-    commands.spawn((
-        Mesh3d(meshes.add(Circle::new(400.0))),
-        //MeshMaterial3d(materials.add(Color::srgb_u8(55, 200, 55))),
-        Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
-    ));
-
-    // cube
-    let mesh = Mesh3d(meshes.add(Cuboid::new(1.0, 1.0, 1.0)));
-    let color: MeshMaterial3d<StandardMaterial> =
-        MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
-    commands.spawn((mesh, color, Transform::from_xyz(0.0, 0.5, 0.0)));
+    // Plane
+    let mesh = Mesh3d(meshes.add(Cuboid::new(2000., 2., 2000.)));
+    let mat = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.9, 0.3)));
+    commands.spawn((mesh, mat, Transform::default()));
 
     // directional 'sun' light
+    commands.spawn((DirectionalLight::default(), Sun));
     commands.spawn((
-        DirectionalLight {
-            illuminance: 32000.0,
+        PointLight {
+            color: Color::srgb(0.3, 0.5, 0.5),
+            radius: 30.0,
+            range: 100.,
             ..default()
         },
-        Transform::from_xyz(0.0, 2.0, 0.0).with_rotation(Quat::from_rotation_x(-PI / 4.)),
+        Transform::from_xyz(4.0, 8.0, 4.0),
     ));
-    commands.spawn(Skybox {
-        image: textures.skybox_image.clone(),
-        brightness: 1000.0,
-        ..default()
-    });
-
-    // NOTE: The ambient light is used to scale how bright the environment map is so with a bright
-    // environment map, use an appropriate color and brightness to match
-    //commands.insert_resource(AmbientLight {
-    //    color: Color::srgb_u8(210, 220, 240),
-    //    brightness: 1.0,
-    //});
 }
 
 // This system logs all Mesh3d components in our world. Try making a change to a ComponentA in
