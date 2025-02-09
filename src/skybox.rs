@@ -9,7 +9,7 @@ use bevy::{
 };
 use std::f32::consts::PI;
 
-use crate::{loading::TextureAssets, Screen};
+use crate::{loading::TextureAssets, scene, Screen};
 
 #[derive(Resource)]
 pub struct Cubemap {
@@ -19,65 +19,28 @@ pub struct Cubemap {
 }
 
 const CUBEMAP_SWAP_DELAY: f32 = 3.0;
-const CUBEMAPS: &[(&str, CompressedImageFormats)] = &[
-    (
-        "textures/Ryfjallet_cubemap.png",
-        CompressedImageFormats::NONE,
-    ),
-    (
-        "textures/Ryfjallet_cubemap_astc4x4.ktx2",
-        CompressedImageFormats::ASTC_LDR,
-    ),
-    (
-        "textures/Ryfjallet_cubemap_bc7.ktx2",
-        CompressedImageFormats::BC,
-    ),
-    (
-        "textures/Ryfjallet_cubemap_etc2.ktx2",
-        CompressedImageFormats::ETC2,
-    ),
-];
 
 pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         (
-            cycle_cubemap_asset,
+            cycle_cubemap_asset.after(scene::setup),
             asset_loaded.after(cycle_cubemap_asset),
             animate_light_direction,
         ),
     )
-    .add_systems(OnEnter(Screen::Playing), setup);
+    .add_systems(Startup, setup);
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>, textures: Res<TextureAssets>) {
-    // directional 'sun' light
-    commands.spawn((
-        DirectionalLight {
-            illuminance: 32000.0,
-            ..default()
-        },
-        Transform::from_xyz(0.0, 2.0, 0.0).with_rotation(Quat::from_rotation_x(-PI / 4.)),
-    ));
-
-    commands.spawn(Skybox {
-        image: textures.skybox_image.clone(),
-        brightness: 1000.0,
-        ..default()
-    });
-
-    // ambient light
-    // NOTE: The ambient light is used to scale how bright the environment map is so with a bright
-    // environment map, use an appropriate color and brightness to match
+fn setup(mut commands: Commands) {
     commands.insert_resource(AmbientLight {
         color: Color::srgb_u8(210, 220, 240),
         brightness: 1.0,
     });
-
     commands.insert_resource(Cubemap {
         is_loaded: false,
         index: 0,
-        image_handle: textures.skybox_image.clone(),
+        image_handle: Default::default(),
     });
 }
 
@@ -85,7 +48,7 @@ fn cycle_cubemap_asset(
     time: Res<Time>,
     mut next_swap: Local<f32>,
     mut cubemap: ResMut<Cubemap>,
-    asset_server: Res<AssetServer>,
+    textures: Res<TextureAssets>,
     render_device: Res<RenderDevice>,
 ) {
     let now = time.elapsed_secs();
@@ -100,15 +63,22 @@ fn cycle_cubemap_asset(
     let supported_compressed_formats =
         CompressedImageFormats::from_features(render_device.features());
 
+    let cubemaps = &[
+        (&textures.skybox_image, CompressedImageFormats::NONE),
+        (&textures.skybox_astc, CompressedImageFormats::ASTC_LDR),
+        (&textures.skybox_bc7, CompressedImageFormats::BC),
+        (&textures.skybox_etc2, CompressedImageFormats::ETC2),
+    ];
+
     let mut new_index = cubemap.index;
-    for _ in 0..CUBEMAPS.len() {
-        new_index = (new_index + 1) % CUBEMAPS.len();
-        if supported_compressed_formats.contains(CUBEMAPS[new_index].1) {
+    for _ in 0..cubemaps.len() {
+        new_index = (new_index + 1) % cubemaps.len();
+        if supported_compressed_formats.contains(cubemaps[new_index].1) {
             break;
         }
         info!(
             "Skipping format which is not supported by current hardware: {:?}",
-            CUBEMAPS[new_index]
+            cubemaps[new_index]
         );
     }
 
@@ -119,9 +89,10 @@ fn cycle_cubemap_asset(
     }
 
     cubemap.index = new_index;
-    cubemap.image_handle = asset_server.load(CUBEMAPS[cubemap.index].0);
+    cubemap.image_handle = cubemaps[cubemap.index].0.clone();
     cubemap.is_loaded = false;
 }
+
 fn animate_light_direction(
     time: Res<Time>,
     mut query: Query<&mut Transform, With<DirectionalLight>>,
@@ -136,9 +107,23 @@ fn asset_loaded(
     mut images: ResMut<Assets<Image>>,
     mut cubemap: ResMut<Cubemap>,
     mut skyboxes: Query<&mut Skybox>,
+    textures: Res<TextureAssets>,
 ) {
+    let cubemaps = &[
+        &textures.skybox_image,
+        &textures.skybox_astc,
+        &textures.skybox_bc7,
+        &textures.skybox_etc2,
+    ];
+
     if !cubemap.is_loaded && asset_server.load_state(&cubemap.image_handle).is_loaded() {
-        info!("Swapping to {}...", CUBEMAPS[cubemap.index].0);
+        println!(
+            "Swapping to {}...",
+            cubemaps[cubemap.index]
+                .path()
+                .map(ToString::to_string)
+                .unwrap_or_default()
+        );
         let image = images.get_mut(&cubemap.image_handle).unwrap();
         // NOTE: PNGs do not have any metadata that could indicate they contain a cubemap texture,
         // so they appear as one texture. The following code reconfigures the texture as necessary.
