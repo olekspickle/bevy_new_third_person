@@ -9,9 +9,9 @@ use bevy::{
 };
 use std::f32::consts::PI;
 
-use crate::{loading::TextureAssets, scene, Screen};
+use crate::{loading, loading::TextureAssets, scene, Screen};
 
-#[derive(Resource)]
+#[derive(Resource, Default)]
 pub struct Cubemap {
     pub is_loaded: bool,
     pub index: usize,
@@ -24,8 +24,10 @@ pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,
         (
-            cycle_cubemap_asset.after(scene::setup),
-            asset_loaded.after(cycle_cubemap_asset),
+            cycle_cubemap_asset.run_if(in_state(Screen::Playing)),
+            asset_loaded
+                .run_if(in_state(Screen::Playing))
+                .after(cycle_cubemap_asset),
             animate_light_direction,
         ),
     )
@@ -37,11 +39,7 @@ fn setup(mut commands: Commands) {
         color: Color::srgb_u8(210, 220, 240),
         brightness: 1.0,
     });
-    commands.insert_resource(Cubemap {
-        is_loaded: false,
-        index: 0,
-        image_handle: Default::default(),
-    });
+    commands.init_resource::<Cubemap>();
 }
 
 fn cycle_cubemap_asset(
@@ -65,9 +63,9 @@ fn cycle_cubemap_asset(
 
     let cubemaps = &[
         (&textures.skybox_image, CompressedImageFormats::NONE),
-        (&textures.skybox_astc, CompressedImageFormats::ASTC_LDR),
         (&textures.skybox_bc7, CompressedImageFormats::BC),
-        (&textures.skybox_etc2, CompressedImageFormats::ETC2),
+        //(&textures.skybox_astc, CompressedImageFormats::ASTC_LDR),
+        //(&textures.skybox_etc2, CompressedImageFormats::ETC2),
     ];
 
     let mut new_index = cubemap.index;
@@ -111,9 +109,9 @@ fn asset_loaded(
 ) {
     let cubemaps = &[
         &textures.skybox_image,
-        &textures.skybox_astc,
         &textures.skybox_bc7,
-        &textures.skybox_etc2,
+        //&textures.skybox_astc,
+        //&textures.skybox_etc2,
     ];
 
     if !cubemap.is_loaded && asset_server.load_state(&cubemap.image_handle).is_loaded() {

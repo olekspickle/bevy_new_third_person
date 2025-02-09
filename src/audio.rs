@@ -49,9 +49,9 @@ fn start_or_resume_audio(
 }
 
 fn pause_audio(
-    //global_audio: Res<Audio>,
     audio: Res<MainTheme>,
     mut audio_instances: ResMut<Assets<AudioInstance>>,
+    //global_audio: Res<Audio>,
 ) {
     //global_audio.pause();
     if let Some(instance) = audio_instances.get_mut(&audio.0) {

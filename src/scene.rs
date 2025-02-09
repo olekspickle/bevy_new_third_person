@@ -28,7 +28,7 @@ pub fn setup(
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
     commands.spawn((mesh, color, Transform::from_xyz(0.0, 0.5, 0.0)));
 
-    // Light
+    // directional 'sun' light
     commands.spawn((
         DirectionalLight {
             illuminance: 32000.0,
@@ -36,7 +36,6 @@ pub fn setup(
         },
         Transform::from_xyz(0.0, 2.0, 0.0).with_rotation(Quat::from_rotation_x(-PI / 4.)),
     ));
-
     commands.spawn(Skybox {
         image: textures.skybox_image.clone(),
         brightness: 1000.0,
