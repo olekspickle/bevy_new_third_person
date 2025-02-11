@@ -30,12 +30,12 @@ pub fn set_movement(
     player: Query<&Transform, With<Player>>,
     camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>,
 ) {
-    let mut player_movement = Vec2::new(
-        get_movement(GameControl::Right, &keyboard_input)
-            - get_movement(GameControl::Left, &keyboard_input),
-        get_movement(GameControl::Up, &keyboard_input)
-            - get_movement(GameControl::Down, &keyboard_input),
-    );
+    let right = get_movement(GameControl::Right, &keyboard_input);
+    let left = get_movement(GameControl::Left, &keyboard_input);
+    let up = get_movement(GameControl::Up, &keyboard_input);
+    let down = get_movement(GameControl::Down, &keyboard_input);
+    println!("Movement: up:{up}, down:{down}, left:{left}, right:{right}");
+    let mut player_movement = Vec2::new(right - left, up - down);
 
     if let Some(touch_position) = touch_input.first_pressed_position() {
         let (camera, camera_transform) = camera.single();

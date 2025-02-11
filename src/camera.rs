@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy_atmosphere::plugin::AtmosphereCamera;
 use bevy_third_person_camera::*;
 
 use crate::Screen;
@@ -17,19 +16,16 @@ impl Camera {
         let camera = (
             Camera3d::default(),
             ThirdPersonCamera {
-                aim_enabled: true,
-                aim_speed: 3.0, // default
-                aim_zoom: 0.7,  // default
-                offset_enabled: true,
-                offset_toggle_enabled: true,
-                gamepad_settings: CustomGamepadSettings { ..default() },
+                aim_speed: 3.0,             // default
+                aim_zoom: 0.7,              // default
                 zoom_enabled: true,         // default
                 zoom: Zoom::new(1.5, 30.0), // default
+                aim_enabled: true,
+                offset_enabled: true,
+                offset_toggle_enabled: true,
+                gamepad_settings: CustomGamepadSettings::default(),
                 ..default()
             },
-            // Marks camera as having a skybox,
-            // by default it doesn't specify the render layers the skybox can be seen on
-            AtmosphereCamera::default(),
         );
         commands.spawn(camera);
     }

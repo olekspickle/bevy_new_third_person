@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{skybox::Sun, Screen};
+use crate::Screen;
 
 /// This plugin handles loading and saving scenes
 /// Scene logic is only active during the State `GameState::Playing`
@@ -19,7 +19,7 @@ pub fn setup(
     commands.spawn((mesh, mat, Transform::default()));
 
     // directional 'sun' light
-    commands.spawn((DirectionalLight::default(), Sun));
+    //commands.spawn((DirectionalLight::default(), Sun));
     commands.spawn((
         PointLight {
             color: Color::srgb(0.3, 0.5, 0.5),

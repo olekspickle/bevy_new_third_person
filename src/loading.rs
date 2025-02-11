@@ -31,9 +31,9 @@ pub struct TextureAssets {
     pub bevy: Handle<Image>,
     #[asset(path = "textures/github.png")]
     pub github: Handle<Image>,
-    #[asset(path = "textures/Ryfjallet_cubemap.png")]
+    #[asset(path = "textures/cubemap.png")]
     pub skybox_image: Handle<Image>,
-    #[asset(path = "textures/Ryfjallet_cubemap_bc7.ktx2")]
+    #[asset(path = "textures/cubemap_bc7.ktx2")]
     pub skybox_bc7: Handle<Image>,
     //#[asset(path = "textures/Ryfjallet_cubemap_astc4x4.ktx2")]
     //pub skybox_astc: Handle<Image>,

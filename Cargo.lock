@@ -338,7 +338,6 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_asset_loader",
- "bevy_atmosphere",
  "bevy_kira_audio",
  "bevy_third_person_camera",
  "embed-resource",
@@ -480,30 +479,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d0df207d6c6582d6b2d5ff77ad0e17f6f384369fbf9c92cb976496e235e5b5de"
 dependencies = [
  "bevy_macro_utils",
- "proc-macro2",
- "quote",
- "syn",
-]
-
-[[package]]
-name = "bevy_atmosphere"
-version = "0.12.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d947b114d324c588557b87a12c4818b1844170392697965ca90b9b10bcf0b4e"
-dependencies = [
- "bevy",
- "bevy_atmosphere_macros",
- "cfg-if",
-]
-
-[[package]]
-name = "bevy_atmosphere_macros"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f133ec6899e99e56b984e53e58c348779c9d6273032cca79825c6f915306f8b"
-dependencies = [
- "bevy_macro_utils",
- "proc-macro-crate",
  "proc-macro2",
  "quote",
  "syn",
