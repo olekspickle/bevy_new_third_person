@@ -34,8 +34,7 @@ pub fn set_movement(
     let left = get_movement(GameControl::Left, &keyboard_input);
     let up = get_movement(GameControl::Up, &keyboard_input);
     let down = get_movement(GameControl::Down, &keyboard_input);
-    println!("Movement: up:{up}, down:{down}, left:{left}, right:{right}");
-    let mut player_movement = Vec2::new(right - left, up - down);
+    let mut player_movement = Vec2::new(right - left, down - up);
 
     if let Some(touch_position) = touch_input.first_pressed_position() {
         let (camera, camera_transform) = camera.single();

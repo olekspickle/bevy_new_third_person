@@ -14,7 +14,7 @@ pub fn plugin(app: &mut App) {
         .add_systems(OnExit(Screen::Playing), pause_audio)
         .add_systems(
             Update,
-            control_flying_sound
+            movement_sound
                 .after(actions::set_movement)
                 .run_if(in_state(Screen::Playing)),
         );
@@ -48,7 +48,7 @@ fn pause_audio(
     }
 }
 
-fn control_flying_sound(
+fn movement_sound(
     //actions: Res<Actions>,
     bg_audio: Res<MainTheme>,
     mut audio_instances: ResMut<Assets<AudioInstance>>,

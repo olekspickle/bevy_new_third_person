@@ -39,8 +39,8 @@ pub fn movement(
     let speed = 150.;
     let movement = Vec3::new(
         actions.player_movement.unwrap().x * speed * time.delta_secs(),
-        actions.player_movement.unwrap().y * speed * time.delta_secs(),
         0.,
+        actions.player_movement.unwrap().y * speed * time.delta_secs(),
     );
     for mut player_transform in &mut player_query {
         player_transform.translation += movement;
