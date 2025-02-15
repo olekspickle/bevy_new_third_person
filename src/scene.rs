@@ -18,8 +18,10 @@ pub fn setup(
     let mat = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.9, 0.3)));
     commands.spawn((mesh, mat, Transform::default()));
 
-    // directional 'sun' light
-    //commands.spawn((DirectionalLight::default(), Sun));
+    commands.insert_resource(AmbientLight {
+        color: Color::WHITE,
+        brightness: 1000.0,
+    });
     commands.spawn((
         PointLight {
             color: Color::srgb(0.3, 0.5, 0.5),

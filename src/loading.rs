@@ -35,9 +35,9 @@ pub struct TextureAssets {
     pub skybox_image: Handle<Image>,
     #[asset(path = "textures/cubemap_bc7.ktx2")]
     pub skybox_bc7: Handle<Image>,
-    //#[asset(path = "textures/Ryfjallet_cubemap_astc4x4.ktx2")]
+    //#[asset(path = "textures/cubemap_astc4x4.ktx2")]
     //pub skybox_astc: Handle<Image>,
-    //#[asset(path = "textures/Ryfjallet_cubemap_etc2.ktx2")]
+    //#[asset(path = "textures/cubemap_etc2.ktx2")]
     //pub skybox_etc2: Handle<Image>,
 }
 

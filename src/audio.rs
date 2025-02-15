@@ -28,24 +28,24 @@ fn start_or_resume_audio(
     global_audio: Res<Audio>,
     audio_assets: Res<AudioAssets>,
 ) {
-    //global_audio.resume();
+    global_audio.resume();
     let handle = global_audio
         .play(audio_assets.bg_play.clone())
         .looped()
-        .with_volume(0.3)
+        .with_volume(0.1)
         .handle();
     commands.insert_resource(MainTheme(handle));
 }
 
 fn pause_audio(
-    audio: Res<MainTheme>,
-    mut audio_instances: ResMut<Assets<AudioInstance>>,
-    //global_audio: Res<Audio>,
+    //audio: Res<MainTheme>,
+    //mut audio_instances: ResMut<Assets<AudioInstance>>,
+    global_audio: Res<Audio>,
 ) {
-    //global_audio.pause();
-    if let Some(instance) = audio_instances.get_mut(&audio.0) {
-        instance.pause(AudioTween::default());
-    }
+    global_audio.pause();
+    //if let Some(instance) = audio_instances.get_mut(&audio.0) {
+    //    instance.pause(AudioTween::default());
+    //}
 }
 
 fn movement_sound(
@@ -56,12 +56,12 @@ fn movement_sound(
     if let Some(instance) = audio_instances.get_mut(&bg_audio.0) {
         match instance.state() {
             PlaybackState::Paused { .. } => {
-                instance.resume(AudioTween::default());
+                //instance.resume(AudioTween::default());
                 //if actions.player_movement.is_some() {
                 //}
             }
             PlaybackState::Playing { .. } => {
-                instance.pause(AudioTween::default());
+                //instance.pause(AudioTween::default());
                 //if actions.player_movement.is_none() {
                 //}
             }
