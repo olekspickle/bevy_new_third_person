@@ -14,7 +14,7 @@ pub fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Plane
-    let mesh = Mesh3d(meshes.add(Cuboid::new(2000., 2., 2000.)));
+    let mesh = Mesh3d(meshes.add(Cuboid::new(2000., 0., 2000.)));
     let mat = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.9, 0.3)));
     commands.spawn((mesh, mat, Transform::default()));
 
@@ -22,15 +22,22 @@ pub fn setup(
         color: Color::WHITE,
         brightness: 1000.0,
     });
-    commands.spawn((
-        PointLight {
-            color: Color::srgb(0.3, 0.5, 0.5),
-            radius: 30.0,
-            range: 100.,
-            ..default()
-        },
-        Transform::from_xyz(4.0, 8.0, 4.0),
-    ));
+
+    // setup point light grid
+    // TODO: rand colors
+    for i in (-1000..1000).step_by(50) {
+        for j in (-1000..1000).step_by(50) {
+            commands.spawn((
+                PointLight {
+                    color: Color::srgb(0.3, 0.5, 0.5),
+                    radius: 30.0,
+                    range: 100.,
+                    ..default()
+                },
+                Transform::from_xyz(i as f32, 4.0, j as f32),
+            ));
+        }
+    }
 }
 
 // This system logs all Mesh3d components in our world. Try making a change to a ComponentA in

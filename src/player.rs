@@ -24,7 +24,7 @@ fn spawn(
     let mesh = Mesh3d(meshes.add(Mesh::from(Cuboid::new(1.0, 1.0, 1.0))));
     let color: MeshMaterial3d<StandardMaterial> =
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
-    let pos = Transform::from_translation(Vec3::new(0.0, 2., 0.0));
+    let pos = Transform::from_translation(Vec3::new(0.0, 0.5, 0.0));
     commands.spawn((color, mesh, pos, ThirdPersonCameraTarget, Player));
 }
 

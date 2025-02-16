@@ -31,10 +31,10 @@ pub struct TextureAssets {
     pub bevy: Handle<Image>,
     #[asset(path = "textures/github.png")]
     pub github: Handle<Image>,
-    #[asset(path = "textures/cubemap.png")]
-    pub skybox_image: Handle<Image>,
-    #[asset(path = "textures/cubemap_bc7.ktx2")]
-    pub skybox_bc7: Handle<Image>,
+    //#[asset(path = "textures/cubemap.png")]
+    //pub skybox_image: Handle<Image>,
+    //#[asset(path = "textures/cubemap_bc7.ktx2")]
+    //pub skybox_bc7: Handle<Image>,
     //#[asset(path = "textures/cubemap_astc4x4.ktx2")]
     //pub skybox_astc: Handle<Image>,
     //#[asset(path = "textures/cubemap_etc2.ktx2")]
