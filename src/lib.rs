@@ -1,49 +1,53 @@
-#![allow(clippy::type_complexity)]
+use bevy::{app::App, prelude::*};
+use serde::{Deserialize, Serialize};
 
-use bevy::app::App;
-#[cfg(debug_assertions)]
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
-use bevy::prelude::*;
-use bevy_third_person_camera::ThirdPersonCameraPlugin;
-
-mod actions;
 mod audio;
 mod camera;
-mod loading;
-mod menu;
 mod player;
 mod scene;
+mod screens;
 
-// This example game uses States to separate logic
-// See https://bevy-cheatbook.github.io/programming/states.html
-// Or https://github.com/bevyengine/bevy/blob/main/examples/ecs/state.rs
-#[derive(States, Default, Clone, Eq, PartialEq, Debug, Hash)]
-enum Screen {
-    // During the loading State the LoadingPlugin will load our assets
-    #[default]
-    Loading,
-    // During this State the actual game logic is executed
-    Playing,
-    // Here the menu is drawn and waiting for player interaction
-    Menu,
-    // TODO: cinematics
-    Interlude,
-}
+pub use screens::{
+    Screen, loading,
+    settings::{self, Action},
+};
 
 pub fn game(app: &mut App) {
-    app.init_state::<Screen>().add_plugins((
-        menu::plugin,
+    app.configure_sets(
+        Update,
+        (AppSet::TickTimers, AppSet::RecordInput, AppSet::Update).chain(),
+    );
+
+    app.add_plugins((
         scene::plugin,
         player::plugin,
         camera::plugin,
-        loading::plugin,
-        actions::plugin,
+        screens::plugin,
         audio::plugin,
-        ThirdPersonCameraPlugin,
     ));
 
-    #[cfg(debug_assertions)]
-    {
-        app.add_plugins((FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin::default()));
-    }
+    //#[cfg(debug_assertions)]
+    //use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
+    //#[cfg(debug_assertions)]
+    //app.add_plugins((FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin::default()));
+}
+#[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
+pub struct GameConfig {
+    scale: f32,
+}
+
+#[derive(Default, Resource)]
+pub struct Score(pub i32);
+
+/// High-level groupings of systems for the app in the `Update` schedule.
+/// When adding a new variant, make sure to order it in the `configure_sets`
+/// call above.
+#[derive(SystemSet, Debug, Clone, Copy, Eq, PartialEq, Hash, PartialOrd, Ord)]
+enum AppSet {
+    /// Tick timers.
+    TickTimers,
+    /// Record player input.
+    RecordInput,
+    /// Do everything else (consider splitting this into further variants).
+    Update,
 }

@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 use bevy_third_person_camera::*;
+use leafwing_input_manager::prelude::ActionState;
 
-use crate::{actions::Actions, Screen};
+use crate::{Action, Screen};
 
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `GameState::Playing`
@@ -30,19 +31,49 @@ fn spawn(
 
 pub fn movement(
     time: Res<Time>,
-    actions: Res<Actions>,
-    mut player_query: Query<&mut Transform, With<Player>>,
+    action: Query<&ActionState<Action>>,
+    mut camera: Query<&mut Transform, With<ThirdPersonCamera>>,
+    mut player: Query<&mut Transform, With<Player>>,
 ) {
-    if actions.player_movement.is_none() {
-        return;
-    }
-    let speed = 150.;
-    let movement = Vec3::new(
-        actions.player_movement.unwrap().x * speed * time.delta_secs(),
-        0.,
-        actions.player_movement.unwrap().y * speed * time.delta_secs(),
-    );
-    for mut player_transform in &mut player_query {
-        player_transform.translation += movement;
-    }
+    let (state, player, camera) = (action.single(), player.single(), camera.single());
+    if state.just_pressed(&Action::Right) {}
+    //let speed = 150.;
+
+    //let movement = Vec3::new(
+    //    actions.player_movement.unwrap().x * speed * time.delta_secs(),
+    //    0.,
+    //    actions.player_movement.unwrap().y * speed * time.delta_secs(),
+    //);
+    //for mut player_transform in &mut player_query {
+    //    player_transform.translation += movement;
+    //}
 }
+
+//pub fn set_movement(
+//    keyboard_input: Res<ButtonInput<KeyCode>>,
+//    touch_input: Res<Touches>,
+//    player: Query<&Transform, With<Player>>,
+//    camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>,
+//) {
+//    let right = get_movement(GameControl::Right, &keyboard_input);
+//    let left = get_movement(GameControl::Left, &keyboard_input);
+//    let up = get_movement(GameControl::Up, &keyboard_input);
+//    let down = get_movement(GameControl::Down, &keyboard_input);
+//    let mut player_movement = Vec2::new(right - left, down - up);
+//
+//    if let Some(touch_position) = touch_input.first_pressed_position() {
+//        let (camera, camera_transform) = camera.single();
+//        if let Ok(touch_position) = camera.viewport_to_world_2d(camera_transform, touch_position) {
+//            let diff = touch_position - player.single().translation.xy();
+//            if diff.length() > FOLLOW_EPSILON {
+//                player_movement = diff.normalize();
+//            }
+//        }
+//    }
+//
+//    if player_movement != Vec2::ZERO {
+//        actions.player_movement = Some(player_movement.normalize());
+//    } else {
+//        actions.player_movement = None;
+//    }
+//}

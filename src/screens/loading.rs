@@ -10,7 +10,8 @@ use crate::Screen;
 pub fn plugin(app: &mut App) {
     app.add_loading_state(
         LoadingState::new(Screen::Loading)
-            .continue_to_state(Screen::Menu)
+            // TODO: Screen::Menu after menu rework
+            .continue_to_state(Screen::Playing)
             .load_collection::<AudioAssets>()
             .load_collection::<TextureAssets>(),
     );

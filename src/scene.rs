@@ -18,6 +18,27 @@ pub fn setup(
     let mat = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.9, 0.3)));
     commands.spawn((mesh, mat, Transform::default()));
 
+    // Some environment
+    let mesh = Mesh3d(meshes.add(Cuboid::new(200., 1000., 200.)));
+    let mat = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.3, 0.8)));
+    commands.spawn((mesh, mat, Transform::from_xyz(-200., 0., -200.)));
+
+    let mesh = Mesh3d(meshes.add(Cuboid::new(60., 60., 60.)));
+    let mat = MeshMaterial3d(materials.add(Color::srgb(0.6, 0.3, 0.6)));
+    commands.spawn((mesh, mat, Transform::from_xyz(200., 30.0, 200.)));
+
+    let mesh = Mesh3d(meshes.add(Cuboid::new(40., 40., 40.)));
+    let mat = MeshMaterial3d(materials.add(Color::srgb(0.9, 0.9, 0.9)));
+    commands.spawn((mesh, mat, Transform::from_xyz(400., 20., -400.)));
+
+    let mesh = Mesh3d(meshes.add(Cylinder::new(400., 40.)));
+    let mat = MeshMaterial3d(materials.add(Color::srgb(0.5, 0.5, 0.1)));
+    commands.spawn((mesh, mat, Transform::from_xyz(100., 20., -100.)));
+
+    let mesh = Mesh3d(meshes.add(Cylinder::new(60., 400.)));
+    let mat = MeshMaterial3d(materials.add(Color::srgb(0.5, 0.5, 0.1)));
+    commands.spawn((mesh, mat, Transform::from_xyz(-100., 30., 100.)));
+
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
         brightness: 1000.0,

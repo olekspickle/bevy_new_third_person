@@ -1,11 +1,8 @@
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
+use leafwing_input_manager::prelude::ActionState;
 
-use crate::{
-    actions::{self, Actions},
-    loading::AudioAssets,
-    Screen,
-};
+use crate::{Action, Screen, loading::AudioAssets, player};
 
 // This plugin is responsible to control the game audio
 pub fn plugin(app: &mut App) {
@@ -15,7 +12,7 @@ pub fn plugin(app: &mut App) {
         .add_systems(
             Update,
             movement_sound
-                .after(actions::set_movement)
+                .after(player::movement)
                 .run_if(in_state(Screen::Playing)),
         );
 }
@@ -40,19 +37,20 @@ fn start_or_resume_audio(
 fn pause_audio(
     //audio: Res<MainTheme>,
     //mut audio_instances: ResMut<Assets<AudioInstance>>,
+    action: Query<&ActionState<Action>>,
     global_audio: Res<Audio>,
 ) {
-    global_audio.pause();
+    let state = action.single();
+    if state.just_pressed(&Action::Pause) {
+        global_audio.pause();
+    }
+
     //if let Some(instance) = audio_instances.get_mut(&audio.0) {
     //    instance.pause(AudioTween::default());
     //}
 }
 
-fn movement_sound(
-    //actions: Res<Actions>,
-    bg_audio: Res<MainTheme>,
-    mut audio_instances: ResMut<Assets<AudioInstance>>,
-) {
+fn movement_sound(bg_audio: Res<MainTheme>, mut audio_instances: ResMut<Assets<AudioInstance>>) {
     if let Some(instance) = audio_instances.get_mut(&bg_audio.0) {
         match instance.state() {
             PlaybackState::Paused { .. } => {
