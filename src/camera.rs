@@ -1,18 +1,15 @@
 use bevy::prelude::*;
 use bevy_third_person_camera::*;
 
-use crate::{Screen, player::Player};
+use crate::Screen;
 
 const ZOOM: (f32, f32) = (1.5, 30.);
-const ZOOM_RADIUS: f32 = (ZOOM.0 + ZOOM.1) / 2.0;
-pub const SCENE_EYE: Vec3 = Vec3::new(30., 14., 30.5);
-pub const SCENE_TARGET: Vec3 = Vec3::ZERO;
 
 /// Camera logic is only active during the State `GameState::Playing`
 pub fn plugin(app: &mut App) {
     app.add_plugins(ThirdPersonCameraPlugin)
-        .add_systems(OnEnter(Screen::Playing), spawn_scene_camera)
-        .add_systems(Update, player_camera.run_if(in_state(Screen::Playing)));
+        .add_systems(Startup, spawn_ui_camera)
+        .add_systems(OnEnter(Screen::Playing), spawn_scene_camera);
 }
 
 #[derive(Component)]
@@ -23,7 +20,7 @@ pub struct SceneCamera;
 
 fn spawn_ui_camera(mut commands: Commands) {
     commands.spawn((
-        Name::new("Camera"),
+        Name::new("ui-camera"),
         Camera2d,
         Camera {
             order: 1,
@@ -37,6 +34,7 @@ fn spawn_ui_camera(mut commands: Commands) {
         // for debugging. So it's good to have this here for future-proofing.
         IsDefaultUiCamera,
         Ui,
+        Msaa::Off,
     ));
 }
 
@@ -57,36 +55,4 @@ fn spawn_scene_camera(mut commands: Commands) {
         SceneCamera,
     );
     commands.spawn(camera);
-}
-
-pub fn despawn_scene_camera(mut commands: Commands, query: Query<Entity, With<SceneCamera>>) {
-    for entity in &query {
-        commands.entity(entity).despawn_recursive();
-    }
-}
-
-fn player_camera(
-    mut player: Query<&mut Transform, With<Player>>,
-    mut cam: Query<(&mut ThirdPersonCamera, &mut Transform), Without<Player>>,
-) {
-    let Ok(mut player) = player.get_single_mut() else {
-        return;
-    };
-    let Ok((cam, mut cam_transform)) = cam.get_single_mut() else {
-        return;
-    };
-
-    // Calculate the desired camera translation based, radius, and xy_offset
-    let rotation_matrix = Mat3::from_quat(cam_transform.rotation);
-
-    // apply the offset if offset_enabled is true
-    let mut offset = Vec3::ZERO;
-    if cam.offset_enabled {
-        offset = rotation_matrix.mul_vec3(Vec3::new(cam.offset.offset.0, cam.offset.offset.1, 0.0));
-    }
-
-    let desired_translation = rotation_matrix.mul_vec3(Vec3::new(0.0, 0.0, ZOOM_RADIUS)) + offset;
-
-    cam_transform.translation = desired_translation + player.translation;
-    player.rotation = cam_transform.rotation;
 }

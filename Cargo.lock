@@ -338,6 +338,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy_asset_loader",
+ "bevy_common_assets",
  "bevy_kira_audio",
  "bevy_third_person_camera",
  "embed-resource",
@@ -461,6 +462,7 @@ dependencies = [
  "anyhow",
  "bevy",
  "bevy_asset_loader_derive",
+ "iyes_progress",
  "path-slash",
 ]
 
@@ -500,6 +502,19 @@ dependencies = [
  "encase",
  "serde",
  "wgpu-types",
+]
+
+[[package]]
+name = "bevy_common_assets"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3521990269672c442f2bf0fbed0fce9db719e3dd136dd4012a97809464a4389d"
+dependencies = [
+ "anyhow",
+ "bevy",
+ "ron",
+ "serde",
+ "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -1643,6 +1658,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "convert_case"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ec182b0ca2f35d8fc196cf3404988fd8b8c739a4d270ff118a398feb0cbec1ca"
+dependencies = [
+ "unicode-segmentation",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1861,6 +1885,7 @@ version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cb7330aeadfbe296029522e6c40f315320aba36fc43a5b3632f3795348f3bd22"
 dependencies = [
+ "convert_case",
  "proc-macro2",
  "quote",
  "syn",
@@ -2693,6 +2718,20 @@ name = "itoa"
 version = "1.0.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d75a2a4b1b190afb6f5425f10f6a8f959d2ea0b9c2b1d79553551850539e4674"
+
+[[package]]
+name = "iyes_progress"
+version = "0.13.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1e21ef918f00c8b44adbfd9aeefaab5c22db4bbaa8c5be4376c5404a241777c"
+dependencies = [
+ "bevy_app",
+ "bevy_ecs",
+ "bevy_state",
+ "bevy_utils",
+ "derive_more 1.0.0",
+ "parking_lot",
+]
 
 [[package]]
 name = "jni"

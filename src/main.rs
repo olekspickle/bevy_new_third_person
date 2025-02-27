@@ -2,8 +2,8 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{
-    asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow, winit::WinitWindows,
-    DefaultPlugins,
+    DefaultPlugins, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow,
+    winit::WinitWindows,
 };
 use bevy_3rd_person_view::game;
 use std::io::Cursor;
@@ -50,7 +50,7 @@ fn set_window_icon(
     let Some(primary) = windows.get_window(primary_entity) else {
         return;
     };
-    let icon_buf = Cursor::new(include_bytes!("../assets/textures/icon.png"));
+    let icon_buf = Cursor::new(include_bytes!("../assets/images/icon.png"));
     if let Ok(image) = image::load(icon_buf, image::ImageFormat::Png) {
         let image = image.into_rgba8();
         let (width, height) = image.dimensions();

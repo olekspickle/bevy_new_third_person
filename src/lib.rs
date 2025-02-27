@@ -1,4 +1,5 @@
 use bevy::{app::App, prelude::*};
+use bevy_common_assets::ron::RonAssetPlugin;
 use serde::{Deserialize, Serialize};
 
 mod audio;
@@ -6,17 +7,22 @@ mod camera;
 mod player;
 mod scene;
 mod screens;
+mod utils;
 
+pub use camera::{SceneCamera, Ui};
 pub use screens::{
     Screen, loading,
-    settings::{self, Action},
+    settings::{Action, Settings},
 };
+pub use utils::despawn;
 
 pub fn game(app: &mut App) {
-    app.configure_sets(
-        Update,
-        (AppSet::TickTimers, AppSet::RecordInput, AppSet::Update).chain(),
-    );
+    //app.configure_sets(
+    //    Update,
+    //    (AppSet::TickTimers, AppSet::RecordInput, AppSet::Update).chain(),
+    //);
+    app.add_plugins((RonAssetPlugin::<Config>::new(&["config.ron"]),));
+    app.add_systems(Startup, (add_config, print_config.after(add_config)));
 
     app.add_plugins((
         scene::plugin,
@@ -31,10 +37,22 @@ pub fn game(app: &mut App) {
     //#[cfg(debug_assertions)]
     //app.add_plugins((FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin::default()));
 }
+fn add_config(mut commands: Commands, asset_server: Res<AssetServer>) {
+    let cfg = ConfigHandle(asset_server.load("config.ron"));
+    commands.insert_resource(cfg);
+}
+fn print_config(cfg: Res<Config>, cfg_handle: Res<ConfigHandle>) {
+    //println!("scale: {}", cfg.scale);
+    //println!("scale: {}", cfg_handle.0.clone());
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
-pub struct GameConfig {
+pub struct Config {
     scale: f32,
 }
+
+#[derive(Resource)]
+struct ConfigHandle(Handle<Config>);
 
 #[derive(Default, Resource)]
 pub struct Score(pub i32);

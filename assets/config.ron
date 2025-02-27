@@ -1,0 +1,35 @@
+(
+    max_buckets_per_round: 3,
+    input_timer: 0.1,
+    blocks_per_round: 20,
+    min_spawn_height: -300,
+    spawn_height: 600,
+    initial_lives: 5,
+
+    physics: (
+        gravity: 1000.0,
+        steering_force: 10000.0,
+        max_speed_controlled: 300.0,
+        max_speed_dropping: 700.0,
+        friction: 1.0,
+        restitution: 0.0,
+        density: 1.0,
+        initial_density: 0.01,
+        boat_force: 2000000.0,
+        boat_speed: 2.0,
+        boat_float_force: 100000.0,
+        boat_damping: 100.0,
+        boat_level_set: -360.0,
+        boat_friction: 10000.0,
+        boat_stabalization_force: 10000000.0,
+    ),
+
+    base_ui_scaling: 2.0,
+
+    block_base_height: -1200.0,
+    block_height_multiplier: 0.001,
+    min_max_block_height: -400.0,
+    camera_lerp_speed: 0.5,
+    camera_y_offset: -300.0,
+    camera_y_growth: 320.0,
+)

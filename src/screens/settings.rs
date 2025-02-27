@@ -1,22 +1,15 @@
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
-//use crate::{
-//    Screen,
-//    actions::game_control::{GameControl, get_movement},
-//    player::Player,
-//};
-//
-
-pub const FOLLOW_EPSILON: f32 = 5.;
+use crate::Screen;
 
 // This plugin listens for keyboard input and converts the input into Actions.
 // Actions can then be used as a resource in other systems to act on the player input.
 pub fn plugin(app: &mut App) {
     app.init_resource::<Settings>();
     app.add_plugins(InputManagerPlugin::<Action>::default())
-        .add_systems(Startup, spawn_player_input_map);
-    //.add_systems(Update, settings.run_if(in_state(Screen::Playing)));
+        .add_systems(Startup, spawn_player_input_map)
+        .add_systems(Update, settings.run_if(in_state(Screen::Playing)));
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]

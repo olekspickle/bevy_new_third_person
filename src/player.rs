@@ -2,13 +2,15 @@ use bevy::prelude::*;
 use bevy_third_person_camera::*;
 use leafwing_input_manager::prelude::ActionState;
 
-use crate::{Action, Screen};
+use crate::{Action, Screen, camera::SceneCamera};
+
+pub const FOLLOW_EPSILON: f32 = 5.;
 
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `GameState::Playing`
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Playing), spawn)
-        .add_systems(Update, movement);
+    app.add_systems(OnEnter(Screen::Playing), spawn);
+    //.add_systems(Update, movement.run_if(in_state(Screen::Playing)));
 }
 
 #[derive(Component)]
@@ -30,23 +32,56 @@ fn spawn(
 }
 
 pub fn movement(
-    time: Res<Time>,
+    time: Res<Time<Virtual>>,
+    //touch_input: Res<Touches>,
     action: Query<&ActionState<Action>>,
-    mut camera: Query<&mut Transform, With<ThirdPersonCamera>>,
-    mut player: Query<&mut Transform, With<Player>>,
+    camera: Query<&mut Transform, With<SceneCamera>>,
+    mut player: Query<&mut Transform, (With<Player>, Without<SceneCamera>)>,
 ) {
-    let (state, player, camera) = (action.single(), player.single(), camera.single());
-    if state.just_pressed(&Action::Right) {}
-    //let speed = 150.;
+    let (state, mut player) = (action.single(), player.single_mut());
+    let camera_transform = camera.single();
+    let speed = 3.0 * time.delta_secs();
+    let mut direction = Vec3::ZERO;
 
-    //let movement = Vec3::new(
-    //    actions.player_movement.unwrap().x * speed * time.delta_secs(),
-    //    0.,
-    //    actions.player_movement.unwrap().y * speed * time.delta_secs(),
-    //);
-    //for mut player_transform in &mut player_query {
-    //    player_transform.translation += movement;
+    if state.just_pressed(&Action::Right) {
+        let right = camera_transform.right().normalize();
+        let right_flat = Vec3::new(right.x, 0.0, right.z).normalize();
+        direction += speed * right_flat;
+    }
+
+    if state.just_pressed(&Action::Left) {
+        let left = camera_transform.left().normalize();
+        let left_flat = Vec3::new(left.x, 0.0, left.z).normalize();
+        direction += speed * left_flat;
+    }
+
+    if state.just_pressed(&Action::Forward) {
+        let forward = camera_transform.forward().normalize();
+        let forward_flat = Vec3::new(forward.x, 0.0, forward.z).normalize();
+        direction += speed * forward_flat;
+    }
+
+    if state.just_pressed(&Action::Backward) {
+        let back = camera_transform.back().normalize();
+        let back_flat = Vec3::new(back.x, 0.0, back.z).normalize();
+        direction += speed * back_flat;
+    }
+
+    // TODO: jump
+
+    //if let Some(touch_position) = touch_input.first_pressed_position() {
+    //    if let Ok(touch_position) = camera.viewport_to_world_2d(camera_transform, touch_position) {
+    //        let diff = touch_position - player.translation.xy();
+    //        if diff.length() > FOLLOW_EPSILON {
+    //            player_movement = diff.normalize();
+    //        }
+    //    }
     //}
+
+    if direction.length_squared() > 0.0 {
+        direction = direction.normalize(); // Normalize to avoid diagonal speed boost
+        player.translation += direction * speed;
+    }
 }
 
 //pub fn set_movement(

@@ -1,14 +1,19 @@
 use bevy::prelude::*;
 
-use crate::Screen;
+use crate::{Config, Screen};
 
 /// This plugin handles loading and saving scenes
 /// Scene logic is only active during the State `GameState::Playing`
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Playing), setup);
+    app.add_systems(Startup, print_config)
+        .add_systems(OnEnter(Screen::Playing), setup);
 }
 
-pub fn setup(
+fn print_config(cfg: Res<Config>) {
+    println!("config: {cfg:?}");
+}
+
+fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,

@@ -51,9 +51,11 @@ bevy = { version = "0.15", default-features = false, features = [
     "x11",
     "wayland"
 ] }
-bevy_kira_audio = { version = "0.22.0", features = ["android_shared_stdcxx"] }
-bevy_asset_loader = { version = "0.22" }
+bevy_asset_loader = { version = "0.22", features=["progress_tracking"] }
+bevy_common_assets = {version="0.12.0", features=["ron"]}
 bevy_third_person_camera = "0.2.0"
+bevy_kira_audio = { version = "0.22.0", features = ["android_shared_stdcxx"] }
+
 image = { version = "0.25", default-features = false }
 leafwing-input-manager = "0.16.0"
 ## This greatly improves WGPU's performance due to its heavy use of trace! calls
