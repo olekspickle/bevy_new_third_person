@@ -1,19 +1,15 @@
 use bevy::prelude::*;
+use rand::Rng;
 
-use crate::{Config, Screen};
+use crate::Screen;
 
 /// This plugin handles loading and saving scenes
 /// Scene logic is only active during the State `GameState::Playing`
 pub fn plugin(app: &mut App) {
-    app.add_systems(Startup, print_config)
-        .add_systems(OnEnter(Screen::Playing), setup);
+    app.add_systems(OnEnter(Screen::Playing), setup);
 }
 
-fn print_config(cfg: Res<Config>) {
-    println!("config: {cfg:?}");
-}
-
-fn setup(
+pub fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -49,13 +45,18 @@ fn setup(
         brightness: 1000.0,
     });
 
+    let mut rng = rand::thread_rng();
+
     // setup point light grid
-    // TODO: rand colors
     for i in (-1000..1000).step_by(50) {
         for j in (-1000..1000).step_by(50) {
             commands.spawn((
                 PointLight {
-                    color: Color::srgb(0.3, 0.5, 0.5),
+                    color: Color::srgb(
+                        rng.gen_range(0.01..0.9),
+                        rng.gen_range(0.01..0.9),
+                        rng.gen_range(0.01..0.9),
+                    ),
                     radius: 30.0,
                     range: 100.,
                     ..default()

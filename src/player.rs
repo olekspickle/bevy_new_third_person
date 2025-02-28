@@ -9,8 +9,8 @@ pub const FOLLOW_EPSILON: f32 = 5.;
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `GameState::Playing`
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Playing), spawn);
-    //.add_systems(Update, movement.run_if(in_state(Screen::Playing)));
+    app.add_systems(OnEnter(Screen::Playing), spawn)
+        .add_systems(Update, movement.run_if(in_state(Screen::Playing)));
 }
 
 #[derive(Component)]
@@ -38,30 +38,32 @@ pub fn movement(
     camera: Query<&mut Transform, With<SceneCamera>>,
     mut player: Query<&mut Transform, (With<Player>, Without<SceneCamera>)>,
 ) {
-    let (state, mut player) = (action.single(), player.single_mut());
-    let camera_transform = camera.single();
-    let speed = 3.0 * time.delta_secs();
     let mut direction = Vec3::ZERO;
+    let mut rot = Vec3::ZERO;
+    let speed = 50.0 * time.delta_secs();
 
-    if state.just_pressed(&Action::Right) {
+    let camera_transform = camera.single();
+    let forward = camera_transform.forward().normalize();
+    let (state, mut player) = (action.single(), player.single_mut());
+
+    if state.pressed(&Action::Right) {
         let right = camera_transform.right().normalize();
         let right_flat = Vec3::new(right.x, 0.0, right.z).normalize();
         direction += speed * right_flat;
     }
 
-    if state.just_pressed(&Action::Left) {
+    if state.pressed(&Action::Left) {
         let left = camera_transform.left().normalize();
         let left_flat = Vec3::new(left.x, 0.0, left.z).normalize();
         direction += speed * left_flat;
     }
 
-    if state.just_pressed(&Action::Forward) {
-        let forward = camera_transform.forward().normalize();
+    if state.pressed(&Action::Forward) {
         let forward_flat = Vec3::new(forward.x, 0.0, forward.z).normalize();
         direction += speed * forward_flat;
     }
 
-    if state.just_pressed(&Action::Backward) {
+    if state.pressed(&Action::Backward) {
         let back = camera_transform.back().normalize();
         let back_flat = Vec3::new(back.x, 0.0, back.z).normalize();
         direction += speed * back_flat;
@@ -82,6 +84,12 @@ pub fn movement(
         direction = direction.normalize(); // Normalize to avoid diagonal speed boost
         player.translation += direction * speed;
     }
+
+    let mut forward = forward;
+    forward.y = 0.0;
+    forward = forward.normalize();
+    let player_rot = Quat::from_rotation_arc(Vec3::Z, forward);
+    player.rotation = player_rot;
 }
 
 //pub fn set_movement(

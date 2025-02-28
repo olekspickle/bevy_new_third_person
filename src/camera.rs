@@ -8,7 +8,7 @@ const ZOOM: (f32, f32) = (1.5, 30.);
 /// Camera logic is only active during the State `GameState::Playing`
 pub fn plugin(app: &mut App) {
     app.add_plugins(ThirdPersonCameraPlugin)
-        .add_systems(Startup, spawn_ui_camera)
+        //.add_systems(Startup, spawn_ui_camera)
         .add_systems(OnEnter(Screen::Playing), spawn_scene_camera);
 }
 
@@ -24,6 +24,7 @@ fn spawn_ui_camera(mut commands: Commands) {
         Camera2d,
         Camera {
             order: 1,
+            clear_color: ClearColorConfig::None,
             ..default()
         },
         // Render all UI to this camera.
@@ -50,6 +51,10 @@ fn spawn_scene_camera(mut commands: Commands) {
             offset_enabled: true,
             offset_toggle_enabled: true,
             gamepad_settings: CustomGamepadSettings::default(),
+            ..default()
+        },
+        Camera {
+            order: 0,
             ..default()
         },
         SceneCamera,
