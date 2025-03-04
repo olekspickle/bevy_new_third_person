@@ -1,34 +1,37 @@
+#![allow(clippy::type_complexity)]
 use bevy::{app::App, prelude::*};
 
+mod asset_tracking;
 mod audio;
 mod camera;
+mod config;
 mod player;
 mod scene;
 mod screens;
+mod skybox;
+mod ui;
 mod utils;
-
 pub use camera::{SceneCamera, Ui};
 pub use screens::{
     Screen, loading,
     settings::{Action, Settings},
 };
+pub use skybox::Sun;
 pub use utils::despawn;
 
 pub fn game(app: &mut App) {
-    //app.configure_sets(
-    //    Update,
-    //    (AppSet::TickTimers, AppSet::RecordInput, AppSet::Update).chain(),
-    //);
-
-    //app.add_systems(Startup, print_config);
-    //app.add_systems(Startup, (add_config, print_config.after(add_config)));
+    app.configure_sets(
+        Update,
+        (AppSet::TickTimers, AppSet::RecordInput, AppSet::Update).chain(),
+    );
 
     app.add_plugins((
-        scene::plugin,
-        player::plugin,
-        camera::plugin,
-        screens::plugin,
         audio::plugin,
+        camera::plugin,
+        player::plugin,
+        screens::plugin,
+        scene::plugin,
+        skybox::plugin,
     ));
 
     //#[cfg(debug_assertions)]
@@ -44,11 +47,8 @@ pub struct Score(pub i32);
 /// When adding a new variant, make sure to order it in the `configure_sets`
 /// call above.
 #[derive(SystemSet, Debug, Clone, Copy, Eq, PartialEq, Hash, PartialOrd, Ord)]
-enum AppSet {
-    /// Tick timers.
+pub enum AppSet {
     TickTimers,
-    /// Record player input.
     RecordInput,
-    /// Do everything else (consider splitting this into further variants).
     Update,
 }

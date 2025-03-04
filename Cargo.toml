@@ -11,9 +11,25 @@ repository = "https://github.com/olekspickle/bevy_3rd_person_view"
 members = ["mobile"]
 
 [features]
-dev = [
-    "bevy/dynamic_linking",
+default = [
+    # Default to a native dev build.
+    "dev_native",
 ]
+dev = [
+    # Improve compile times for dev builds by linking Bevy as a dynamic library.
+    "bevy/dynamic_linking",
+    "bevy/bevy_dev_tools",
+    # "bevy-inspector-egui",
+    # "avian2d/debug-plugin",
+]
+dev_native = [
+    "dev",
+    # Enable asset hot reloading for native dev builds.
+    "bevy/file_watcher",
+    # Enable embedded asset hot reloading for native dev builds.
+    "bevy/embedded_watcher",
+]
+physics_debug = []
 
 # All of Bevy's default features exept for the audio related ones (bevy_audio, vorbis), since they clash with bevy_kira_audio
 #   and android_shared_stdcxx/android-game-activity, since those are covered in `mobile`
@@ -51,7 +67,6 @@ bevy = { version = "0.15", default-features = false, features = [
     "x11",
     "wayland"
 ] }
-bevy_asset_loader = { version = "0.22", features=["progress_tracking"] }
 bevy_common_assets = {version="0.12.0", features=["ron"]}
 bevy_third_person_camera = "0.2.0"
 bevy_kira_audio = { version = "0.22.0", features = ["android_shared_stdcxx"] }
@@ -66,6 +81,8 @@ serde = "1"
 webbrowser = { version = "1", features = ["hardened"] }
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.30", default-features = false }
+bevy_atmosphere = "0.12.2"
+iyes_perf_ui = "0.4.0"
 
 [profile.dev.package."*"]
 opt-level = 3

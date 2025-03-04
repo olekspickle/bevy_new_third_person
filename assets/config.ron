@@ -1,6 +1,6 @@
 (
     scale: 3.0,
-    geometry_positions: [
+    geometry: [
         (142., 56., 0.),
         (25., 132., 0.),
         (123., 7., 0.),
