@@ -1,13 +1,12 @@
+use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_third_person_camera::*;
 use leafwing_input_manager::prelude::ActionState;
 
-use crate::{Action, Screen, camera::SceneCamera};
-
-pub const FOLLOW_EPSILON: f32 = 5.;
+//pub const FOLLOW_EPSILON: f32 = 5.;
 
 /// This plugin handles player related stuff like movement, shooting
-/// Player logic is only active during the State `GameState::Playing`
+/// Player logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Playing), spawn)
         .add_systems(Update, movement.run_if(in_state(Screen::Playing)));
@@ -15,6 +14,12 @@ pub fn plugin(app: &mut App) {
 
 #[derive(Component)]
 pub struct Player;
+
+/// Rotation in radians
+#[derive(Component)]
+pub struct Rotatable {
+    angle: f32,
+}
 
 fn spawn(
     mut commands: Commands,
@@ -28,7 +33,14 @@ fn spawn(
     let color: MeshMaterial3d<StandardMaterial> =
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
     let pos = Transform::from_translation(Vec3::new(0.0, 0.5, 0.0));
-    commands.spawn((color, mesh, pos, ThirdPersonCameraTarget, Player));
+    commands.spawn((
+        color,
+        mesh,
+        pos,
+        ThirdPersonCameraTarget,
+        Player,
+        Rotatable { angle: 0.3 },
+    ));
 }
 
 pub fn movement(
@@ -36,30 +48,41 @@ pub fn movement(
     //touch_input: Res<Touches>,
     action: Query<&ActionState<Action>>,
     camera: Query<&mut Transform, With<SceneCamera>>,
-    mut player: Query<&mut Transform, (With<Player>, Without<SceneCamera>)>,
+    mut player: Query<(&mut Transform, &Rotatable), (With<Player>, Without<SceneCamera>)>,
 ) {
     let mut direction = Vec3::ZERO;
-    let mut rot = Vec3::ZERO;
     let speed = 50.0 * time.delta_secs();
 
+    let state = action.single();
     let camera_transform = camera.single();
     let forward = camera_transform.forward().normalize();
-    let (state, mut player) = (action.single(), player.single_mut());
+    let (mut player, rot) = player.single_mut();
+
+    // Rotate player
+    let mut forward_dir = forward;
+    forward_dir.y = 0.0;
+    let player_rot = Quat::from_rotation_arc(Vec3::X, forward_dir);
+    player.rotation = player_rot;
 
     if state.pressed(&Action::Right) {
         let right = camera_transform.right().normalize();
-        let right_flat = Vec3::new(right.x, 0.0, right.z).normalize();
+        let right_flat = Vec3::new(right.x, 0.0, right.z);
         direction += speed * right_flat;
+        player.rotate_y(-rot.angle);
+        //player.rotate_y(-rot.angle * time.delta_secs());
     }
 
     if state.pressed(&Action::Left) {
         let left = camera_transform.left().normalize();
-        let left_flat = Vec3::new(left.x, 0.0, left.z).normalize();
+        let left_flat = Vec3::new(left.x, 0.0, left.z);
         direction += speed * left_flat;
+        player.rotate_y(rot.angle);
+        //player.rotate_y(rot.angle * time.delta_secs());
     }
 
     if state.pressed(&Action::Forward) {
-        let forward_flat = Vec3::new(forward.x, 0.0, forward.z).normalize();
+        let forward = forward.normalize();
+        let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
         direction += speed * forward_flat;
     }
 
@@ -67,6 +90,7 @@ pub fn movement(
         let back = camera_transform.back().normalize();
         let back_flat = Vec3::new(back.x, 0.0, back.z).normalize();
         direction += speed * back_flat;
+        player.rotate_y(2. * rot.angle * time.delta_secs());
     }
 
     // TODO: jump
@@ -84,12 +108,6 @@ pub fn movement(
         direction = direction.normalize(); // Normalize to avoid diagonal speed boost
         player.translation += direction * speed;
     }
-
-    let mut forward = forward;
-    forward.y = 0.0;
-    forward = forward.normalize();
-    let player_rot = Quat::from_rotation_arc(Vec3::Z, forward);
-    player.rotation = player_rot;
 }
 
 //pub fn set_movement(

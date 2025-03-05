@@ -1,13 +1,14 @@
+use crate::prelude::*;
 use bevy::prelude::*;
+use bevy_atmosphere::prelude::*;
 use bevy_third_person_camera::*;
-
-use crate::Screen;
 
 const ZOOM: (f32, f32) = (1.5, 30.);
 
-/// Camera logic is only active during the State `GameState::Playing`
+/// Camera logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
     app.add_plugins(ThirdPersonCameraPlugin)
+        // TODO: figure out how not to block 3d scene (bevy splitscreen example)
         //.add_systems(Startup, spawn_ui_camera)
         .add_systems(OnEnter(Screen::Playing), spawn_scene_camera);
 }
@@ -57,6 +58,9 @@ fn spawn_scene_camera(mut commands: Commands) {
             order: 0,
             ..default()
         },
+        Msaa::Sample4,
+        // Marks camera as having a skybox, by default it doesn't specify the render layers the skybox can be seen on
+        AtmosphereCamera::default(),
         SceneCamera,
     );
     commands.spawn(camera);

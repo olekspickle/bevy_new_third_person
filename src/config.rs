@@ -1,8 +1,7 @@
+use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
 use serde::{Deserialize, Serialize};
-
-use crate::{Screen, asset_tracking::LoadResource};
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(RonAssetPlugin::<Config>::new(&["config.ron"]));
@@ -15,27 +14,34 @@ pub struct Config {
     geometry: Vec<(f32, f32, f32)>,
 }
 
-//#[derive(AssetCollection, Resource)]
-//pub struct AudioAssets {
-//    #[asset(path = "audio/time-for-fun.ogg")]
-//    pub bg_play: Handle<AudioSource>,
-//}
-//#[derive(AssetCollection, Resource)]
-//pub struct TextureAssets {
-//    #[asset(path = "images/bevy.png")]
-//    pub bevy: Handle<Image>,
-//    #[asset(path = "images/github.png")]
-//    pub github: Handle<Image>,
-//}
-//#[derive(AssetCollection, Resource)]
-//pub struct MeshAssets {
-//    #[asset(path = "models/Player.gltf")]
-//    pub player: Handle<Mesh>,
-//}
-//
-//font: asset_server.load("fonts/FiraSans-Regular.ttf"),
-//#[derive(AssetCollection, Resource)]
-//pub struct ConfigAsset {
-//    #[asset(path = "config.ron")]
-//    pub config: Handle<Config>,
-//}
+#[derive(Asset, Clone, Reflect, Resource)]
+pub struct Textures {
+    #[dependency]
+    pub bevy: Handle<Image>,
+    #[dependency]
+    pub github: Handle<Image>,
+}
+#[derive(Asset, Clone, Reflect, Resource)]
+pub struct Meshes {
+    #[dependency]
+    pub player: Handle<Mesh>,
+}
+
+impl FromWorld for Textures {
+    fn from_world(world: &mut World) -> Self {
+        let assets = world.resource::<AssetServer>();
+        Self {
+            bevy: assets.load("images/bevy.png"),
+            github: assets.load("images/github.png"),
+        }
+    }
+}
+
+impl FromWorld for Meshes {
+    fn from_world(world: &mut World) -> Self {
+        let assets = world.resource::<AssetServer>();
+        Self {
+            player: assets.load("models/Player.gltf"),
+        }
+    }
+}

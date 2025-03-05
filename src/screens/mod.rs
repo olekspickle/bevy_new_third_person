@@ -40,5 +40,4 @@ pub enum Screen {
     // Settings screen
     Settings,
     GameOver,
-    Title,
 }

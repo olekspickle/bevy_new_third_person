@@ -1,4 +1,4 @@
-use crate::Screen;
+use crate::prelude::*;
 use bevy::{pbr::light_consts::lux::AMBIENT_DAYLIGHT, prelude::*};
 use bevy_atmosphere::prelude::*;
 

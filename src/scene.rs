@@ -1,10 +1,9 @@
+use crate::prelude::*;
 use bevy::prelude::*;
 use rand::Rng;
 
-use crate::Screen;
-
 /// This plugin handles loading and saving scenes
-/// Scene logic is only active during the State `GameState::Playing`
+/// Scene logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Playing), setup);
 }
@@ -20,26 +19,28 @@ pub fn setup(
     commands.spawn((mesh, mat, Transform::default()));
 
     // Some environment
-    let mesh = Mesh3d(meshes.add(Cuboid::new(200., 1000., 200.)));
+    let mesh = Mesh3d(meshes.add(Cuboid::new(200., 500., 200.)));
     let mat = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.3, 0.8)));
-    commands.spawn((mesh, mat, Transform::from_xyz(-200., 0., -200.)));
+    commands.spawn((mesh, mat, Transform::from_xyz(-200., 250., -200.)));
 
     let mesh = Mesh3d(meshes.add(Cuboid::new(60., 60., 60.)));
     let mat = MeshMaterial3d(materials.add(Color::srgb(0.6, 0.3, 0.6)));
     commands.spawn((mesh, mat, Transform::from_xyz(200., 30.0, 200.)));
 
     let mesh = Mesh3d(meshes.add(Cuboid::new(40., 40., 40.)));
-    let mat = MeshMaterial3d(materials.add(Color::srgb(0.9, 0.9, 0.9)));
+    let mat = MeshMaterial3d(materials.add(Color::srgb(0.4, 0.1, 0.4)));
     commands.spawn((mesh, mat, Transform::from_xyz(400., 20., -400.)));
 
     let mesh = Mesh3d(meshes.add(Cylinder::new(400., 40.)));
-    let mat = MeshMaterial3d(materials.add(Color::srgb(0.5, 0.5, 0.1)));
+    let mat = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.5, 0.6)));
     commands.spawn((mesh, mat, Transform::from_xyz(100., 20., -100.)));
 
-    let mesh = Mesh3d(meshes.add(Cylinder::new(60., 400.)));
-    let mat = MeshMaterial3d(materials.add(Color::srgb(0.5, 0.5, 0.1)));
-    commands.spawn((mesh, mat, Transform::from_xyz(-100., 30., 100.)));
+    let mesh = Mesh3d(meshes.add(Cylinder::new(60., 50.)));
+    let mat = MeshMaterial3d(materials.add(Color::srgb(0.4, 0.5, 0.8)));
+    commands.spawn((mesh, mat, Transform::from_xyz(-300., 25., 100.)));
 
+    // Light
+    commands.spawn((DirectionalLight::default(), Sun));
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
         brightness: 1000.0,

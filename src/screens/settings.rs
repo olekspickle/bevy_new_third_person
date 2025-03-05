@@ -1,7 +1,6 @@
+use crate::prelude::*;
 use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
-
-use crate::Screen;
 
 // This plugin listens for keyboard input and converts the input into Actions.
 // Actions can then be used as a resource in other systems to act on the player input.

@@ -2,8 +2,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use bevy::{
-    DefaultPlugins, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow,
-    winit::WinitWindows,
+    DefaultPlugins,
+    asset::AssetMetaCheck,
+    log,
+    prelude::*,
+    window::PrimaryWindow,
+    winit::{WinitSettings, WinitWindows},
 };
 use bevy_3rd_person_view::game;
 use std::io::Cursor;
@@ -36,12 +40,14 @@ fn main() {
         .add_plugins(game)
         .add_systems(Startup, set_window_icon);
 
-    // set any additional plugins/systems
+    // Only run the app when there is user input. This will significantly reduce CPU/GPU use.
+    app.insert_resource(WinitSettings::desktop_app());
 
     app.run();
 }
 
-// Sets the icon on windows and X11
+/// Sets the icon on windows and X11
+/// TODO: fix when bevy gets a normal way of setting window image
 fn set_window_icon(
     windows: NonSend<WinitWindows>,
     primary_window: Query<Entity, With<PrimaryWindow>>,

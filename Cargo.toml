@@ -83,6 +83,7 @@ webbrowser = { version = "1", features = ["hardened"] }
 winit = { version = "0.30", default-features = false }
 bevy_atmosphere = "0.12.2"
 iyes_perf_ui = "0.4.0"
+typed-builder = "0.20.0"
 
 [profile.dev.package."*"]
 opt-level = 3
