@@ -16,7 +16,7 @@ pub mod prelude {
     use super::*;
 
     pub use asset_tracking::{LoadResource, ResourceHandles};
-    pub use camera::{SceneCamera, Ui};
+    pub use camera::SceneCamera;
     pub use screens::{
         Screen, loading,
         settings::{Action, Settings},

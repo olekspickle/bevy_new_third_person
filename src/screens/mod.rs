@@ -14,9 +14,9 @@ pub(super) fn plugin(app: &mut App) {
     app.enable_state_scoped_entities::<Screen>();
 
     app.add_plugins((
+        loading::plugin,
         menu::plugin,
         //splash::plugin,
-        loading::plugin,
         settings::plugin,
         gameplay::plugin,
         gameover::plugin,

@@ -26,10 +26,10 @@ pub fn plugin(app: &mut App) {
         .add_plugins(bevy::render::diagnostic::RenderDiagnosticsPlugin)
         .add_plugins(PerfUiPlugin);
 
-    app.load_resource_from_path::<Fira>("fonts/FiraSans-Regular.ttf");
+    app.add_systems(Startup, setup);
 }
 
-fn setup(commands: &mut Commands) {
+fn setup(mut commands: Commands) {
     commands.spawn((
         // Contains everything related to FPS and frame time
         PerfUiFramerateEntries::default(),

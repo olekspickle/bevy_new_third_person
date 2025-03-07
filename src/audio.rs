@@ -6,9 +6,7 @@ use rand::prelude::*;
 
 // This plugin is responsible to control the game audio
 pub fn plugin(app: &mut App) {
-    app.load_resource::<AudioSources>();
-    app.insert_resource(AudioInstances::default())
-        .add_plugins(AudioPlugin)
+    app.add_plugins(AudioPlugin)
         .add_systems(OnEnter(Screen::Playing), start_or_resume_audio)
         .add_systems(OnExit(Screen::Playing), pause_audio)
         .add_systems(
@@ -17,6 +15,9 @@ pub fn plugin(app: &mut App) {
                 .after(player::movement)
                 .run_if(in_state(Screen::Playing)),
         );
+
+    app.load_resource::<AudioSources>()
+        .insert_resource(AudioInstances::default());
 }
 
 #[derive(Resource, Asset, Reflect, Clone)]
@@ -33,9 +34,8 @@ struct AudioInstances {
 impl FromWorld for AudioSources {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
-        Self {
-            bg_audio: assets.load("audio/time-for-fun.ogg"),
-        }
+        let bg_audio = assets.load("audio/time-for-fun.ogg");
+        Self { bg_audio }
     }
 }
 

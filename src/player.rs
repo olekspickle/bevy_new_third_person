@@ -28,6 +28,7 @@ fn spawn(
     //assets: Res<AssetServer>,
 ) {
     // TODO: load during loading screen
+    //let mesh: Mesh = assets.load("models/Player.gltf#Scene0");
     //let mesh = SceneRoot(assets.load("Player.gltf#Scene0"));
     let mesh = Mesh3d(meshes.add(Mesh::from(Cuboid::new(1.0, 1.0, 1.0))));
     let color: MeshMaterial3d<StandardMaterial> =

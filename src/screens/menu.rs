@@ -4,16 +4,14 @@ use bevy::prelude::*;
 /// This plugin is responsible for the game menu (containing only one button...)
 /// The menu is only drawn during the State `GameState::Menu` and is removed when that state is exited
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Menu), (setup_menu, despawn::<SceneCamera>));
-    //.add_systems(OnExit(Screen::Menu), despawn::<Menu>);
+    app.add_systems(OnEnter(Screen::Menu), setup_menu);
 }
 
-//#[derive(Component)]
-//struct Menu;
-
-fn setup_menu(mut commands: Commands, font: Res<Fira>) {
+fn setup_menu(font: Res<Fira>, mut commands: Commands, camera: Query<Entity, With<SceneCamera>>) {
+    let camera = camera.single();
     commands
         .ui_root()
+        .insert(TargetCamera(camera))
         .insert(StateScoped(Screen::Menu))
         .with_children(|children| {
             let opts = ButtonOpts::default()

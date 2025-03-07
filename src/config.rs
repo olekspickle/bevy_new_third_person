@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(RonAssetPlugin::<Config>::new(&["config.ron"]));
+
     app.load_resource_from_path::<Config>("config.ron");
 }
 
@@ -24,7 +25,7 @@ pub struct Textures {
 #[derive(Asset, Clone, Reflect, Resource)]
 pub struct Meshes {
     #[dependency]
-    pub player: Handle<Mesh>,
+    pub player: Handle<Scene>,
 }
 
 impl FromWorld for Textures {

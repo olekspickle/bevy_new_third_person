@@ -11,23 +11,27 @@ use bevy::prelude::*;
 pub(super) fn plugin(app: &mut App) {
     app.load_resource::<Meshes>();
     app.load_resource::<Textures>();
+    app.load_resource_from_path::<Fira>("fonts/FiraCode-Regular.ttf");
+
     app.add_systems(OnEnter(Screen::Loading), spawn_loading_screen)
         .add_systems(
             Update,
-            continue_to_title_screen.run_if(in_state(Screen::Loading).and(all_assets_loaded)),
+            continue_to_menu_screen.run_if(in_state(Screen::Loading).and(all_assets_loaded)),
         );
 }
 
-fn spawn_loading_screen(mut commands: Commands) {
+fn spawn_loading_screen(mut commands: Commands, camera: Query<Entity, With<SceneCamera>>) {
+    let camera = camera.single();
     commands
         .spawn(Name::new("loading-text"))
+        .insert(TargetCamera(camera))
         .insert(StateScoped(Screen::Loading))
         .with_children(|children| {
             children.label(&"Loading...".into());
         });
 }
 
-fn continue_to_title_screen(mut next_screen: ResMut<NextState<Screen>>) {
+fn continue_to_menu_screen(mut next_screen: ResMut<NextState<Screen>>) {
     next_screen.set(Screen::Menu);
 }
 

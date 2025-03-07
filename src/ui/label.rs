@@ -37,11 +37,12 @@ impl From<&ButtonOpts> for LabelOpts {
     fn from(value: &ButtonOpts) -> Self {
         Self {
             text: value.label.clone(),
+            height: value.font.font_size,
+            width: value.width,
             color: value.color,
             bg_color: value.bg_color,
-            width: value.width,
             font: value.font.clone(),
-            ..default()
+            ..Default::default()
         }
     }
 }
@@ -55,7 +56,7 @@ impl Default for LabelOpts {
             bg_color: BG_COLOR_NORM,
             text: "label".into(),
             font: TextFont::from_font_size(FONT_SIZE),
-            ..default()
+            border: 0.0,
         }
     }
 }
