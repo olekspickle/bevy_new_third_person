@@ -11,7 +11,7 @@ use bevy::prelude::*;
 pub(super) fn plugin(app: &mut App) {
     app.load_resource::<Meshes>();
     app.load_resource::<Textures>();
-    app.load_resource_from_path::<Fira>("fonts/FiraCode-Regular.ttf");
+    //app.load_resource_from_path::<Fira>("fonts/FiraCode-Regular.ttf");
 
     app.add_systems(OnEnter(Screen::Loading), spawn_loading_screen)
         .add_systems(
@@ -20,11 +20,14 @@ pub(super) fn plugin(app: &mut App) {
         );
 }
 
-fn spawn_loading_screen(mut commands: Commands, camera: Query<Entity, With<SceneCamera>>) {
-    let camera = camera.single();
+fn spawn_loading_screen(
+    mut commands: Commands,
+    //camera: Query<Entity, With<SceneCamera>>
+) {
+    //let camera = camera.single();
     commands
-        .spawn(Name::new("loading-text"))
-        .insert(TargetCamera(camera))
+        .ui_root()
+        //.insert(TargetCamera(camera))
         .insert(StateScoped(Screen::Loading))
         .with_children(|children| {
             children.label(&"Loading...".into());
@@ -32,7 +35,7 @@ fn spawn_loading_screen(mut commands: Commands, camera: Query<Entity, With<Scene
 }
 
 fn continue_to_menu_screen(mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Menu);
+    next_screen.set(Screen::Playing);
 }
 
 fn all_assets_loaded(resource_handles: Res<ResourceHandles>) -> bool {

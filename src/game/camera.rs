@@ -1,4 +1,3 @@
-use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_atmosphere::prelude::*;
 use bevy_third_person_camera::*;
@@ -12,9 +11,6 @@ pub fn plugin(app: &mut App) {
         //.add_systems(Startup, spawn_ui_camera)
         .add_systems(Startup, spawn_scene_camera);
 }
-
-//#[derive(Component)]
-//pub struct Ui;
 
 #[derive(Component)]
 pub struct SceneCamera;
@@ -33,7 +29,7 @@ pub struct SceneCamera;
 //     ));
 // }
 
-fn spawn_scene_camera(mut commands: Commands) {
+pub fn spawn_scene_camera(mut commands: Commands) {
     let camera = (
         Camera3d::default(),
         ThirdPersonCamera {
@@ -55,12 +51,6 @@ fn spawn_scene_camera(mut commands: Commands) {
         // Marks camera as having a skybox, by default it doesn't specify the render layers the skybox can be seen on
         AtmosphereCamera::default(),
         SceneCamera,
-        // Render all UI to this camera.
-        // Not strictly necessary since we only use one camera,
-        // but if we don't use this component, our UI will disappear as soon
-        // as we add another camera. This includes indirect ways of adding cameras like using
-        // [ui node outlines](https://bevyengine.org/news/bevy-0-14/#ui-node-outline-gizmos)
-        // for debugging. So it's good to have this here for future-proofing.
         IsDefaultUiCamera,
     );
     commands.spawn(camera);

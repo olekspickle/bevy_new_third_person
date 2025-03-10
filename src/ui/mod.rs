@@ -1,4 +1,3 @@
-use crate::prelude::*;
 use bevy::{prelude::*, ui::Val::*};
 use iyes_perf_ui::{
     PerfUiPlugin,
@@ -10,7 +9,7 @@ use iyes_perf_ui::{
 mod button;
 mod label;
 pub use button::{ButtonOpts, Buttonable};
-pub use label::Label;
+pub use label::{Label, LabelOpts};
 
 pub const FONT_SIZE: f32 = 24.0;
 pub const COLOR_NORM: Color = Color::srgb(0.9, 0.9, 0.9);

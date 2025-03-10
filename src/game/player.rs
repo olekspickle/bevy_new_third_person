@@ -22,14 +22,14 @@ pub struct Rotatable {
 }
 
 fn spawn(
+    //meshes: Res<Meshes>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     //assets: Res<AssetServer>,
 ) {
     // TODO: load during loading screen
-    //let mesh: Mesh = assets.load("models/Player.gltf#Scene0");
-    //let mesh = SceneRoot(assets.load("Player.gltf#Scene0"));
+    //let mesh = SceneRoot(meshes.player.clone()),
     let mesh = Mesh3d(meshes.add(Mesh::from(Cuboid::new(1.0, 1.0, 1.0))));
     let color: MeshMaterial3d<StandardMaterial> =
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));

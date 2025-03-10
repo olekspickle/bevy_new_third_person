@@ -1,4 +1,5 @@
-use crate::{player, prelude::*};
+use super::player;
+use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_kira_audio::prelude::*;
 use leafwing_input_manager::prelude::ActionState;
@@ -87,30 +88,30 @@ fn movement_sound(
     let instance = instances.bg_audio.clone();
 
     // TODO: add actual step audio
-    if let Some(instance) = &instance {
-        if let Some(instance) = audio_instances.get_mut(instance) {
-            match instance.state() {
-                PlaybackState::Stopped | PlaybackState::Paused { .. } => {
-                    let state = action.single();
-                    if state.pressed(&Action::Forward)
-                        | state.pressed(&Action::Backward)
-                        | state.pressed(&Action::Left)
-                        | state.pressed(&Action::Right)
-                    {
-                        let handle = global_audio
-                            .play(sources.bg_audio.clone())
-                            .with_volume(0.1)
-                            .handle();
-                        instances.bg_audio = Some(handle);
-                    }
-                }
-                //PlaybackState::Playing { .. } => {
-                //instance.pause(AudioTween::default());
-                //if actions.player_movement.is_none() {
-                //}
-                //}
-                _ => {}
-            }
-        }
-    }
+    //if let Some(instance) = &instance {
+    //    if let Some(instance) = audio_instances.get_mut(instance) {
+    //        match instance.state() {
+    //            PlaybackState::Stopped | PlaybackState::Paused { .. } => {
+    //                let state = action.single();
+    //                if state.pressed(&Action::Forward)
+    //                    | state.pressed(&Action::Backward)
+    //                    | state.pressed(&Action::Left)
+    //                    | state.pressed(&Action::Right)
+    //                {
+    //                    let handle = global_audio
+    //                        .play(sources.bg_audio.clone())
+    //                        .with_volume(0.1)
+    //                        .handle();
+    //                    instances.bg_audio = Some(handle);
+    //                }
+    //            }
+    //            //PlaybackState::Playing { .. } => {
+    //            //instance.pause(AudioTween::default());
+    //            //if actions.player_movement.is_none() {
+    //            //}
+    //            //}
+    //            _ => {}
+    //        }
+    //    }
+    //}
 }

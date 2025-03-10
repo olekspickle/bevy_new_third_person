@@ -2,26 +2,23 @@
 use bevy::{app::App, prelude::*};
 
 mod asset_tracking;
-mod audio;
-mod camera;
 mod config;
-mod player;
-mod scene;
+mod game;
 mod screens;
-mod skybox;
 mod ui;
 mod utils;
 
 pub mod prelude {
+
     use super::*;
 
     pub use asset_tracking::{LoadResource, ResourceHandles};
-    pub use camera::SceneCamera;
+    pub use config::{Meshes, Textures};
+    pub use game::{camera::SceneCamera, skybox::Sun};
     pub use screens::{
         Screen, loading,
         settings::{Action, Settings},
     };
-    pub use skybox::Sun;
     pub use ui::*;
     pub use utils::despawn;
 }
@@ -34,13 +31,9 @@ pub fn game(app: &mut App) {
 
     app.add_plugins((
         asset_tracking::plugin,
-        audio::plugin,
-        camera::plugin,
+        game::plugin,
         config::plugin,
-        player::plugin,
         screens::plugin,
-        scene::plugin,
-        skybox::plugin,
     ));
 
     //#[cfg(debug_assertions)]

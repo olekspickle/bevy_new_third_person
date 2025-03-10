@@ -42,7 +42,7 @@ impl FromWorld for Meshes {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            player: assets.load("models/Player.gltf"),
+            player: assets.load("models/player.glb#Scene0"),
         }
     }
 }
