@@ -1,11 +1,12 @@
 (
     scale: 3.0,
-    geometry: [
-        (142., 56., 0.),
-        (25., 132., 0.),
-        (123., 7., 0.),
-        (-61., 149., 0.),
-        (-96., -52., 0.),
-        (69., -189., 0.),
-    ]
+    geometry: (
+        quantity: 100,
+        y_upper_bound: 300,
+        y_lower_bound: 10,
+        x_upper_bound: 200,
+        x_lower_bound: 10,
+        z_upper_bound: 200,
+        z_lower_bound: 10,
+    )
 )

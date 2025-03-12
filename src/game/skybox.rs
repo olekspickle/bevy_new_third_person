@@ -14,6 +14,8 @@ pub fn plugin(app: &mut App) {
             bevy::utils::Duration::from_millis(500),
             TimerMode::Repeating,
         )))
+        .add_systems(OnEnter(Screen::Playing), add_skybox_component_to_camera)
+        .add_systems(OnExit(Screen::Playing), despawn::<AtmosphereCamera>)
         .add_systems(Update, daylight_cycle.run_if(in_state(Screen::Playing)));
 }
 
@@ -22,6 +24,17 @@ pub struct Sun;
 
 #[derive(Resource)]
 struct CycleTimer(Timer);
+
+fn add_skybox_component_to_camera(
+    mut commands: Commands,
+    mut camera: Query<Entity, With<SceneCamera>>,
+) {
+    let camera = camera.single_mut();
+    commands.entity(camera).insert(
+        // Marks camera as having a skybox, by default it doesn't specify the render layers the skybox can be seen on
+        AtmosphereCamera::default(),
+    );
+}
 
 // We can edit the Atmosphere resource and it will be updated automatically
 fn daylight_cycle(

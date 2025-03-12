@@ -1,46 +1,72 @@
 use crate::prelude::*;
-use bevy::prelude::*;
-use rand::Rng;
+use avian3d::prelude::*;
+use bevy::{pbr::DirectionalLightShadowMap, prelude::*};
+use rand::{Rng, thread_rng};
+
+const PLANE_WIDTH: f32 = 2000.;
+const PLANE_WIDTH_INT: i32 = 2000;
+const SUN: Color = Color::srgb(248.0 / 255.0, 176.0 / 255.0, 14.0 / 255.0);
 
 /// This plugin handles loading and saving scenes
 /// Scene logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Playing), setup);
+    app.add_plugins(PhysicsPlugins::default())
+        .insert_resource(DirectionalLightShadowMap { size: 4096 })
+        .add_systems(OnEnter(Screen::Playing), setup);
 }
 
 pub fn setup(
+    config: Res<Config>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     // Plane
-    let mesh = Mesh3d(meshes.add(Cuboid::new(2000., 0., 2000.)));
-    let mat = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.9, 0.3)));
-    commands.spawn((mesh, mat, Transform::default()));
+    let mesh = Mesh3d(meshes.add(Cuboid::new(PLANE_WIDTH, 0., PLANE_WIDTH)));
+    let green = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.9, 0.3)));
+    commands.spawn((
+        mesh,
+        green,
+        Transform::default(),
+        RigidBody::Static,
+        Collider::half_space(Vec3::Y),
+    ));
 
-    // Some environment
-    let mesh = Mesh3d(meshes.add(Cuboid::new(200., 500., 200.)));
-    let mat = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.3, 0.8)));
-    commands.spawn((mesh, mat, Transform::from_xyz(-200., 250., -200.)));
-
-    let mesh = Mesh3d(meshes.add(Cuboid::new(60., 60., 60.)));
-    let mat = MeshMaterial3d(materials.add(Color::srgb(0.6, 0.3, 0.6)));
-    commands.spawn((mesh, mat, Transform::from_xyz(200., 30.0, 200.)));
-
-    let mesh = Mesh3d(meshes.add(Cuboid::new(40., 40., 40.)));
-    let mat = MeshMaterial3d(materials.add(Color::srgb(0.4, 0.1, 0.4)));
-    commands.spawn((mesh, mat, Transform::from_xyz(400., 20., -400.)));
-
-    let mesh = Mesh3d(meshes.add(Cylinder::new(400., 40.)));
-    let mat = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.5, 0.6)));
-    commands.spawn((mesh, mat, Transform::from_xyz(100., 20., -100.)));
-
-    let mesh = Mesh3d(meshes.add(Cylinder::new(60., 50.)));
-    let mat = MeshMaterial3d(materials.add(Color::srgb(0.4, 0.5, 0.8)));
-    commands.spawn((mesh, mat, Transform::from_xyz(-300., 25., 100.)));
+    let mut rng = thread_rng();
+    let geom = config.geometry.clone();
+    for i in 0..geom.quantity {
+        let height = rng.gen_range(geom.y_lower_bound..geom.y_upper_bound);
+        let x_width = rng.gen_range(geom.x_lower_bound..geom.x_upper_bound);
+        let z_width = rng.gen_range(geom.z_lower_bound..geom.z_upper_bound);
+        let mesh = if i % 2 == 0 {
+            Mesh3d(meshes.add(Cuboid::new(x_width, height, z_width)))
+        } else {
+            Mesh3d(meshes.add(Cylinder::new(x_width, height)))
+        };
+        let (r, g, b) = (
+            rng.gen_range(0.01..0.99),
+            rng.gen_range(0.01..0.99),
+            rng.gen_range(0.01..0.99),
+        );
+        let mat = MeshMaterial3d(materials.add(Color::srgb(r, g, b)));
+        let (x, y, z) = (
+            rng.gen_range((-PLANE_WIDTH + x_width)..(PLANE_WIDTH - x_width)),
+            // this will send them flying!
+            rng.gen_range(height / 3.0..height / 1.5),
+            rng.gen_range((-PLANE_WIDTH + x_width)..(PLANE_WIDTH - x_width)),
+        );
+        commands.spawn((mesh, mat, Transform::from_xyz(x, y, z)));
+    }
 
     // Light
-    commands.spawn((DirectionalLight::default(), Sun));
+    commands.spawn((
+        DirectionalLight {
+            color: SUN,
+            shadows_enabled: true,
+            ..Default::default()
+        },
+        Sun,
+    ));
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
         brightness: 1000.0,
@@ -49,8 +75,8 @@ pub fn setup(
     let mut rng = rand::thread_rng();
 
     // setup point light grid
-    for i in (-1000..1000).step_by(50) {
-        for j in (-1000..1000).step_by(50) {
+    for i in (-PLANE_WIDTH_INT..PLANE_WIDTH_INT).step_by(50) {
+        for j in (-PLANE_WIDTH_INT..PLANE_WIDTH_INT).step_by(50) {
             commands.spawn((
                 PointLight {
                     color: Color::srgb(
@@ -62,7 +88,7 @@ pub fn setup(
                     range: 100.,
                     ..default()
                 },
-                Transform::from_xyz(i as f32, 4.0, j as f32),
+                Transform::from_xyz(i as f32, 20.0, j as f32),
             ));
         }
     }

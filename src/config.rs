@@ -9,10 +9,21 @@ pub fn plugin(app: &mut App) {
     app.load_resource_from_path::<Config>("config.ron");
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
+pub struct Geometry {
+    pub quantity: u32,
+    pub y_upper_bound: f32,
+    pub y_lower_bound: f32,
+    pub x_upper_bound: f32,
+    pub x_lower_bound: f32,
+    pub z_upper_bound: f32,
+    pub z_lower_bound: f32,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
 pub struct Config {
-    scale: f32,
-    geometry: Vec<(f32, f32, f32)>,
+    pub scale: f32,
+    pub geometry: Geometry,
 }
 
 #[derive(Asset, Clone, Reflect, Resource)]
@@ -23,9 +34,9 @@ pub struct Textures {
     pub github: Handle<Image>,
 }
 #[derive(Asset, Clone, Reflect, Resource)]
-pub struct Meshes {
+pub struct Models {
     #[dependency]
-    pub player: Handle<Scene>,
+    pub player: Handle<Gltf>,
 }
 
 impl FromWorld for Textures {
@@ -38,7 +49,7 @@ impl FromWorld for Textures {
     }
 }
 
-impl FromWorld for Meshes {
+impl FromWorld for Models {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {

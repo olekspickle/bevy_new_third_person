@@ -18,6 +18,7 @@ pub enum Action {
     Backward,
     Left,
     Right,
+    Jump,
 
     // Miscellaneous
     Mute,

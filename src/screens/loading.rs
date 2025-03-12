@@ -2,15 +2,15 @@
 //! This reduces stuttering, especially for audio on WASM.
 
 use crate::{
-    config::{Meshes, Textures},
+    config::{Models, Textures},
     prelude::*,
     ui::Label,
 };
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.load_resource::<Meshes>();
-    app.load_resource::<Textures>();
+    app.load_resource::<Models>();
+    //app.load_resource::<Textures>();
     //app.load_resource_from_path::<Fira>("fonts/FiraCode-Regular.ttf");
 
     app.add_systems(OnEnter(Screen::Loading), spawn_loading_screen)
@@ -20,14 +20,10 @@ pub(super) fn plugin(app: &mut App) {
         );
 }
 
-fn spawn_loading_screen(
-    mut commands: Commands,
-    //camera: Query<Entity, With<SceneCamera>>
-) {
-    //let camera = camera.single();
+fn spawn_loading_screen(mut commands: Commands) {
+    info!("spawning loading screen");
     commands
         .ui_root()
-        //.insert(TargetCamera(camera))
         .insert(StateScoped(Screen::Loading))
         .with_children(|children| {
             children.label(&"Loading...".into());
@@ -39,5 +35,6 @@ fn continue_to_menu_screen(mut next_screen: ResMut<NextState<Screen>>) {
 }
 
 fn all_assets_loaded(resource_handles: Res<ResourceHandles>) -> bool {
+    //info!("check all done");
     resource_handles.is_all_done()
 }
