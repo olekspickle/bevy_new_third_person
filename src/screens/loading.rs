@@ -10,7 +10,7 @@ use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.load_resource::<Models>();
-    //app.load_resource::<Textures>();
+    app.load_resource::<Textures>();
     //app.load_resource_from_path::<Fira>("fonts/FiraCode-Regular.ttf");
 
     app.add_systems(OnEnter(Screen::Loading), spawn_loading_screen)

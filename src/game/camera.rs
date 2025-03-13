@@ -10,10 +10,6 @@ pub struct SceneCamera;
 pub fn spawn_scene_camera(mut commands: Commands) {
     let camera = (
         Camera3d::default(),
-        //Camera {
-        //    order: 0,
-        //    ..default()
-        //},
         Msaa::Sample4,
         SceneCamera,
         IsDefaultUiCamera,

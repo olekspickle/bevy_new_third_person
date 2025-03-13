@@ -2,13 +2,11 @@ use super::*;
 
 #[derive(Debug, Clone)]
 pub struct ButtonOpts {
-    pub label: String,
-    pub color: Color,
-    pub bg_color: Color,
-    pub width: f32,
-    pub height: f32,
-    pub border: f32,
     pub font: TextFont,
+    pub label_opts: LabelOpts,
+    pub bg_color: Color,
+    pub color: Color,
+    pub node: Node,
 }
 
 impl ButtonOpts {
@@ -17,7 +15,11 @@ impl ButtonOpts {
         self
     }
     pub fn with_label(mut self, label: impl Into<String>) -> Self {
-        self.label = label.into();
+        self.label_opts = LabelOpts::from(label.into());
+        self
+    }
+    pub fn with_node(mut self, n: Node) -> Self {
+        self.node = n;
         self
     }
 }
@@ -26,7 +28,7 @@ impl ButtonOpts {
 impl<T: Into<String>> From<T> for ButtonOpts {
     fn from(value: T) -> Self {
         Self {
-            label: value.into(),
+            label_opts: LabelOpts::from(value),
             ..default()
         }
     }
@@ -37,14 +39,16 @@ impl Default for ButtonOpts {
         Self {
             color: COLOR_NORM,
             bg_color: BG_COLOR_NORM,
-            width: 150.0,
-            height: 60.0,
-            border: 5.0,
-            label: "button".into(),
-            font: TextFont {
-                font_size: 24.0,
-                ..default()
+            node: Node {
+                width: Px(150.0),
+                height: Px(60.0),
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                border: UiRect::all(Px(1.0)),
+                ..Default::default()
             },
+            label_opts: "button".into(),
+            font: TextFont::from_font_size(FONT_SIZE),
         }
     }
 }
@@ -70,15 +74,12 @@ pub trait Buttonable {
 impl<T: Spawn> Buttonable for T {
     fn button(&mut self, opts: &ButtonOpts) -> EntityCommands {
         let mut entity = self.spawn((
-            Name::new(format!("Button {}", opts.label)),
+            Name::new(format!("Button {}", opts.label_opts.text)),
             Button,
             Node {
-                width: Val::Px(opts.width),
-                height: Val::Px(opts.height),
-                border: UiRect::all(Val::Px(opts.border)),
                 justify_content: JustifyContent::Center,
                 align_items: AlignItems::Center,
-                ..default()
+                ..opts.node.clone()
             },
             BorderRadius::MAX,
             BorderColor(Color::BLACK),

@@ -1,4 +1,3 @@
-//use bevy_third_person_camera::*;
 use crate::prelude::*;
 use avian3d::prelude::*;
 use bevy::prelude::*;
@@ -57,32 +56,32 @@ struct AnimationNodes {
 }
 
 fn spawn(
-    //meshes: Res<Models>,
-    mut meshes: ResMut<Assets<Mesh>>,
+    meshes: Res<Models>,
+    //mut meshes: ResMut<Assets<Mesh>>,
     mut commands: Commands,
+    //assets: Res<AssetServer>,
     gltf_assets: Res<Assets<Gltf>>,
     mut camera: Query<Entity, With<SceneCamera>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
-    //assets: Res<AssetServer>,
 ) {
-    //let camera = camera.single_mut();
-    //commands.entity(camera).insert(ThirdPersonCamera {
-    //    aim_speed: 3.0,                  // default
-    //    aim_zoom: 0.7,                   // default
-    //    zoom_enabled: true,              // default
-    //    zoom: Zoom::new(ZOOM.0, ZOOM.1), // default
-    //    aim_enabled: true,
-    //    offset_enabled: true,
-    //    offset_toggle_enabled: true,
-    //    gamepad_settings: CustomGamepadSettings::default(),
-    //    ..default()
-    //});
+    let camera = camera.single_mut();
+    commands.entity(camera).insert(ThirdPersonCamera {
+        aim_speed: 3.0,                  // default
+        aim_zoom: 0.7,                   // default
+        zoom_enabled: true,              // default
+        zoom: Zoom::new(ZOOM.0, ZOOM.1), // default
+        aim_enabled: true,
+        offset_enabled: true,
+        offset_toggle_enabled: true,
+        gamepad_settings: CustomGamepadSettings::default(),
+        ..default()
+    });
 
-    //let Some(gltf) = gltf_assets.get(&meshes.player) else {
-    //    return;
-    //};
-    //let mesh = SceneRoot(gltf.scenes[0].clone());
-    let mesh = Mesh3d(meshes.add(Cylinder::new(10., 10.)));
+    let Some(gltf) = gltf_assets.get(&meshes.player) else {
+        return;
+    };
+    let mesh = SceneRoot(gltf.scenes[0].clone());
+    //let mesh = Mesh3d(meshes.add(Cylinder::new(10., 10.)));
     let color: MeshMaterial3d<StandardMaterial> =
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
     let pos = Transform::from_translation(Vec3::new(0.0, 0.5, 0.0));
@@ -91,8 +90,8 @@ fn spawn(
         mesh,
         pos,
         Player::default(),
-        // tnua stuff
         ThirdPersonCameraTarget,
+        // tnua stuff
         TnuaController::default(),
         // A sensor shape is not strictly necessary, but without it we'll get weird results.
         TnuaAvian3dSensorShape(Collider::cylinder(0.49, 0.0)),
@@ -159,7 +158,7 @@ pub fn movement(
     // just fall.
     controller.basis(TnuaBuiltinWalk {
         // The `desired_velocity` determines how the character will move.
-        desired_velocity: direction.normalize_or_zero() * 10.0,
+        desired_velocity: direction.normalize_or_zero() * speed,
         desired_forward: Dir3::new(direction).ok(),
         // The `float_height` must be greater (even if by little) from the distance between the
         // character's center and the lowest point of its collider.

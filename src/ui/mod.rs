@@ -28,8 +28,10 @@ pub fn plugin(app: &mut App) {
     app.add_systems(Startup, setup);
 }
 
-fn setup(mut commands: Commands) {
-    commands.spawn((
+fn setup(mut commands: Commands, camera: Query<Entity, With<Camera3d>>) {
+    let camera = camera.single();
+    commands.ui_root().spawn((
+        TargetCamera(camera),
         // Contains everything related to FPS and frame time
         PerfUiFramerateEntries::default(),
         // Contains everything related to the window and cursor

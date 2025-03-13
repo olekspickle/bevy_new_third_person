@@ -110,11 +110,10 @@ fn load_resource_assets(world: &mut World) {
             for _ in 0..resource_handles.waiting.len() {
                 let (handle, insert_fn) = resource_handles.waiting.pop_front().unwrap();
                 if assets.is_loaded_with_dependencies(&handle) {
-                    info!("loaded: {handle:?}");
+                    info!("loaded: {:?}", handle.path());
                     insert_fn(world, &handle);
                     resource_handles.finished.push(handle);
                 } else {
-                    //info!("waiting for: {handle:?}");
                     resource_handles.waiting.push_back((handle, insert_fn));
                 }
             }

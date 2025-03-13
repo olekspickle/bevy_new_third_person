@@ -33,6 +33,7 @@ pub struct Textures {
     #[dependency]
     pub github: Handle<Image>,
 }
+
 #[derive(Asset, Clone, Reflect, Resource)]
 pub struct Models {
     #[dependency]
@@ -53,7 +54,7 @@ impl FromWorld for Models {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            player: assets.load("models/player.glb#Scene0"),
+            player: assets.load("models/player.glb"),
         }
     }
 }

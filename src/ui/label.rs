@@ -3,13 +3,11 @@ use bevy::ecs::system::EntityCommands;
 
 #[derive(Debug, Clone)]
 pub struct LabelOpts {
-    text: String,
-    color: Color,
-    bg_color: Color,
-    width: f32,
-    height: f32,
-    border: f32,
-    font: TextFont,
+    pub text: String,
+    pub color: Color,
+    pub bg_color: Color,
+    pub font: TextFont,
+    pub node: Node,
 }
 
 impl LabelOpts {
@@ -19,6 +17,10 @@ impl LabelOpts {
     }
     pub fn with_label(mut self, s: impl Into<String>) -> Self {
         self.text = s.into();
+        self
+    }
+    pub fn with_node(mut self, n: Node) -> Self {
+        self.node = n;
         self
     }
 }
@@ -36,13 +38,14 @@ impl<T: Into<String>> From<T> for LabelOpts {
 impl From<&ButtonOpts> for LabelOpts {
     fn from(value: &ButtonOpts) -> Self {
         Self {
-            text: value.label.clone(),
-            height: value.font.font_size,
-            width: value.width,
+            text: value.label_opts.text.clone(),
+            node: Node {
+                height: Px(value.font.font_size),
+                ..value.node.clone()
+            },
             color: value.color,
             bg_color: value.bg_color,
             font: value.font.clone(),
-            ..Default::default()
         }
     }
 }
@@ -50,13 +53,18 @@ impl From<&ButtonOpts> for LabelOpts {
 impl Default for LabelOpts {
     fn default() -> Self {
         Self {
-            width: 150.0,
-            height: FONT_SIZE,
+            node: Node {
+                width: Px(150.0),
+                height: Px(FONT_SIZE),
+                border: UiRect::ZERO,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                ..Default::default()
+            },
             color: COLOR_NORM,
             bg_color: BG_COLOR_NORM,
             text: "label".into(),
             font: TextFont::from_font_size(FONT_SIZE),
-            border: 0.0,
         }
     }
 }
@@ -72,14 +80,10 @@ impl<T: Spawn> Label for T {
         let entity = self.spawn((
             Name::new(format!("Label {short}")),
             Text(s),
+            opts.node.clone(),
             opts.font.clone(),
             TextColor(opts.color),
             BackgroundColor(opts.bg_color),
-            Node {
-                width: Px(opts.width),
-                height: Px(opts.height),
-                ..default()
-            },
         ));
         entity
     }
