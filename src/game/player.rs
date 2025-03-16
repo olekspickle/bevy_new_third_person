@@ -18,8 +18,8 @@ pub fn plugin(app: &mut App) {
         TnuaControllerPlugin::new(FixedUpdate),
         TnuaAvian3dPlugin::new(FixedUpdate),
     ));
-    app.add_systems(OnEnter(Screen::Playing), spawn)
-        .add_systems(OnExit(Screen::Playing), despawn::<ThirdPersonCamera>)
+    app.add_systems(OnEnter(Screen::Gameplay), spawn)
+        .add_systems(OnExit(Screen::Gameplay), despawn::<ThirdPersonCamera>)
         .add_systems(
             Update,
             (
@@ -27,7 +27,7 @@ pub fn plugin(app: &mut App) {
                 //prepare_animations,
                 //handle_animating,
             )
-                .run_if(in_state(Screen::Playing)),
+                .run_if(in_state(Screen::Gameplay)),
         );
 }
 

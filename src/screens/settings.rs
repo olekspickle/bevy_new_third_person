@@ -8,7 +8,7 @@ pub fn plugin(app: &mut App) {
     app.init_resource::<Settings>();
     app.add_plugins(InputManagerPlugin::<Action>::default())
         .add_systems(Startup, spawn_player_input_map)
-        .add_systems(Update, settings.run_if(in_state(Screen::Playing)));
+        .add_systems(Update, settings.run_if(in_state(Screen::Gameplay)));
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]

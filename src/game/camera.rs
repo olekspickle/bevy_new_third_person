@@ -8,11 +8,10 @@ pub fn plugin(app: &mut App) {
 pub struct SceneCamera;
 
 pub fn spawn_scene_camera(mut commands: Commands) {
-    let camera = (
+    commands.spawn((
         Camera3d::default(),
         Msaa::Sample4,
         SceneCamera,
         IsDefaultUiCamera,
-    );
-    commands.spawn(camera);
+    ));
 }

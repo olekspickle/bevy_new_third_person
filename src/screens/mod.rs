@@ -34,7 +34,7 @@ pub enum Screen {
     #[default]
     Loading,
     // During this State the actual game logic is executed
-    Playing,
+    Gameplay,
     // Here the menu is drawn and waiting for player interaction
     Menu,
     // Settings screen

@@ -14,9 +14,9 @@ pub fn plugin(app: &mut App) {
             bevy::utils::Duration::from_millis(500),
             TimerMode::Repeating,
         )))
-        .add_systems(OnEnter(Screen::Playing), add_skybox_component_to_camera)
-        .add_systems(OnExit(Screen::Playing), despawn::<AtmosphereCamera>)
-        .add_systems(Update, daylight_cycle.run_if(in_state(Screen::Playing)));
+        .add_systems(OnEnter(Screen::Gameplay), add_skybox_component_to_camera)
+        .add_systems(OnExit(Screen::Gameplay), despawn::<AtmosphereCamera>)
+        .add_systems(Update, daylight_cycle.run_if(in_state(Screen::Gameplay)));
 }
 
 #[derive(Component)]
@@ -30,10 +30,8 @@ fn add_skybox_component_to_camera(
     mut camera: Query<Entity, With<SceneCamera>>,
 ) {
     let camera = camera.single_mut();
-    commands.entity(camera).insert(
-        // Marks camera as having a skybox, by default it doesn't specify the render layers the skybox can be seen on
-        AtmosphereCamera::default(),
-    );
+    // Marks camera as having a skybox, by default it doesn't specify the render layers the skybox can be seen on
+    commands.entity(camera).insert(AtmosphereCamera::default());
 }
 
 // We can edit the Atmosphere resource and it will be updated automatically

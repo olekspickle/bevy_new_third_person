@@ -12,7 +12,7 @@ const SUN: Color = Color::srgb(248.0 / 255.0, 176.0 / 255.0, 14.0 / 255.0);
 pub fn plugin(app: &mut App) {
     app.add_plugins(PhysicsPlugins::default())
         .insert_resource(DirectionalLightShadowMap { size: 4096 })
-        .add_systems(OnEnter(Screen::Playing), setup);
+        .add_systems(OnEnter(Screen::Gameplay), setup);
 }
 
 pub fn setup(

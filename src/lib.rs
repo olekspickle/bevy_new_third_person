@@ -9,12 +9,15 @@ mod ui;
 mod utils;
 
 pub mod prelude {
-
     use super::*;
 
     pub use asset_tracking::{LoadResource, ResourceHandles};
     pub use config::{Config, Models, Textures};
-    pub use game::{camera::SceneCamera, skybox::Sun};
+    pub use game::{
+        audio::{Music, SoundEffect},
+        camera::SceneCamera,
+        skybox::Sun,
+    };
     pub use screens::{
         Screen, loading,
         settings::{Action, Settings},

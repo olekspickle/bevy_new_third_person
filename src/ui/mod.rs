@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use bevy::{prelude::*, ui::Val::*};
 use iyes_perf_ui::{
     PerfUiPlugin,
@@ -6,26 +7,31 @@ use iyes_perf_ui::{
     },
 };
 
-mod button;
-mod label;
-pub use button::{ButtonOpts, Buttonable};
-pub use label::{Label, LabelOpts};
+mod interaction;
+mod palette;
+mod widgets;
+
+pub use interaction::{InteractionPalette, OnPress};
+pub use palette::*;
+pub use widgets::*;
 
 pub const FONT_SIZE: f32 = 24.0;
-pub const COLOR_NORM: Color = Color::srgb(0.9, 0.9, 0.9);
-pub const BG_COLOR_NORM: Color = Color::srgba(0.1, 0.1, 0.4, 0.0);
-pub const BG_COLOR_HOVER: Color = Color::srgb(0.25, 0.25, 0.25);
-pub const BG_COLOR_PRESSED: Color = Color::srgb(0.35, 0.75, 0.35);
-pub const NODE_BACKGROUND: Color = Color::srgb(0.286, 0.478, 0.773);
+pub const BORDER_RADIUS: f32 = 15.0;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(bevy::diagnostic::FrameTimeDiagnosticsPlugin)
-        .add_plugins(bevy::diagnostic::EntityCountDiagnosticsPlugin)
-        .add_plugins(bevy::diagnostic::SystemInformationDiagnosticsPlugin)
-        .add_plugins(bevy::render::diagnostic::RenderDiagnosticsPlugin)
-        .add_plugins(PerfUiPlugin);
+    //app.load_resource_from_path::<Fira>("fonts/FiraCode-Regular.ttf");
 
-    app.add_systems(Startup, setup);
+    app.add_plugins((
+        bevy::diagnostic::FrameTimeDiagnosticsPlugin,
+        bevy::diagnostic::EntityCountDiagnosticsPlugin,
+        bevy::diagnostic::SystemInformationDiagnosticsPlugin,
+        bevy::render::diagnostic::RenderDiagnosticsPlugin,
+        interaction::plugin,
+        widgets::plugin,
+        PerfUiPlugin,
+    ));
+
+    app.add_systems(OnEnter(Screen::Gameplay), setup);
 }
 
 fn setup(mut commands: Commands, camera: Query<Entity, With<Camera3d>>) {
@@ -46,12 +52,6 @@ fn setup(mut commands: Commands, camera: Query<Entity, With<Camera3d>>) {
 #[derive(Clone, Debug, Reflect, Asset, Resource)]
 pub struct Fira(pub Handle<Font>);
 
-/// Event triggered on a UI entity when the [`Interaction`] component on the same entity changes to
-/// [`Interaction::Pressed`]. Observe this event to detect e.g. button presses.
-#[derive(Event)]
-pub struct OnPress;
-
-/// (courtesy of RynKitty)
 /// Ideally, this trait should be [part of Bevy itself](https://github.com/bevyengine/bevy/issues/14231).
 pub trait Spawn {
     fn spawn<B: Bundle>(&mut self, bundle: B) -> EntityCommands;
