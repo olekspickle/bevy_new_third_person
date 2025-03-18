@@ -14,7 +14,8 @@ pub mod prelude {
     pub use asset_tracking::{LoadResource, ResourceHandles};
     pub use config::{Config, Models, Textures};
     pub use game::{
-        audio::{Music, SoundEffect},
+        Score,
+        audio::{AudioInstances, AudioSources, Music, SoundEffect},
         camera::SceneCamera,
         skybox::Sun,
     };
@@ -35,8 +36,8 @@ pub fn game(app: &mut App) {
     app.add_plugins((
         asset_tracking::plugin,
         game::plugin,
-        config::plugin,
         screens::plugin,
+        config::plugin,
     ));
 
     //#[cfg(debug_assertions)]
@@ -44,9 +45,6 @@ pub fn game(app: &mut App) {
     //#[cfg(debug_assertions)]
     //app.add_plugins((FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin::default()));
 }
-
-#[derive(Default, Resource)]
-pub struct Score(pub i32);
 
 /// High-level groupings of systems for the app in the `Update` schedule.
 /// When adding a new variant, make sure to order it in the `configure_sets`

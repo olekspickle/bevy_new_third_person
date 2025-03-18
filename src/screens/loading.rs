@@ -7,6 +7,8 @@ use bevy::prelude::*;
 pub(super) fn plugin(app: &mut App) {
     app.load_resource::<Models>();
     app.load_resource::<Textures>();
+    app.load_resource::<AudioSources>()
+        .insert_resource(AudioInstances::default());
 
     app.add_systems(OnEnter(Screen::Loading), spawn_loading_screen)
         .add_systems(
@@ -30,6 +32,5 @@ fn continue_to_menu_screen(mut next_screen: ResMut<NextState<Screen>>) {
 }
 
 fn all_assets_loaded(resource_handles: Res<ResourceHandles>) -> bool {
-    //info!("check all done");
     resource_handles.is_all_done()
 }

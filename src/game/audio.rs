@@ -6,9 +6,6 @@ use rand::prelude::*;
 
 // This plugin is responsible to control the game audio
 pub fn plugin(app: &mut App) {
-    app.load_resource::<AudioSources>()
-        .insert_resource(AudioInstances::default());
-
     app.add_plugins(AudioPlugin)
         .add_systems(OnEnter(Screen::Gameplay), start_or_resume_audio)
         .add_systems(OnExit(Screen::Gameplay), pause_audio)
@@ -35,9 +32,11 @@ pub struct AudioSources {
     pub bg_music: Handle<AudioSource>,
 }
 
+/// struct of handles for long standing sounds for pause/unpase
+/// or going to menu and resuming the game
 #[derive(Resource, Default)]
 pub struct AudioInstances {
-    pub bg_audio: Option<Handle<AudioInstance>>,
+    pub bg_music: Option<Handle<AudioInstance>>,
 }
 
 impl AudioSources {
@@ -66,10 +65,10 @@ fn start_or_resume_audio(
     mut instances: ResMut<AudioInstances>,
     mut audio_instances: ResMut<Assets<AudioInstance>>,
 ) {
-    //global_audio.resume();
+    audio.resume();
 
     // If there is an instance pause it
-    if let Some(instance) = &instances.bg_audio {
+    if let Some(instance) = &instances.bg_music {
         if let Some(instance) = audio_instances.get_mut(instance) {
             let state = instance.state();
             if let PlaybackState::Playing { .. } = state {
@@ -83,7 +82,7 @@ fn start_or_resume_audio(
             .looped()
             .with_volume(0.1)
             .handle();
-        instances.bg_audio = Some(handle);
+        instances.bg_music = Some(handle);
     }
 }
 
@@ -99,9 +98,9 @@ fn pause_audio(action: Query<&ActionState<Action>>, global_audio: Res<Audio>) {
 }
 
 fn trigger_interaction_sound_effect(
-    interaction_query: Query<&Interaction, Changed<Interaction>>,
-    audio_sources: Res<AudioSources>,
     audio: Res<Audio>,
+    audio_sources: Res<AudioSources>,
+    interaction_query: Query<&Interaction, Changed<Interaction>>,
 ) {
     for interaction in &interaction_query {
         let source = match interaction {
@@ -114,41 +113,19 @@ fn trigger_interaction_sound_effect(
 }
 
 fn movement_sound(
-    global_audio: Res<Audio>,
+    audio: Res<Audio>,
     sources: ResMut<AudioSources>,
-    mut instances: ResMut<AudioInstances>,
-    mut audio_instances: ResMut<Assets<AudioInstance>>,
     action: Query<&ActionState<Action>>,
 ) {
-    let instance = instances.bg_audio.clone();
-
     // TODO: add actual step audio
-    //if let Some(instance) = &instance {
-    //    if let Some(instance) = audio_instances.get_mut(instance) {
-    //        match instance.state() {
-    //            PlaybackState::Stopped | PlaybackState::Paused { .. } => {
-    //                let state = action.single();
-    //                if state.pressed(&Action::Forward)
-    //                    | state.pressed(&Action::Backward)
-    //                    | state.pressed(&Action::Left)
-    //                    | state.pressed(&Action::Right)
-    //                {
-    //                    let handle = global_audio
-    //                        .play(sources.bg_audio.clone())
-    //                        .with_volume(0.1)
-    //                        .handle();
-    //                    instances.bg_audio = Some(handle);
-    //                }
-    //            }
-    //            //PlaybackState::Playing { .. } => {
-    //            //instance.pause(AudioTween::default());
-    //            //if actions.player_movement.is_none() {
-    //            //}
-    //            //}
-    //            _ => {}
-    //        }
-    //    }
-    //}
+    let state = action.single();
+    if state.pressed(&Action::Forward)
+        | state.pressed(&Action::Backward)
+        | state.pressed(&Action::Left)
+        | state.pressed(&Action::Right)
+    {
+        audio.play(sources.walk.clone()).with_volume(0.5);
+    }
 }
 
 /// An organizational marker component that should be added to a spawned [`AudioBundle`] if it is in the

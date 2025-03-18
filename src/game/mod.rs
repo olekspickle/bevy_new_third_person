@@ -15,3 +15,6 @@ pub fn plugin(app: &mut App) {
         skybox::plugin,
     ));
 }
+
+#[derive(Default, Resource)]
+pub struct Score(pub i32);
