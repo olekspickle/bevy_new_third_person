@@ -15,8 +15,8 @@ pub(super) fn plugin(app: &mut App) {
 
     app.add_plugins((
         loading::plugin,
-        menu::plugin,
         //splash::plugin,
+        menu::plugin,
         settings::plugin,
         gameplay::plugin,
         gameover::plugin,

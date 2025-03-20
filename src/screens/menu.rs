@@ -18,10 +18,14 @@ fn setup_menu(
         .insert(TargetCamera(camera))
         .insert(StateScoped(Screen::Menu))
         .with_children(|children| {
-            let layout = LayoutOpts::button().with_node(Node {
-                padding: UiRect::all(Px(10.0)),
-                ..Default::default()
-            });
+            let layout = LayoutOpts::button()
+                .with_border_color(Color::WHITE)
+                .with_node(Node {
+                    padding: UiRect::all(Px(10.0)),
+                    width: Px(200.0),
+                    height: Px(50.0),
+                    ..Default::default()
+                });
             //let text = TextOpts::from("Play")
             //.with_font(TextFont {
             //    font: font.0.clone(),

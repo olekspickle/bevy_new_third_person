@@ -2,7 +2,7 @@
 use bevy::{app::App, prelude::*};
 
 mod asset_tracking;
-mod config;
+mod assets;
 mod game;
 mod screens;
 mod ui;
@@ -12,10 +12,10 @@ pub mod prelude {
     use super::*;
 
     pub use asset_tracking::{LoadResource, ResourceHandles};
-    pub use config::{Config, Models, Textures};
+    pub use assets::{AudioSources, Config, Models, Textures};
     pub use game::{
         Score,
-        audio::{AudioInstances, AudioSources, Music, SoundEffect},
+        audio::{AudioInstances, Music, SoundEffect},
         camera::SceneCamera,
         skybox::Sun,
     };
@@ -33,11 +33,13 @@ pub fn game(app: &mut App) {
         (AppSet::TickTimers, AppSet::RecordInput, AppSet::Update).chain(),
     );
 
+    // the order is important
+    // be sure you use plugins/resources AFTER you add/insert them
     app.add_plugins((
         asset_tracking::plugin,
         game::plugin,
         screens::plugin,
-        config::plugin,
+        assets::plugin,
     ));
 
     //#[cfg(debug_assertions)]

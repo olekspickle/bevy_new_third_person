@@ -1,6 +1,7 @@
 use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
+use bevy_kira_audio::prelude::*;
 use serde::{Deserialize, Serialize};
 
 pub fn plugin(app: &mut App) {
@@ -10,13 +11,8 @@ pub fn plugin(app: &mut App) {
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
 pub struct Geometry {
+    pub main_plane: f32,
     pub quantity: u32,
-    pub y_upper_bound: f32,
-    pub y_lower_bound: f32,
-    pub x_upper_bound: f32,
-    pub x_lower_bound: f32,
-    pub z_upper_bound: f32,
-    pub z_lower_bound: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
@@ -54,6 +50,48 @@ impl FromWorld for Models {
         let assets = world.resource::<AssetServer>();
         Self {
             player: assets.load("models/player.glb"),
+        }
+    }
+}
+
+#[derive(Resource, Asset, Reflect, Clone)]
+pub struct AudioSources {
+    // SFX
+    #[dependency]
+    pub btn_hover: Handle<AudioSource>,
+    #[dependency]
+    pub btn_press: Handle<AudioSource>,
+    #[dependency]
+    pub steps: Vec<Handle<AudioSource>>,
+
+    // music
+    #[dependency]
+    pub bg_music: Handle<AudioSource>,
+}
+
+impl AudioSources {
+    pub const STEPS: &[&'static str] = &[
+        "audio/sfx/step.ogg",
+        "audio/sfx/step1.ogg",
+        "audio/sfx/step2.ogg",
+        "audio/sfx/step3.ogg",
+        "audio/sfx/step4.ogg",
+    ];
+    pub const BTN_HOVER: &'static str = "audio/sfx/btn-hover.ogg";
+    pub const BTN_PRESS: &'static str = "audio/sfx/btn-press.ogg";
+
+    pub const BG_MUSIC: &'static str = "audio/music/time-for-fun.ogg";
+}
+
+impl FromWorld for AudioSources {
+    fn from_world(world: &mut World) -> Self {
+        let assets = world.resource::<AssetServer>();
+        let steps = Self::STEPS.iter().map(|p| assets.load(*p)).collect();
+        Self {
+            steps,
+            btn_hover: assets.load(Self::STEPS[0]),
+            btn_press: assets.load(Self::STEPS[1]),
+            bg_music: assets.load(Self::BG_MUSIC),
         }
     }
 }

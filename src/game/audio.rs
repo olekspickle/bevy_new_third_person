@@ -6,6 +6,8 @@ use rand::prelude::*;
 
 // This plugin is responsible to control the game audio
 pub fn plugin(app: &mut App) {
+    app.insert_resource(StepTimer(Timer::from_seconds(0.5, TimerMode::Repeating)));
+
     app.add_plugins(AudioPlugin)
         .add_systems(OnEnter(Screen::Gameplay), start_or_resume_audio)
         .add_systems(OnExit(Screen::Gameplay), pause_audio)
@@ -17,46 +19,11 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-#[derive(Resource, Asset, Reflect, Clone)]
-pub struct AudioSources {
-    // SFX
-    #[dependency]
-    pub btn_hover: Handle<AudioSource>,
-    #[dependency]
-    pub btn_press: Handle<AudioSource>,
-    #[dependency]
-    pub walk: Handle<AudioSource>,
-
-    // music
-    #[dependency]
-    pub bg_music: Handle<AudioSource>,
-}
-
 /// struct of handles for long standing sounds for pause/unpase
 /// or going to menu and resuming the game
 #[derive(Resource, Default)]
 pub struct AudioInstances {
     pub bg_music: Option<Handle<AudioInstance>>,
-}
-
-impl AudioSources {
-    pub const WALK: &'static str = "audio/sfx/walk.ogg";
-    pub const BTN_HOVER: &'static str = "audio/sfx/btn-hover.ogg";
-    pub const BTN_PRESS: &'static str = "audio/sfx/btn-press.ogg";
-
-    pub const BG_MUSIC: &'static str = "audio/music/time-for-fun.ogg";
-}
-
-impl FromWorld for AudioSources {
-    fn from_world(world: &mut World) -> Self {
-        let assets = world.resource::<AssetServer>();
-        Self {
-            walk: assets.load(Self::WALK),
-            btn_hover: assets.load(Self::BTN_HOVER),
-            btn_press: assets.load(Self::BTN_PRESS),
-            bg_music: assets.load(Self::BG_MUSIC),
-        }
-    }
 }
 
 fn start_or_resume_audio(
@@ -112,19 +79,26 @@ fn trigger_interaction_sound_effect(
     }
 }
 
+#[derive(Resource)]
+struct StepTimer(Timer);
+
 fn movement_sound(
     audio: Res<Audio>,
+    time: Res<Time>,
+    mut timer: ResMut<StepTimer>,
     sources: ResMut<AudioSources>,
     action: Query<&ActionState<Action>>,
 ) {
-    // TODO: add actual step audio
     let state = action.single();
     if state.pressed(&Action::Forward)
         | state.pressed(&Action::Backward)
         | state.pressed(&Action::Left)
         | state.pressed(&Action::Right)
+        && timer.0.tick(time.delta()).just_finished()
     {
-        audio.play(sources.walk.clone()).with_volume(0.5);
+        let mut rng = thread_rng();
+        let i = rng.gen_range(0..sources.steps.len());
+        audio.play(sources.steps[i].clone()).with_volume(0.5);
     }
 }
 

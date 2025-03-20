@@ -3,8 +3,6 @@ use avian3d::prelude::*;
 use bevy::{pbr::DirectionalLightShadowMap, prelude::*};
 use rand::{Rng, thread_rng};
 
-const PLANE_WIDTH: f32 = 2000.;
-const PLANE_WIDTH_INT: i32 = 2000;
 const SUN: Color = Color::srgb(248.0 / 255.0, 176.0 / 255.0, 14.0 / 255.0);
 
 /// This plugin handles loading and saving scenes
@@ -21,8 +19,9 @@ pub fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    let main_plane = config.geometry.main_plane;
     // Plane
-    let mesh = Mesh3d(meshes.add(Cuboid::new(PLANE_WIDTH, 0., PLANE_WIDTH)));
+    let mesh = Mesh3d(meshes.add(Cuboid::new(main_plane, 0., main_plane)));
     let green = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.9, 0.3)));
     commands.spawn((
         mesh,
@@ -35,9 +34,10 @@ pub fn setup(
     let mut rng = thread_rng();
     let geom = config.geometry.clone();
     for i in 0..geom.quantity {
-        let height = rng.gen_range(geom.y_lower_bound..geom.y_upper_bound);
-        let x_width = rng.gen_range(geom.x_lower_bound..geom.x_upper_bound);
-        let z_width = rng.gen_range(geom.z_lower_bound..geom.z_upper_bound);
+        let (low, upper) = (main_plane / 100.0, main_plane / 20.0);
+        let height = rng.gen_range(low..upper);
+        let x_width = rng.gen_range(low..upper);
+        let z_width = rng.gen_range(low..upper);
         let mesh = if i % 2 == 0 {
             Mesh3d(meshes.add(Cuboid::new(x_width, height, z_width)))
         } else {
@@ -50,10 +50,10 @@ pub fn setup(
         );
         let mat = MeshMaterial3d(materials.add(Color::srgb(r, g, b)));
         let (x, y, z) = (
-            rng.gen_range((-PLANE_WIDTH + x_width)..(PLANE_WIDTH - x_width)),
+            rng.gen_range((-main_plane + x_width)..(main_plane - x_width)),
             // this will send them flying!
             rng.gen_range(height / 3.0..height / 1.5),
-            rng.gen_range((-PLANE_WIDTH + x_width)..(PLANE_WIDTH - x_width)),
+            rng.gen_range((-main_plane + x_width)..(main_plane - x_width)),
         );
         commands.spawn((mesh, mat, Transform::from_xyz(x, y, z)));
     }
@@ -62,14 +62,14 @@ pub fn setup(
     commands.spawn((
         DirectionalLight {
             color: SUN,
-            shadows_enabled: true,
+            //shadows_enabled: true,
             ..Default::default()
         },
         Sun,
     ));
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
-        brightness: 1000.0,
+        brightness: 200.0,
     });
 
     //// setup point light grid

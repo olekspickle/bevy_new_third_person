@@ -1,4 +1,4 @@
-use crate::game::audio::AudioSources;
+use crate::prelude::*;
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
@@ -45,8 +45,14 @@ fn apply_interaction_palette(
     for (interaction, palette, mut background) in &mut palette_query {
         *background = match interaction {
             Interaction::None => palette.none,
-            Interaction::Hovered => palette.hovered,
-            Interaction::Pressed => palette.pressed,
+            Interaction::Hovered => {
+                info!("Hovered");
+                palette.hovered
+            }
+            Interaction::Pressed => {
+                info!("Pressed");
+                palette.pressed
+            }
         }
         .into();
     }
