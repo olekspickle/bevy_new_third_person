@@ -38,6 +38,7 @@ pub fn game(app: &mut App) {
     app.add_plugins((
         asset_tracking::plugin,
         game::plugin,
+        ui::plugin,
         screens::plugin,
         assets::plugin,
     ));

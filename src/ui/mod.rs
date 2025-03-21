@@ -26,27 +26,31 @@ pub fn plugin(app: &mut App) {
         bevy::diagnostic::EntityCountDiagnosticsPlugin,
         bevy::diagnostic::SystemInformationDiagnosticsPlugin,
         bevy::render::diagnostic::RenderDiagnosticsPlugin,
+        PerfUiPlugin,
         interaction::plugin,
         widgets::plugin,
-        PerfUiPlugin,
     ));
 
-    app.add_systems(OnEnter(Screen::Gameplay), setup);
+    app.add_systems(OnEnter(Screen::Gameplay), setup_perf_ui);
 }
 
-fn setup(mut commands: Commands, camera: Query<Entity, With<Camera3d>>) {
-    let camera = camera.single();
-    commands.ui_root().spawn((
-        TargetCamera(camera),
-        // Contains everything related to FPS and frame time
-        PerfUiFramerateEntries::default(),
-        // Contains everything related to the window and cursor
-        PerfUiWindowEntries::default(),
-        // Contains everything related to system diagnostics (CPU, RAM)
-        PerfUiSystemEntries::default(),
-        // Contains everything related to fixed timestep
-        PerfUiFixedTimeEntries::default(),
-    ));
+fn setup_perf_ui(mut commands: Commands) {
+    commands
+        .container(
+            FlexDirection::Column,
+            AlignItems::End,
+            JustifyContent::Start,
+        )
+        .spawn((
+            // Contains everything related to FPS and frame time
+            PerfUiFramerateEntries::default(),
+            // Contains everything related to the window and cursor
+            PerfUiWindowEntries::default(),
+            // Contains everything related to system diagnostics (CPU, RAM)
+            PerfUiSystemEntries::default(),
+            // Contains everything related to fixed timestep
+            PerfUiFixedTimeEntries::default(),
+        ));
 }
 
 #[derive(Clone, Debug, Reflect, Asset, Resource)]

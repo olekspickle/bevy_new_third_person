@@ -11,37 +11,6 @@ pub use label::Labelable;
 
 pub(super) fn plugin(_app: &mut App) {}
 
-pub trait GenericContainer {
-    /// Spawns a container node with specified direction, align_items, and justify_content.
-    fn container(
-        &mut self,
-        direction: FlexDirection,
-        align_items: AlignItems,
-        justify_content: JustifyContent,
-    ) -> EntityCommands;
-}
-
-impl<T: Spawn> GenericContainer for T {
-    fn container(
-        &mut self,
-        direction: FlexDirection,
-        align_items: AlignItems,
-        justify_content: JustifyContent,
-    ) -> EntityCommands {
-        self.spawn((
-            Name::new("Container"),
-            Node {
-                width: Percent(100.0),
-                height: Percent(100.0),
-                justify_content,
-                align_items,
-                flex_direction: direction,
-                ..default()
-            },
-        ))
-    }
-}
-
 #[derive(Debug, Clone)]
 pub struct LayoutOpts {
     pub border_radius: f32,
@@ -132,5 +101,36 @@ impl<T: Into<String>> From<T> for TextOpts {
             text: value.into(),
             font: TextFont::from_font_size(FONT_SIZE),
         }
+    }
+}
+
+pub trait GenericContainer {
+    /// Spawns a container node with specified direction, align_items, and justify_content.
+    fn container(
+        &mut self,
+        direction: FlexDirection,
+        align_items: AlignItems,
+        justify_content: JustifyContent,
+    ) -> EntityCommands;
+}
+
+impl<T: Spawn> GenericContainer for T {
+    fn container(
+        &mut self,
+        direction: FlexDirection,
+        align_items: AlignItems,
+        justify_content: JustifyContent,
+    ) -> EntityCommands {
+        self.spawn((
+            Name::new("Container"),
+            Node {
+                width: Percent(100.0),
+                height: Percent(100.0),
+                justify_content,
+                align_items,
+                flex_direction: direction,
+                ..default()
+            },
+        ))
     }
 }
