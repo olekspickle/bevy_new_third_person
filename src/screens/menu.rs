@@ -21,9 +21,9 @@ fn setup_menu(
             let layout = LayoutOpts::button()
                 .with_border_color(Color::WHITE)
                 .with_node(Node {
-                    padding: UiRect::all(Px(10.0)),
-                    width: Px(200.0),
-                    height: Px(50.0),
+                    padding: UiRect::all(Percent(2.0)),
+                    width: Percent(20.0),
+                    height: Px(5.0),
                     ..Default::default()
                 });
             //let text = TextOpts::from("Play")

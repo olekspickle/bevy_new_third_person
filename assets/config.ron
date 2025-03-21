@@ -1,5 +1,6 @@
 (
     scale: 3.0,
+    zoom: (1.5, 30.0),
     geometry: (
         main_plane: 200,
         quantity: 10,

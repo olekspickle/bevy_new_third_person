@@ -8,8 +8,6 @@ use bevy_tnua::{
 use bevy_tnua_avian3d::*;
 use leafwing_input_manager::prelude::ActionState;
 
-const ZOOM: (f32, f32) = (1.5, 30.);
-
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
@@ -23,7 +21,8 @@ pub fn plugin(app: &mut App) {
         .add_systems(
             Update,
             (
-                movement.in_set(TnuaUserControlsSystemSet),
+                movement
+                //.in_set(TnuaUserControlsSystemSet),
                 //prepare_animations,
                 //handle_animating,
             )
@@ -66,13 +65,14 @@ fn spawn(
 ) {
     let camera = camera.single_mut();
     commands.entity(camera).insert(ThirdPersonCamera {
-        aim_speed: 3.0,                  // default
-        aim_zoom: 0.7,                   // default
-        zoom_enabled: true,              // default
-        zoom: Zoom::new(ZOOM.0, ZOOM.1), // default
+        aim_speed: 3.0,     // default
+        aim_zoom: 0.7,      // default
+        zoom_enabled: true, // default
+        zoom: Zoom::new(1.5, 30.0),
         aim_enabled: true,
         offset_enabled: true,
         offset_toggle_enabled: true,
+        cursor_lock_key: KeyCode::KeyL,
         gamepad_settings: CustomGamepadSettings::default(),
         ..default()
     });
@@ -117,7 +117,7 @@ pub fn movement(
         return;
     };
     let mut direction = Vec3::ZERO;
-    let speed = 50.0 * time.delta_secs();
+    let speed = 200.0 * time.delta_secs();
 
     let (state, camera_transform, mut player) =
         (action.single(), camera.single(), player.single_mut());
@@ -168,7 +168,6 @@ pub fn movement(
         ..Default::default()
     });
 
-    // TODO: jump
     // Feed the jump action every frame as long as the player holds the jump button. If the player
     // stops holding the jump button, simply stop feeding the action.
     if state.pressed(&Action::Jump) {

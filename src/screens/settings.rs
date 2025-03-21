@@ -40,6 +40,7 @@ fn spawn_player_input_map(mut commands: Commands) {
 
     input_map.insert(Action::Pause, KeyCode::KeyP);
     input_map.insert(Action::Mute, KeyCode::KeyM);
+    input_map.insert(Action::Jump, KeyCode::Space);
     commands.spawn(InputManagerBundle::with_map(input_map));
 }
 
