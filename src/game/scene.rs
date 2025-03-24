@@ -49,13 +49,21 @@ pub fn setup(
             rng.gen_range(0.01..0.99),
         );
         let mat = MeshMaterial3d(materials.add(Color::srgb(r, g, b)));
+
+        let half_plane = main_plane / 2.0;
         let (x, y, z) = (
-            rng.gen_range((-main_plane + x_width)..(main_plane - x_width)),
+            rng.gen_range((-half_plane + x_width)..(half_plane - x_width)),
             // this will send them flying!
             rng.gen_range(height / 3.0..height / 1.5),
-            rng.gen_range((-main_plane + x_width)..(main_plane - x_width)),
+            rng.gen_range((-half_plane + x_width)..(half_plane - x_width)),
         );
-        commands.spawn((mesh, mat, Transform::from_xyz(x, y, z)));
+        commands.spawn((
+            mesh,
+            mat,
+            RigidBody::Static,
+            Collider::capsule(x_width.max(z_width) / 2.0, height),
+            Transform::from_xyz(x, y, z),
+        ));
     }
 
     // Light

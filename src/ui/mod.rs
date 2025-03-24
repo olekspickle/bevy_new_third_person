@@ -27,7 +27,7 @@ pub fn plugin(app: &mut App) {
         bevy::diagnostic::SystemInformationDiagnosticsPlugin,
         bevy::render::diagnostic::RenderDiagnosticsPlugin,
         PerfUiPlugin,
-        interaction::plugin,
+        //interaction::plugin,
         widgets::plugin,
     ));
 

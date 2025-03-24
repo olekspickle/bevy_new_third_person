@@ -16,13 +16,13 @@ pub fn plugin(app: &mut App) {
         TnuaControllerPlugin::new(FixedUpdate),
         TnuaAvian3dPlugin::new(FixedUpdate),
     ));
+
     app.add_systems(OnEnter(Screen::Gameplay), spawn)
-        .add_systems(OnExit(Screen::Gameplay), despawn::<ThirdPersonCamera>)
+        .configure_sets(PostUpdate, CameraSyncSet.after(PhysicsSet::Sync))
         .add_systems(
             Update,
             (
-                movement
-                //.in_set(TnuaUserControlsSystemSet),
+                movement.in_set(TnuaUserControlsSystemSet),
                 //prepare_animations,
                 //handle_animating,
             )
@@ -56,27 +56,10 @@ struct AnimationNodes {
 
 fn spawn(
     meshes: Res<Models>,
-    //mut meshes: ResMut<Assets<Mesh>>,
     mut commands: Commands,
-    //assets: Res<AssetServer>,
     gltf_assets: Res<Assets<Gltf>>,
-    mut camera: Query<Entity, With<SceneCamera>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let camera = camera.single_mut();
-    commands.entity(camera).insert(ThirdPersonCamera {
-        aim_speed: 3.0,     // default
-        aim_zoom: 0.7,      // default
-        zoom_enabled: true, // default
-        zoom: Zoom::new(1.5, 30.0),
-        aim_enabled: true,
-        offset_enabled: true,
-        offset_toggle_enabled: true,
-        cursor_lock_key: KeyCode::KeyL,
-        gamepad_settings: CustomGamepadSettings::default(),
-        ..default()
-    });
-
     let Some(gltf) = gltf_assets.get(&meshes.player) else {
         return;
     };
@@ -111,19 +94,19 @@ pub fn movement(
     action: Query<&ActionState<Action>>,
     mut tnua: Query<&mut TnuaController>,
     camera: Query<&mut Transform, With<SceneCamera>>,
-    mut player: Query<&mut Transform, (With<Player>, Without<SceneCamera>)>,
+    //mut player: Query<&mut Transform, (With<Player>, Without<SceneCamera>)>,
 ) {
     let Ok(mut controller) = tnua.get_single_mut() else {
         return;
     };
     let mut direction = Vec3::ZERO;
-    let speed = 200.0 * time.delta_secs();
+    let speed = 300.0 * time.delta_secs();
 
-    let (state, camera_transform, mut player) =
-        (action.single(), camera.single(), player.single_mut());
+    let (state, camera_transform) = (action.single(), camera.single());
     let forward = camera_transform.forward().normalize();
 
     // Rotate player
+    //let mut player = player.single_mut();
     //let mut forward_dir = forward;
     //forward_dir.y = 0.0;
     //let player_rot = Quat::from_rotation_arc(Vec3::X, forward_dir);
@@ -186,6 +169,10 @@ pub fn movement(
     //            player_movement = diff.normalize();
     //        }
     //    }
+    //}
+
+    //if direction != Vec3::ZERO {
+    //    player.translation = direction;
     //}
 }
 

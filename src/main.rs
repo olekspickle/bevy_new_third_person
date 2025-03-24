@@ -7,7 +7,7 @@ use bevy::{
     log,
     prelude::*,
     window::PrimaryWindow,
-    winit::{WinitSettings, WinitWindows},
+    winit::{UpdateMode, WinitSettings, WinitWindows},
 };
 use bevy_3rd_person_view::game;
 use std::io::Cursor;
@@ -40,6 +40,10 @@ fn main() {
     };
     let mut app = App::new();
     app.add_plugins(DefaultPlugins.set(window).set(assets).set(log_level))
+        .insert_resource(WinitSettings {
+            focused_mode: UpdateMode::Continuous,
+            unfocused_mode: UpdateMode::Continuous,
+        })
         .add_plugins(game)
         .add_systems(Startup, set_window_icon);
 
