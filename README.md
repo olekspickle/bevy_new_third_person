@@ -1,11 +1,24 @@
-# A Bevy game template
+
+
+# WIP: this template is just an attempt to create simpler and up to date template unlike foxtrot.
+## Simple Third Person Bevy game template
+Current status - not much done:
+- [x] simple asset loading from [BevyFlock] example
+- [x] import and usage of game mechanics from .ron config
+- [x] simple skybox sun cycle using bevy_atmosphere
+- [x] third person camera with bevy_third_person_camera
+- [x] simple player movement using bevy_tnua
+- [x] simple scene with random objects with colliders and rigid body using avian3d
+- [ ] rig and animations using [Universal Animation Library](ual) from quaternius
+- [ ] jumping and vault mechanics
+
 
 Template for a Game using the awesome [Bevy engine][bevy] featuring out of the box builds for Windows, Linux, macOS, Web (Wasm), Android, and iOS.
 
 # What does this template give you?
 
-* small example ["game"](https://niklasei.github.io/bevy_game_template/)
-* easy setup for running the web build using [trunk] (`trunk serve`) 
+<!--* small example ["game"](https://olekspickle.github.io/bevy_new_3d/)-->
+* easy setup for running the web build using [trunk] (`trunk serve`)
 * run the native version with `cargo run`
 * workflow for GitHub actions creating releases for Windows, Linux, macOS, and Web (Wasm) ready for distribution
     * the same workflow creates development builds for the mobile platforms (two separate workflows can push to the stores after [some setup](#deploy-mobile-platforms))
@@ -17,10 +30,10 @@ WARNING: if you work in a private repository, please be aware that macOS and Win
 
 # How to use this template?
 
- 1. Click "Use this template" on the repository's page
- 2. Look for `ToDo` to use your own game name everywhere
- 3. [Update the icons as described below](#updating-the-icons)
- 4. Start coding :tada:
+1. Click "Use this template" on the repository's page
+2. Look for `ToDo` to use your own game name everywhere
+3. [Update the icons as described below](#updating-the-icons)
+4. Start coding :tada:
     * Start the native app: `cargo run`
     * Start the web build: `trunk serve`
         * requires [trunk]: `cargo install --locked trunk`
@@ -37,39 +50,39 @@ WARNING: if you work in a private repository, please be aware that macOS and Win
 You should keep the `credits` directory up to date. The release workflow automatically includes the directory in every build.
 
 ### Updating the icons
- 1. Replace `build/macos/icon_1024x1024.png` with a `1024` times `1024` pixel png icon and run `create_icns.sh` or `create_icns_linux.sh` if you use linux (make sure to run the script inside the `build/macos` directory) - _Note: `create_icns.sh` requires a mac, and `create_icns_linux.sh` requires imagemagick and png2icns_
- 2. Replace `build/windows/icon.ico` (used for windows executable and as favicon for the web-builds)
+1. Replace `build/macos/icon_1024x1024.png` with a `1024` times `1024` pixel png icon and run `create_icns.sh` or `create_icns_linux.sh` if you use linux (make sure to run the script inside the `build/macos` directory) - _Note: `create_icns.sh` requires a mac, and `create_icns_linux.sh` requires imagemagick and png2icns_
+2. Replace `build/windows/icon.ico` (used for windows executable and as favicon for the web-builds)
     * You can create an `.ico` file for windows by following these steps:
        1. Open `macos/AppIcon.iconset/icon_256x256.png` in [Gimp](https://www.gimp.org/downloads/)
        2. Select the `File > Export As` menu item.
        3. Change the file extension to `.ico` (or click `Select File Type (By Extension)` and select `Microsoft Windows Icon`)
        4. Save as `build/windows/icon.ico`
- 3. Replace `build/android/res/mipmap-mdpi/icon.png` with `macos/AppIcon.iconset/icon_256x256.png`, but rename it to `icon.png`
+3. Replace `build/android/res/mipmap-mdpi/icon.png` with `macos/AppIcon.iconset/icon_256x256.png`, but rename it to `icon.png`
 
 ### Deploy web build to GitHub pages
 
- 1. Trigger the `deploy-github-page` workflow
- 2. Activate [GitHub pages](https://pages.github.com/) for your repository
+1. Trigger the `deploy-github-page` workflow
+2. Activate [GitHub pages](https://pages.github.com/) for your repository
      1. Source from the `gh-pages` branch (created by the just executed action)
- 3. After a few minutes your game is live at `http://username.github.io/repository`
+3. After a few minutes your game is live at `http://username.github.io/repository`
 
 To deploy newer versions, just run the `deploy-github-page` workflow again.
 
 # Deploy mobile platforms
 
-For general info on mobile support, you can take a look at [one of my blog posts about mobile development with Bevy][mobile_dev_with_bevy_2] which is relevant to the current setup.
+For general info on mobile support, you can take a look at [one of blog posts about mobile development with Bevy][mobile_dev_with_bevy_2] which is relevant to the current setup.
 
 ## Android
 
 Currently, `cargo-apk` is used to run the development app. But APKs can no longer be published in the store and `cargo-apk` cannot produce the required AAB. This is why there is setup for two android related tools. In [`mobile/Cargo.toml`](./mobile/Cargo.toml), the `package.metadata.android` section configures `cargo-apk` while [`mobile/manifest.yaml`](./mobile/manifest.yaml) configures a custom fork of `xbuild` which is used in the `release-android-google-play` workflow to create an AAB.
 
-There is a [post about how to set up the android release workflow][workflow_bevy_android] on my blog.
+You can also peek at this [post about how to set up the android release workflow][workflow_bevy_android].
 
 ## iOS
 
 The setup is pretty much what Bevy does for the mobile example.
 
-There is a [post about how to set up the iOS release workflow][workflow_bevy_ios] on my blog.
+Consult this [post about how to set up the iOS release workflow][workflow_bevy_ios].
 
 # Removing mobile platforms
 
@@ -86,18 +99,18 @@ Audio in web-builds can have issues in some browsers. This seems to be a general
 
 # License
 
-This project is licensed under [CC0 1.0 Universal](LICENSE) except some content of `assets` and the Bevy icons in the `build` directory (see [Credits](credits/CREDITS.md)). Go crazy and feel free to show me whatever you build with this ([@nikl_me][nikl-twitter] / [@nikl_me@mastodon.online][nikl-mastodon] ).
+This project is licensed under [CC0 1.0 Universal](LICENSE) except some content of `assets` and the Bevy icons in the `build` directory (see [Credits](credits/CREDITS.md)).
 
+[android-instructions]: https://github.com/bevyengine/bevy/blob/latest/examples/README.md#setup
 [bevy]: https://bevyengine.org/
 [bevy-learn]: https://bevyengine.org/learn/
 [bevy-discord]: https://discord.gg/bevy
-[nikl-twitter]: https://twitter.com/nikl_me
-[nikl-mastodon]: https://mastodon.online/@nikl_me
-[firefox-sound-issue]: https://github.com/NiklasEi/bevy_kira_audio/issues/9
 [Bevy Cheat Book]: https://bevy-cheatbook.github.io/introduction.html
-[trunk]: https://trunkrs.dev/
-[android-instructions]: https://github.com/bevyengine/bevy/blob/latest/examples/README.md#setup
+[BevyFlock]: https://github.com/TheBevyFlock/bevy_new_2d
 [ios-instructions]: https://github.com/bevyengine/bevy/blob/latest/examples/README.md#setup-1
+[firefox-sound-issue]: https://github.com/NiklasEi/bevy_kira_audio/issues/9
 [mobile_dev_with_bevy_2]: https://www.nikl.me/blog/2023/notes_on_mobile_development_with_bevy_2/
+[trunk]: https://trunkrs.dev/
+[ual]: https://quaternius.itch.io/universal-animation-library
 [workflow_bevy_android]: https://www.nikl.me/blog/2023/github_workflow_to_publish_android_app/
 [workflow_bevy_ios]: https://www.nikl.me/blog/2023/github_workflow_to_publish_ios_app/
