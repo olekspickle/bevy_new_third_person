@@ -17,7 +17,7 @@ Template for a Game using the awesome [Bevy engine][bevy] featuring out of the b
 
 # What does this template give you?
 
-<!--* small example ["game"](https://olekspickle.github.io/bevy_new_3d/)-->
+<!--* small example ["game"](https://olekspickle.github.io/bevy_new_third_person/)-->
 * easy setup for running the web build using [trunk] (`trunk serve`)
 * run the native version with `cargo run`
 * workflow for GitHub actions creating releases for Windows, Linux, macOS, and Web (Wasm) ready for distribution

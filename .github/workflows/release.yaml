@@ -11,11 +11,31 @@ on:
         required: true
         type: string
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # ToDo: adapt names
 env:
+  build: {
+    web: true,
+    linux: false,
+    windows: false,
+    macos: false,
+    android: false,
+    ios: false
+  }
+  upload: {
+    # The itch.io project to upload to in the format `user-name/project-name`.
+    itch: olekspickle/bevy-third-person,
+    github: false
+  }
+  pkg_name: bevy-third-person
+  # The path to the assets directory.
+  assets_path: assets
   # This variable is used to name release output files.
-  GAME_EXECUTABLE_NAME: bevy_game
-  GAME_OSX_APP_NAME: BevyGame
+  GAME_EXECUTABLE_NAME: bevy-third-person
+  GAME_OSX_APP_NAME: BevyThirdPerson
 
 permissions:
   contents: write
@@ -33,6 +53,7 @@ jobs:
   build-macOS:
     runs-on: macos-latest
     needs: get-version
+    if: ${{ env.build.macos }}
     env:
       # macOS 11.0 Big Sur is the first version to support universal binaries
       MACOSX_DEPLOYMENT_TARGET: 11.0
@@ -71,6 +92,14 @@ jobs:
           mv build/macos/src/Game.app build/macos/src/${{ env.GAME_OSX_APP_NAME }}.app
           ln -s /Applications build/macos/src/
           hdiutil create -fs HFS+ -volname "${{ env.GAME_OSX_APP_NAME }}" -srcfolder build/macos/src ${{ env.GAME_EXECUTABLE_NAME }}.dmg
+
+      - name: Upload package to workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.GAME_EXECUTABLE_NAME }}_macos.zip
+          retention-days: 1
+          overwrite: true
+
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -84,6 +113,7 @@ jobs:
   build-linux:
     runs-on: ubuntu-latest
     needs: get-version
+    if: ${{ env.build.linux }}
     env:
       VERSION: ${{needs.get-version.outputs.version}}
     steps:
@@ -105,6 +135,14 @@ jobs:
       - name: Bundle release
         run: |
           tar -czf ${{ env.GAME_EXECUTABLE_NAME }}_linux.tar.gz ${{ env.GAME_EXECUTABLE_NAME }} assets credits
+
+      - name: Upload package to workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.GAME_EXECUTABLE_NAME }}_linux.zip
+          retention-days: 1
+          overwrite: true
+
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -118,6 +156,7 @@ jobs:
   build-windows:
     runs-on: windows-latest
     needs: get-version
+    if: ${{ env.build.windows }}
     env:
       VERSION: ${{needs.get-version.outputs.version}}
       BUILD_INSTALLER: ${{ false }}
@@ -148,6 +187,14 @@ jobs:
       - name: Create Installer
         if: ${{ env.BUILD_INSTALLER }}
         run: dotnet build -p:Version=${{ env.VERSION }} -c Release build/windows/installer/Installer.wixproj --output installer
+
+      - name: Upload package to workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.GAME_EXECUTABLE_NAME }}_windows.zip
+          retention-days: 1
+          overwrite: true
+
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -167,9 +214,86 @@ jobs:
           tag: ${{ env.VERSION }}
           overwrite: true
 
+  build-for-iOS:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    needs: get-version
+    if: ${{ env.build.ios }}
+    env:
+      VERSION: ${{needs.get-version.outputs.version}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Add iOS targets
+        run: rustup target add aarch64-apple-ios x86_64-apple-ios
+      - name: Build app for iOS
+        run: |
+          cd mobile
+          make xcodebuild-iphone-release
+          mkdir Payload
+          mv build/Build/Products/Release-iphoneos/*.app Payload
+          zip -r ${{ env.GAME_EXECUTABLE_NAME }}.zip Payload
+          mv ${{ env.GAME_EXECUTABLE_NAME }}.zip ${{ env.GAME_EXECUTABLE_NAME }}.ipa
+
+      - name: Upload package to workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.GAME_EXECUTABLE_NAME }}_ios.zip
+          retention-days: 1
+          overwrite: true
+
+      - name: Upload release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: mobile/${{ env.GAME_EXECUTABLE_NAME }}.ipa
+          asset_name: ${{ env.GAME_EXECUTABLE_NAME }}_${{ env.VERSION }}_unsigned_ios.ipa
+          release_name: ${{ env.VERSION }}
+          tag: ${{ env.VERSION }}
+          overwrite: true
+
+  build-for-Android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: ${{ env.build.android }}
+    needs: get-version
+    env:
+      VERSION: ${{needs.get-version.outputs.version}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Add Android targets
+        # could add more targets like armv7-linux-androideabi here (then also add to cargo-apk config)
+        run: rustup target add aarch64-linux-android
+      - name: Install Cargo APK
+        run: cargo install --force cargo-apk
+      - name: Build app for Android
+        # This uses a debug build, since release builds require keystore configuration
+        # For AAB builds that can be pushed to the Play store, see the release-android-google-play workflow.
+        run: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME cargo apk build --package mobile
+
+      - name: Upload package to workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.GAME_EXECUTABLE_NAME }}_android.zip
+          retention-days: 1
+          overwrite: true
+
+      - name: Upload release
+        if: ${{ env.upload.github }}
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: target/debug/apk/${{ env.GAME_OSX_APP_NAME }}.apk
+          asset_name: ${{ env.GAME_EXECUTABLE_NAME }}_${{ env.VERSION }}_android.apk
+          release_name: ${{ env.VERSION }}
+          tag: ${{ env.VERSION }}
+          overwrite: true
+
   build-web:
     runs-on: ubuntu-latest
     needs: get-version
+    if: ${{ env.build.web }}
     env:
       VERSION: ${{needs.get-version.outputs.version}}
     steps:
@@ -195,12 +319,22 @@ jobs:
         uses: NiklasEi/wasm-opt-action@v2
         with:
           file: dist/*.wasm
+
       - name: Zip release
         uses: vimtor/action-zip@v1.1
         with:
           files: dist/
           dest: ${{ env.GAME_EXECUTABLE_NAME }}_web.zip
+
+      - name: Upload package to workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.GAME_EXECUTABLE_NAME }}_web.zip
+          retention-days: 1
+          overwrite: true
+
       - name: Upload release
+        if: ${{ env.upload.github }}
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
@@ -210,59 +344,47 @@ jobs:
           tag: ${{ env.VERSION }}
           overwrite: true
 
-  build-for-iOS:
-    runs-on: macos-latest
-    timeout-minutes: 30
-    needs: get-version
-    env:
-      VERSION: ${{needs.get-version.outputs.version}}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Add iOS targets
-        run: rustup target add aarch64-apple-ios x86_64-apple-ios
-      - name: Build app for iOS
-        run: |
-          cd mobile
-          make xcodebuild-iphone-release
-          mkdir Payload
-          mv build/Build/Products/Release-iphoneos/*.app Payload
-          zip -r ${{ env.GAME_EXECUTABLE_NAME }}.zip Payload
-          mv ${{ env.GAME_EXECUTABLE_NAME }}.zip ${{ env.GAME_EXECUTABLE_NAME }}.ipa
-      - name: Upload release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: mobile/${{ env.GAME_EXECUTABLE_NAME }}.ipa
-          asset_name: ${{ env.GAME_EXECUTABLE_NAME }}_${{ env.VERSION }}_unsigned_ios.ipa
-          release_name: ${{ env.VERSION }}
-          tag: ${{ env.VERSION }}
-          overwrite: true
-
-  build-for-Android:
+  # Check if upload to itch.io is enabled.
+  # This is needed because the `env` context can't be used in the `if:` condition of a job:
+  # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
+  check-upload-to-itch:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: get-version
-    env:
-      VERSION: ${{needs.get-version.outputs.version}}
+    if: ${{ env.upload.itch != '' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - name: Add Android targets
-        # could add more targets like armv7-linux-androideabi here (then also add to cargo-apk config)
-        run: rustup target add aarch64-linux-android
-      - name: Install Cargo APK
-        run: cargo install --force cargo-apk
-      - name: Build app for Android
-        # This uses a debug build, since release builds require keystore configuration
-        # For AAB builds that can be pushed to the Play store, see the release-android-google-play workflow.
-        run: ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME cargo apk build --package mobile
-      - name: Upload release
-        uses: svenstaro/upload-release-action@v2
+      - name: Do nothing
+        run: 'true'
+    outputs:
+      target: ${{ env.upload.itch }}
+
+  upload-to-itch:
+    runs-on: ubuntu-latest
+    needs:
+      - get-version
+      - check-upload-to-itch
+      - build-web
+    if: ${{ needs.check-upload-to-itch.outputs.target != '' }}
+
+    steps:
+      - name: Download web build
+        uses: actions/download-artifact@v4
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/debug/apk/${{ env.GAME_OSX_APP_NAME }}.apk
-          asset_name: ${{ env.GAME_EXECUTABLE_NAME }}_${{ env.VERSION }}_android.apk
-          release_name: ${{ env.VERSION }}
-          tag: ${{ env.VERSION }}
-          overwrite: true
+          name: ${{ env.GAME_EXECUTABLE_NAME }}_web.zip
+
+      - name: Install butler
+        run: |
+          curl -L -o butler.zip 'https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default'
+          unzip butler.zip
+          chmod +x butler
+          ./butler -V
+
+      - name: Upload all packages to itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_CREDENTIALS }}
+        run: |
+          for channel in $(ls); do
+            ./butler push \
+              --fix-permissions \
+              --userversion='${{ needs.get-version.outputs.version }}' \
+              tmp/"${channel}"/* \
+              '${{ env.upload.itch }}':"${channel}"
+          done
