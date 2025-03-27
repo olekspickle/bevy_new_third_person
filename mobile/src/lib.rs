@@ -1,5 +1,5 @@
 use bevy::{prelude::*, window::WindowMode, WinitSettings};
-use bevy_3rd_person_view::GamePlugin; // ToDo: Replace with your new crate name.
+use bevy_new_third_person::GamePlugin; // ToDo: Replace with your new crate name.
 
 #[bevy_main]
 fn main() {

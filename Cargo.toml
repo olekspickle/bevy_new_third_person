@@ -1,12 +1,13 @@
 [package]
-name = "bevy_3rd_person_view" # ToDo
+name = "bevy_new_third_person" # ToDo
 version = "0.1.0"
 publish = false
 authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
 edition = "2024"
 license = "MIT OR Apache-2.0"
 exclude = ["dist", "build", "assets", "credits"]
-repository = "https://github.com/olekspickle/bevy_3rd_person_view"
+repository = "https://github.com/olekspickle/bevy_new_third_person"
+description = "Simple third person view 3D game template"
 
 [workspace]
 members = ["mobile"]
