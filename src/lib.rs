@@ -1,5 +1,5 @@
-#![allow(clippy::type_complexity)]
-use bevy::{app::App, prelude::*};
+//#![allow(clippy::type_complexity)]
+use bevy::{app::App, asset::AssetMetaCheck, log, prelude::*};
 
 mod asset_tracking;
 mod assets;
@@ -32,9 +32,35 @@ pub fn game(app: &mut App) {
         Update,
         (AppSet::TickTimers, AppSet::RecordInput, AppSet::Update).chain(),
     );
+    let window = WindowPlugin {
+        primary_window: Some(Window {
+            title: "Bevy Third Person".to_string(), // ToDo
+            // Bind to canvas included in `index.html`
+            canvas: Some("#bevy".to_owned()),
+            fit_canvas_to_parent: true,
+            // Tells wasm not to override default event handling, like F5 and Ctrl+R
+            prevent_default_event_handling: false,
+            ..default()
+        }),
+        ..default()
+    };
+    let assets = AssetPlugin {
+        // Wasm builds will check for meta files (that don't exist) if this isn't set.
+        // This causes errors and even panics on web build on itch.
+        // See https://github.com/bevyengine/bevy_github_ci_template/issues/48.
+        meta_check: AssetMetaCheck::Never,
+        ..default()
+    };
+    let log_level = log::LogPlugin {
+        level: log::Level::TRACE,
+        filter: "info,wgpu=warn".to_string(),
+        ..Default::default()
+    };
 
-    // the order is important
-    // be sure you use plugins/resources AFTER you add/insert them
+    app.add_plugins(DefaultPlugins.set(window).set(assets).set(log_level));
+
+    // custom plugins. the order is important
+    // be sure you use resources/types AFTER you add plugins that insert them
     app.add_plugins((
         asset_tracking::plugin,
         game::plugin,
@@ -42,11 +68,6 @@ pub fn game(app: &mut App) {
         screens::plugin,
         assets::plugin,
     ));
-
-    //#[cfg(debug_assertions)]
-    //use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
-    //#[cfg(debug_assertions)]
-    //app.add_plugins((FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin::default()));
 }
 
 /// High-level groupings of systems for the app in the `Update` schedule.
