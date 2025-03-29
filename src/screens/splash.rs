@@ -1,14 +1,25 @@
 //! A splash screen that plays briefly at startup.
-
+use crate::prelude::*;
 use bevy::{
     image::{ImageLoaderSettings, ImageSampler},
     input::common_conditions::input_just_pressed,
     prelude::*,
+    ui::Val::*,
 };
 
 use crate::{AppSet, screens::Screen};
 
+const SPLASH_BACKGROUND_COLOR: Color = Color::srgb(0.157, 0.157, 0.157);
+const SPLASH_DURATION_SECS: f32 = 1.8;
+const SPLASH_FADE_DURATION_SECS: f32 = 0.3;
+
 pub(super) fn plugin(app: &mut App) {
+    // start asset loading
+    app.load_resource::<Models>();
+    app.load_resource::<Textures>();
+    app.load_resource::<AudioSources>()
+        .insert_resource(AudioInstances::default());
+
     // Spawn splash screen.
     app.insert_resource(ClearColor(SPLASH_BACKGROUND_COLOR));
     app.add_systems(OnEnter(Screen::Splash), spawn_splash_screen);
@@ -44,10 +55,6 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
-const SPLASH_BACKGROUND_COLOR: Color = Color::srgb(0.157, 0.157, 0.157);
-const SPLASH_DURATION_SECS: f32 = 1.8;
-const SPLASH_FADE_DURATION_SECS: f32 = 0.6;
-
 fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .ui_root()
@@ -57,29 +64,33 @@ fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
             StateScoped(Screen::Splash),
         ))
         .with_children(|children| {
-            children.spawn((
-                Name::new("Splash image"),
-                Node {
-                    margin: UiRect::all(Val::Auto),
-                    width: Val::Percent(70.0),
-                    ..default()
-                },
-                ImageNode::new(asset_server.load_with_settings(
-                    // This should be an embedded asset for instant loading, but that is
-                    // currently [broken on Windows Wasm builds](https://github.com/bevyengine/bevy/issues/14246).
-                    "images/splash.png",
-                    |settings: &mut ImageLoaderSettings| {
-                        // Make an exception for the splash image in case
-                        // `ImagePlugin::default_nearest()` is used for pixel art.
-                        settings.sampler = ImageSampler::linear();
+            ChildBuild::spawn(
+                children,
+                (
+                    Name::new("Splash image"),
+                    Node {
+                        width: Percent(20.0),
+                        align_self: AlignSelf::Center,
+                        ..default()
                     },
-                )),
-                ImageNodeFadeInOut {
-                    total_duration: SPLASH_DURATION_SECS,
-                    fade_duration: SPLASH_FADE_DURATION_SECS,
-                    t: 0.0,
-                },
-            ));
+                    ImageNode::new(asset_server.load_with_settings(
+                        // This should be an embedded asset for instant loading, but that is
+                        // currently [broken on Windows Wasm builds](https://github.com/bevyengine/bevy/issues/14246).
+                        "images/bevy.png",
+                        |settings: &mut ImageLoaderSettings| {
+                            // Make an exception for the splash image in case
+                            // `ImagePlugin::default_nearest()` is used for pixel art.
+                            settings.sampler = ImageSampler::linear();
+                        },
+                    )),
+                    ImageNodeFadeInOut {
+                        total_duration: SPLASH_DURATION_SECS,
+                        fade_duration: SPLASH_FADE_DURATION_SECS,
+                        t: 0.0,
+                    },
+                ),
+            );
+            children.label("Made with BEVY", LayoutOpts::label());
         });
 }
 
@@ -148,4 +159,3 @@ fn check_splash_timer(timer: ResMut<SplashTimer>, mut next_screen: ResMut<NextSt
 fn continue_to_loading_screen(mut next_screen: ResMut<NextState<Screen>>) {
     next_screen.set(Screen::Loading);
 }
-

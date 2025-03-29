@@ -5,11 +5,6 @@ use crate::prelude::*;
 use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.load_resource::<Models>();
-    app.load_resource::<Textures>();
-    app.load_resource::<AudioSources>()
-        .insert_resource(AudioInstances::default());
-
     app.add_systems(OnEnter(Screen::Loading), spawn_loading_screen)
         .add_systems(
             Update,
@@ -27,7 +22,7 @@ fn spawn_loading_screen(mut commands: Commands) {
 }
 
 fn continue_to_menu_screen(mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Gameplay);
+    next_screen.set(Screen::Menu);
 }
 
 fn all_assets_loaded(resource_handles: Res<ResourceHandles>) -> bool {

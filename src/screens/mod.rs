@@ -7,15 +7,15 @@ mod gameplay;
 pub mod loading;
 mod menu;
 pub mod settings;
-//mod splash;
+mod splash;
 
 pub(super) fn plugin(app: &mut App) {
     app.init_state::<Screen>();
     app.enable_state_scoped_entities::<Screen>();
 
     app.add_plugins((
+        splash::plugin,
         loading::plugin,
-        //splash::plugin,
         menu::plugin,
         settings::plugin,
         gameplay::plugin,
@@ -29,9 +29,9 @@ pub(super) fn plugin(app: &mut App) {
 #[derive(States, Default, Clone, Eq, PartialEq, Debug, Hash)]
 pub enum Screen {
     // Bevy tribute <3
+    #[default]
     Splash,
     // During the loading State the LoadingPlugin will load our assets
-    #[default]
     Loading,
     // During this State the actual game logic is executed
     Gameplay,

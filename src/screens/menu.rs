@@ -10,22 +10,12 @@ pub fn plugin(app: &mut App) {
 fn setup_menu(
     //font: Res<Fira>,
     mut commands: Commands,
-    camera: Query<Entity, With<SceneCamera>>,
 ) {
-    let camera = camera.single();
     commands
         .ui_root()
-        .insert(TargetCamera(camera))
         .insert(StateScoped(Screen::Menu))
         .with_children(|children| {
-            let layout = LayoutOpts::button()
-                .with_border_color(Color::WHITE)
-                .with_node(Node {
-                    padding: UiRect::all(Percent(2.0)),
-                    width: Percent(20.0),
-                    height: Px(5.0),
-                    ..Default::default()
-                });
+            let layout = LayoutOpts::button();
             //let text = TextOpts::from("Play")
             //.with_font(TextFont {
             //    font: font.0.clone(),
