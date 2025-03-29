@@ -39,10 +39,12 @@ pub fn setup(
         let x_width = rng.gen_range(low..upper);
         let z_width = rng.gen_range(low..upper);
         let mesh = if i % 2 == 0 {
-            Mesh3d(meshes.add(Cuboid::new(x_width, height, z_width)))
+            Mesh::from(Cuboid::new(x_width, height, z_width))
         } else {
-            Mesh3d(meshes.add(Cylinder::new(x_width, height)))
+            Mesh::from(Cylinder::new(x_width, height))
         };
+        let mesh3d = Mesh3d(meshes.add(mesh.clone()));
+
         let (r, g, b) = (
             rng.gen_range(0.01..0.99),
             rng.gen_range(0.01..0.99),
@@ -53,15 +55,15 @@ pub fn setup(
         let half_plane = main_plane / 2.0;
         let (x, y, z) = (
             rng.gen_range((-half_plane + x_width)..(half_plane - x_width)),
-            // this will send them flying!
-            rng.gen_range(height / 3.0..height / 1.5),
+            // elevate for half of height, so that lower vertices would be exactly at 0
+            height / 2.0,
             rng.gen_range((-half_plane + x_width)..(half_plane - x_width)),
         );
         commands.spawn((
-            mesh,
+            mesh3d,
             mat,
             RigidBody::Static,
-            Collider::capsule(x_width.max(z_width) / 2.0, height),
+            Collider::trimesh_from_mesh(&mesh).expect("failed to create collider for mesh"),
             Transform::from_xyz(x, y, z),
         ));
     }

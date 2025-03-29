@@ -16,6 +16,8 @@ use bevy::{ecs::system::EntityCommands, prelude::*, ui::Val::*};
 ///             ..default()
 ///       });
 ///       children.label(&text, LayoutOpts::label());
+///       // or if you don't care about font
+///       children.label("Play", LayoutOpts::label());
 ///     });
 /// }
 ///
@@ -36,13 +38,18 @@ impl<T: Spawn> Labelable for T {
     ) -> EntityCommands {
         let (text_opts, layout) = (text_opts.into(), layout.into());
         let s = text_opts.text.clone();
-        let short = if s.len() > 10 { &s[..9] } else { &s };
+        let short = if s.len() > 10 { &s[..8] } else { &s };
+        let node = Node {
+            // dynamic width calculated from font size
+            width: Px(s.len() as f32 * text_opts.font.font_size),
+            ..layout.node.clone()
+        };
         let entity = self.spawn((
             Name::new(format!("Label {short}")),
+            text_opts.font.clone(),
+            node,
             Label,
             Text(s),
-            layout.node.clone(),
-            text_opts.font.clone(),
             TextColor(layout.color),
             BackgroundColor(layout.bg_color),
         ));

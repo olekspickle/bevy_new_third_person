@@ -27,8 +27,7 @@ pub fn plugin(app: &mut App) {
         bevy::diagnostic::SystemInformationDiagnosticsPlugin,
         bevy::render::diagnostic::RenderDiagnosticsPlugin,
         PerfUiPlugin,
-        //interaction::plugin,
-        widgets::plugin,
+        interaction::plugin,
     ));
 
     app.add_systems(OnEnter(Screen::Gameplay), setup_perf_ui);
@@ -79,7 +78,7 @@ impl Spawn for EntityCommands<'_> {
     }
 }
 
-/// An extension trait for spawning UI containers. (courtesy of RynKitty)
+/// An extension trait for spawning UI containers.
 pub trait UiRoot {
     /// Spawns a root node that covers the full screen
     /// and centers its content horizontally and vertically.
@@ -93,9 +92,9 @@ impl UiRoot for Commands<'_, '_> {
             Node {
                 width: Percent(100.0),
                 height: Percent(100.0),
-                align_items: AlignItems::Center,
                 flex_direction: FlexDirection::Column,
                 justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
                 position_type: PositionType::Absolute,
                 row_gap: Px(10.0),
                 ..default()

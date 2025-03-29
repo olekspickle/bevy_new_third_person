@@ -81,7 +81,7 @@ impl AudioSources {
     pub const BTN_HOVER: &'static str = "audio/sfx/btn-hover.ogg";
     pub const BTN_PRESS: &'static str = "audio/sfx/btn-press.ogg";
 
-    pub const BG_MUSIC: &'static str = "audio/music/time-for-fun.ogg";
+    pub const BG_MUSIC: &'static str = "audio/music/smnbl-time-for-fun.ogg";
 }
 
 impl FromWorld for AudioSources {

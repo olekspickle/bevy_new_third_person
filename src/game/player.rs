@@ -3,7 +3,8 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 use bevy_third_person_camera::*;
 use bevy_tnua::{
-    TnuaAnimatingState, TnuaAnimatingStateDirective, builtins::TnuaBuiltinJumpState, prelude::*,
+    TnuaAnimatingState, TnuaAnimatingStateDirective, builtins::TnuaBuiltinJumpState,
+    control_helpers::TnuaSimpleAirActionsCounter, prelude::*,
 };
 use bevy_tnua_avian3d::*;
 use leafwing_input_manager::prelude::ActionState;
@@ -22,6 +23,7 @@ pub fn plugin(app: &mut App) {
         .add_systems(
             Update,
             (
+                toggle_pause,
                 movement.in_set(TnuaUserControlsSystemSet),
                 //prepare_animations,
                 //handle_animating,
@@ -59,33 +61,52 @@ fn spawn(
     mut commands: Commands,
     gltf_assets: Res<Assets<Gltf>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    camera: Query<&Transform, With<SceneCamera>>,
 ) {
     let Some(gltf) = gltf_assets.get(&meshes.player) else {
         return;
     };
+    let camera_transform = camera.single();
+    let forward = camera_transform.forward().normalize();
+    let player_rot = Quat::from_rotation_arc(Vec3::X, forward);
+
     let mesh = SceneRoot(gltf.scenes[0].clone());
-    //let mesh = Mesh3d(meshes.add(Cylinder::new(10., 10.)));
+    //let collider = Collider::trimesh_from_mesh(&mesh).unwrap();
     let color: MeshMaterial3d<StandardMaterial> =
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
     let pos = Transform::from_translation(Vec3::new(0.0, 0.5, 0.0));
+    let collider = Collider::cylinder(0.2, 0.1);
     commands.spawn((
         color,
         mesh,
         pos,
         Player::default(),
         ThirdPersonCameraTarget,
+        //Transform::from_rotation(player_rot),
         // tnua stuff
         TnuaController::default(),
-        // A sensor shape is not strictly necessary, but without it we'll get weird results.
-        TnuaAvian3dSensorShape(Collider::cylinder(0.49, 0.0)),
         // Tnua can fix the rotation, but the character will still get rotated before it can do so.
         // By locking the rotation we can prevent this.
         LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
         TnuaAnimatingState::<AnimationState>::default(),
+        //TnuaSimpleAirActionsCounter::default(),
+        // A sensor shape is not strictly necessary, but without it we'll get weird results.
+        TnuaAvian3dSensorShape(collider.clone()),
         // physics
         RigidBody::Dynamic,
-        Collider::capsule(0.5, 1.0),
+        collider,
     ));
+}
+
+fn toggle_pause(action: Query<&ActionState<Action>>, mut time: ResMut<Time<Virtual>>) {
+    let state = action.single();
+    if state.just_pressed(&Action::Pause) {
+        if time.is_paused() {
+            time.unpause();
+        } else {
+            time.pause();
+        }
+    }
 }
 
 pub fn movement(
@@ -93,7 +114,8 @@ pub fn movement(
     //touch_input: Res<Touches>,
     action: Query<&ActionState<Action>>,
     mut tnua: Query<&mut TnuaController>,
-    camera: Query<&mut Transform, With<SceneCamera>>,
+    //jump: Query<&mut TnuaSimpleAirActionsCounter>,
+    camera: Query<&Transform, With<SceneCamera>>,
     //mut player: Query<&mut Transform, (With<Player>, Without<SceneCamera>)>,
 ) {
     let Ok(mut controller) = tnua.get_single_mut() else {
@@ -145,7 +167,7 @@ pub fn movement(
         desired_forward: Dir3::new(direction).ok(),
         // The `float_height` must be greater (even if by little) from the distance between the
         // character's center and the lowest point of its collider.
-        float_height: 2.0,
+        float_height: 0.2,
         // `TnuaBuiltinWalk` has many other fields for customizing the movement - but they have
         // sensible defaults. Refer to the `TnuaBuiltinWalk`'s documentation to learn what they do.
         ..Default::default()
@@ -153,11 +175,12 @@ pub fn movement(
 
     // Feed the jump action every frame as long as the player holds the jump button. If the player
     // stops holding the jump button, simply stop feeding the action.
-    if state.pressed(&Action::Jump) {
+    if state.just_pressed(&Action::Jump) {
+        //let jump = jump.single();
         controller.action(TnuaBuiltinJump {
             // The height is the only mandatory field of the jump button.
             height: 4.0,
-            // `TnuaBuiltinJump` also has customization fields with sensible defaults.
+            //allow_in_air: true,
             ..Default::default()
         });
     }

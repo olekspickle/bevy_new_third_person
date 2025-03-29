@@ -1,15 +1,17 @@
 //! Helper traits for creating common widgets.
 
 use crate::prelude::*;
-use bevy::{ecs::system::EntityCommands, prelude::*, ui::Val::*};
+use bevy::{
+    ecs::system::EntityCommands,
+    prelude::*,
+    ui::{self, Val::*},
+};
 
 pub mod button;
 pub mod label;
 
 pub use button::Buttonable;
 pub use label::Labelable;
-
-pub(super) fn plugin(_app: &mut App) {}
 
 #[derive(Debug, Clone)]
 pub struct LayoutOpts {
@@ -24,15 +26,16 @@ impl LayoutOpts {
     pub fn button() -> Self {
         Self {
             node: Node {
-                width: Px(150.0),
                 height: Px(60.0),
-                justify_content: JustifyContent::Center,
+                width: Percent(30.0),
+                align_self: AlignSelf::Center,
                 align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
                 border: UiRect::all(Px(2.0)),
                 ..Default::default()
             },
             color: BTN,
-            bg_color: BTN_BG,
+            bg_color: TRANSPARENT,
             border_color: BTN_BG,
             border_radius: BORDER_RADIUS,
         }
@@ -44,12 +47,13 @@ impl LayoutOpts {
                 width: Px(150.0),
                 height: Px(FONT_SIZE),
                 border: UiRect::ZERO,
-                justify_content: JustifyContent::Center,
+                align_self: AlignSelf::Center,
                 align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
                 ..Default::default()
             },
             color: LABEL,
-            bg_color: LABEL_BG,
+            bg_color: TRANSLUCENT,
             border_color: LABEL_BG,
             border_radius: BORDER_RADIUS,
         }
@@ -67,12 +71,16 @@ impl LayoutOpts {
         self.border_color = color;
         self
     }
+    pub fn with_border_radius(mut self, radius: f32) -> Self {
+        self.border_radius = radius;
+        self
+    }
     pub fn with_node(mut self, n: Node) -> Self {
         self.node = n;
         self
     }
-    pub fn with_border_radius(mut self, radius: f32) -> Self {
-        self.border_radius = radius;
+    pub fn with_margin(mut self, m: UiRect) -> Self {
+        self.node.margin = m;
         self
     }
 }
@@ -90,6 +98,10 @@ impl TextOpts {
     }
     pub fn with_font(mut self, font: TextFont) -> Self {
         self.font = font;
+        self
+    }
+    pub fn with_size(mut self, s: f32) -> Self {
+        self.font.font_size = s;
         self
     }
 }
@@ -117,7 +129,7 @@ pub trait GenericContainer {
 impl<T: Spawn> GenericContainer for T {
     fn container(
         &mut self,
-        direction: FlexDirection,
+        flex_direction: FlexDirection,
         align_items: AlignItems,
         justify_content: JustifyContent,
     ) -> EntityCommands {
@@ -127,8 +139,8 @@ impl<T: Spawn> GenericContainer for T {
                 width: Percent(100.0),
                 height: Percent(100.0),
                 justify_content,
+                flex_direction,
                 align_items,
-                flex_direction: direction,
                 ..default()
             },
         ))
