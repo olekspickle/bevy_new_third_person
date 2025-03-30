@@ -117,31 +117,18 @@ impl<T: Into<String>> From<T> for TextOpts {
 }
 
 pub trait GenericContainer {
-    /// Spawns a container node with specified direction, align_items, and justify_content.
-    fn container(
-        &mut self,
-        direction: FlexDirection,
-        align_items: AlignItems,
-        justify_content: JustifyContent,
-    ) -> EntityCommands;
+    /// Spawns a container node with specified node settings
+    fn container(&mut self, node: Node) -> EntityCommands;
 }
 
 impl<T: Spawn> GenericContainer for T {
-    fn container(
-        &mut self,
-        flex_direction: FlexDirection,
-        align_items: AlignItems,
-        justify_content: JustifyContent,
-    ) -> EntityCommands {
+    fn container(&mut self, node: Node) -> EntityCommands {
         self.spawn((
             Name::new("Container"),
             Node {
                 width: Percent(100.0),
                 height: Percent(100.0),
-                justify_content,
-                flex_direction,
-                align_items,
-                ..default()
+                ..node
             },
         ))
     }

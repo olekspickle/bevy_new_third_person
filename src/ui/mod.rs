@@ -35,11 +35,12 @@ pub fn plugin(app: &mut App) {
 
 fn setup_perf_ui(mut commands: Commands) {
     commands
-        .container(
-            FlexDirection::Column,
-            AlignItems::End,
-            JustifyContent::Start,
-        )
+        .container(Node {
+            align_items: AlignItems::End,
+            flex_direction: FlexDirection::Column,
+            justify_content: JustifyContent::Start,
+            ..Default::default()
+        })
         .spawn((
             // Contains everything related to FPS and frame time
             PerfUiFramerateEntries::default(),
@@ -50,6 +51,28 @@ fn setup_perf_ui(mut commands: Commands) {
             // Contains everything related to fixed timestep
             PerfUiFixedTimeEntries::default(),
         ));
+
+    // Demo keys
+    commands
+        .container(Node {
+            flex_direction: FlexDirection::Row,
+            ..Default::default()
+        })
+        .with_children(|children| {
+            ChildBuild::spawn(
+                children,
+                Node {
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::Start,
+                    align_items: AlignItems::Start,
+                    ..Default::default()
+                },
+            )
+            .with_children(|children| {
+                children.label("P - pause", LayoutOpts::label());
+                children.label("M - mute", LayoutOpts::label());
+            });
+        });
 }
 
 #[derive(Clone, Debug, Reflect, Asset, Resource)]
