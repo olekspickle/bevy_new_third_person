@@ -7,6 +7,11 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Gameplay), spawn_gameplay_ui);
 }
 
+#[derive(Component)]
+pub struct PauseMarker;
+#[derive(Component)]
+pub struct MuteMarker;
+
 fn spawn_gameplay_ui(mut commands: Commands) {
     commands
         .ui_root()
@@ -18,5 +23,32 @@ fn spawn_gameplay_ui(mut commands: Commands) {
                 ..Default::default()
             });
             children.label("Hello Third Person", opts);
+        });
+
+    // Demo keys
+    commands
+        .container(Node {
+            flex_direction: FlexDirection::Row,
+            ..Default::default()
+        })
+        .with_children(|children| {
+            ChildBuild::spawn(
+                children,
+                Node {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Start,
+                    ..Default::default()
+                },
+            )
+            .with_children(|children| {
+                let layout = LayoutOpts::label().with_node(Node {
+                    justify_items: JustifyItems::Start,
+                    ..Default::default()
+                });
+                children
+                    .label("P - pause", layout.clone())
+                    .spawn(PauseMarker);
+                children.label("M - mute", layout).spawn(MuteMarker);
+            });
         });
 }

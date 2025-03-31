@@ -18,16 +18,11 @@ pub fn plugin(app: &mut App) {
         TnuaAvian3dPlugin::new(FixedUpdate),
     ));
 
-    app.add_systems(OnEnter(Screen::Gameplay), spawn)
+    app.add_systems(OnEnter(Screen::Gameplay), (prepare_animations, spawn))
         .configure_sets(PostUpdate, CameraSyncSet.after(PhysicsSet::Sync))
         .add_systems(
             Update,
-            (
-                toggle_pause,
-                movement.in_set(TnuaUserControlsSystemSet),
-                //prepare_animations,
-                //handle_animating,
-            )
+            (movement.in_set(TnuaUserControlsSystemSet), handle_animating)
                 .run_if(in_state(Screen::Gameplay)),
         );
 }
@@ -42,7 +37,8 @@ pub enum AnimationState {
     #[default]
     Standing,
     Running(f32),
-    Jumping,
+    JumpStart,
+    JumpLand,
     Falling,
 }
 
@@ -52,7 +48,8 @@ pub enum AnimationState {
 struct AnimationNodes {
     standing: AnimationNodeIndex,
     running: AnimationNodeIndex,
-    jumping: AnimationNodeIndex,
+    jump_land: AnimationNodeIndex,
+    jump_start: AnimationNodeIndex,
     falling: AnimationNodeIndex,
 }
 
@@ -67,14 +64,15 @@ fn spawn(
         return;
     };
     let camera_transform = camera.single();
-    let forward = camera_transform.forward().normalize();
+    let mut forward = camera_transform.forward().normalize();
+    forward.x = -forward.x;
     let player_rot = Quat::from_rotation_arc(Vec3::X, forward);
 
     let mesh = SceneRoot(gltf.scenes[0].clone());
-    //let collider = Collider::trimesh_from_mesh(&mesh).unwrap();
     let color: MeshMaterial3d<StandardMaterial> =
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
     let pos = Transform::from_translation(Vec3::new(0.0, 0.5, 0.0));
+    //let collider = Collider::trimesh_from_mesh(&mesh).unwrap();
     let collider = Collider::cylinder(0.2, 0.1);
     commands.spawn((
         color,
@@ -89,7 +87,7 @@ fn spawn(
         // By locking the rotation we can prevent this.
         LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
         TnuaAnimatingState::<AnimationState>::default(),
-        //TnuaSimpleAirActionsCounter::default(),
+        TnuaSimpleAirActionsCounter::default(),
         // A sensor shape is not strictly necessary, but without it we'll get weird results.
         TnuaAvian3dSensorShape(collider.clone()),
         // physics
@@ -98,23 +96,12 @@ fn spawn(
     ));
 }
 
-fn toggle_pause(action: Query<&ActionState<Action>>, mut time: ResMut<Time<Virtual>>) {
-    let state = action.single();
-    if state.just_pressed(&Action::Pause) {
-        if time.is_paused() {
-            time.unpause();
-        } else {
-            time.pause();
-        }
-    }
-}
-
 pub fn movement(
     time: Res<Time<Virtual>>,
     //touch_input: Res<Touches>,
     action: Query<&ActionState<Action>>,
     mut tnua: Query<&mut TnuaController>,
-    //jump: Query<&mut TnuaSimpleAirActionsCounter>,
+    mut air_counter: Query<&mut TnuaSimpleAirActionsCounter>,
     camera: Query<&Transform, With<SceneCamera>>,
     //mut player: Query<&mut Transform, (With<Player>, Without<SceneCamera>)>,
 ) {
@@ -155,7 +142,6 @@ pub fn movement(
         let back = camera_transform.back().normalize();
         let back_flat = Vec3::new(back.x, 0.0, back.z);
         direction += back_flat;
-        //player.rotate_y(2. * rot.angle * time.delta_secs());
     }
 
     // Feed the basis every frame. Even if the player doesn't move - just use `desired_velocity:
@@ -167,7 +153,7 @@ pub fn movement(
         desired_forward: Dir3::new(direction).ok(),
         // The `float_height` must be greater (even if by little) from the distance between the
         // character's center and the lowest point of its collider.
-        float_height: 0.2,
+        float_height: 0.06,
         // `TnuaBuiltinWalk` has many other fields for customizing the movement - but they have
         // sensible defaults. Refer to the `TnuaBuiltinWalk`'s documentation to learn what they do.
         ..Default::default()
@@ -175,12 +161,15 @@ pub fn movement(
 
     // Feed the jump action every frame as long as the player holds the jump button. If the player
     // stops holding the jump button, simply stop feeding the action.
+    //let mut air_counter = air_counter.single_mut();
+    //air_counter.update(controller.as_mut());
+
     if state.just_pressed(&Action::Jump) {
         //let jump = jump.single();
         controller.action(TnuaBuiltinJump {
             // The height is the only mandatory field of the jump button.
             height: 4.0,
-            //allow_in_air: true,
+            allow_in_air: true,
             ..Default::default()
         });
     }
@@ -217,10 +206,15 @@ fn prepare_animations(
     let root_node = graph.root;
 
     commands.insert_resource(AnimationNodes {
-        standing: graph.add_clip(gltf.named_animations["Standing"].clone(), 1.0, root_node),
-        running: graph.add_clip(gltf.named_animations["Running"].clone(), 1.0, root_node),
-        jumping: graph.add_clip(gltf.named_animations["Jumping"].clone(), 1.0, root_node),
-        falling: graph.add_clip(gltf.named_animations["Falling"].clone(), 1.0, root_node),
+        standing: graph.add_clip(gltf.named_animations["Idle_Loop"].clone(), 1.0, root_node),
+        running: graph.add_clip(
+            gltf.named_animations["Jog_Fwd_Loop"].clone(),
+            1.0,
+            root_node,
+        ),
+        jump_start: graph.add_clip(gltf.named_animations["Jump_Start"].clone(), 1.0, root_node),
+        jump_land: graph.add_clip(gltf.named_animations["Jump_Land"].clone(), 1.0, root_node),
+        falling: graph.add_clip(gltf.named_animations["Jump_Loop"].clone(), 1.0, root_node),
     });
 
     commands
@@ -263,10 +257,10 @@ fn handle_animating(
             // animation or the fall animation.
             match jump_state {
                 TnuaBuiltinJumpState::NoJump => return,
-                TnuaBuiltinJumpState::StartingJump { .. } => AnimationState::Jumping,
-                TnuaBuiltinJumpState::SlowDownTooFastSlopeJump { .. } => AnimationState::Jumping,
-                TnuaBuiltinJumpState::MaintainingJump => AnimationState::Jumping,
-                TnuaBuiltinJumpState::StoppedMaintainingJump => AnimationState::Jumping,
+                TnuaBuiltinJumpState::StartingJump { .. } => AnimationState::JumpStart,
+                TnuaBuiltinJumpState::SlowDownTooFastSlopeJump { .. } => AnimationState::JumpStart,
+                TnuaBuiltinJumpState::MaintainingJump => AnimationState::Falling,
+                TnuaBuiltinJumpState::StoppedMaintainingJump => AnimationState::JumpLand,
                 TnuaBuiltinJumpState::FallSection => AnimationState::Falling,
             }
         }
@@ -347,10 +341,15 @@ fn handle_animating(
                         .set_speed(*speed)
                         .repeat();
                 }
-                AnimationState::Jumping => {
+                AnimationState::JumpStart => {
                     animation_player
-                        .start(animation_nodes.jumping)
-                        .set_speed(2.0);
+                        .start(animation_nodes.jump_start)
+                        .set_speed(1.0);
+                }
+                AnimationState::JumpLand => {
+                    animation_player
+                        .start(animation_nodes.jump_land)
+                        .set_speed(1.0);
                 }
                 AnimationState::Falling => {
                     animation_player
@@ -361,32 +360,3 @@ fn handle_animating(
         }
     }
 }
-
-//pub fn set_movement(
-//    keyboard_input: Res<ButtonInput<KeyCode>>,
-//    touch_input: Res<Touches>,
-//    player: Query<&Transform, With<Player>>,
-//    camera: Query<(&Camera, &GlobalTransform), With<Camera2d>>,
-//) {
-//    let right = get_movement(GameControl::Right, &keyboard_input);
-//    let left = get_movement(GameControl::Left, &keyboard_input);
-//    let up = get_movement(GameControl::Up, &keyboard_input);
-//    let down = get_movement(GameControl::Down, &keyboard_input);
-//    let mut player_movement = Vec2::new(right - left, down - up);
-//
-//    if let Some(touch_position) = touch_input.first_pressed_position() {
-//        let (camera, camera_transform) = camera.single();
-//        if let Ok(touch_position) = camera.viewport_to_world_2d(camera_transform, touch_position) {
-//            let diff = touch_position - player.single().translation.xy();
-//            if diff.length() > FOLLOW_EPSILON {
-//                player_movement = diff.normalize();
-//            }
-//        }
-//    }
-//
-//    if player_movement != Vec2::ZERO {
-//        actions.player_movement = Some(player_movement.normalize());
-//    } else {
-//        actions.player_movement = None;
-//    }
-//}

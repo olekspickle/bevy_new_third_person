@@ -2,6 +2,11 @@ use super::*;
 
 /// # Example
 /// ```rust,no_run
+/// #[derive(Event)]
+/// pub struct OnPress;
+///
+/// #[derive(Event)]
+/// pub struct MyFont(Handle<Font>);
 ///
 /// fn setup_button(commands: &mut Commands, font: Res<MyFont>) {
 ///   commands
@@ -20,7 +25,7 @@ use super::*;
 ///
 ///
 /// fn go_to_play_screen(_trigger: Trigger<OnPress>, mut next_screen: ResMut<NextState<Screen>>) {
-///     next_screen.set(Screen::Playing);
+///     next_screen.set(Screen::Gameplay);
 /// }
 ///
 /// ```
@@ -40,6 +45,10 @@ impl<T: Spawn> Buttonable for T {
     ) -> EntityCommands {
         let (text_opts, layout) = (text_opts.into(), layout.into());
 
+        info!(
+            "text:{text_opts:?}, border color: {:?}",
+            layout.border_color
+        );
         let mut entity = self.spawn((
             Name::new(format!("Button {}", text_opts.text)),
             Button,

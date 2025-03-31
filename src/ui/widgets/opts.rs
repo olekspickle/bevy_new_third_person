@@ -1,0 +1,104 @@
+use super::*;
+
+#[derive(Debug, Clone)]
+pub struct LayoutOpts {
+    pub border_radius: f32,
+    pub border_color: Color,
+    pub bg_color: Color,
+    pub color: Color,
+    pub node: Node,
+}
+
+impl LayoutOpts {
+    pub fn button() -> Self {
+        Self {
+            node: Node {
+                height: Px(60.0),
+                width: Percent(30.0),
+                align_self: AlignSelf::Center,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                border: UiRect::all(Px(2.0)),
+                ..Default::default()
+            },
+            color: BTN,
+            bg_color: NODE_BG,
+            border_color: BTN,
+            border_radius: BORDER_RADIUS,
+        }
+    }
+
+    pub fn label() -> Self {
+        Self {
+            node: Node {
+                width: Px(150.0),
+                height: Px(FONT_SIZE),
+                border: UiRect::ZERO,
+                align_self: AlignSelf::Center,
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..Default::default()
+            },
+            color: LABEL,
+            bg_color: NODE_BG,
+            border_color: NODE_BG,
+            border_radius: BORDER_RADIUS,
+        }
+    }
+
+    pub fn with_color(mut self, color: Color) -> Self {
+        self.color = color;
+        self
+    }
+    pub fn with_bg_color(mut self, bg_color: Color) -> Self {
+        self.bg_color = bg_color;
+        self
+    }
+    pub fn with_border_color(mut self, color: Color) -> Self {
+        self.border_color = color;
+        self
+    }
+    pub fn with_border_radius(mut self, radius: f32) -> Self {
+        self.border_radius = radius;
+        self
+    }
+    pub fn with_node(mut self, n: Node) -> Self {
+        self.node = n;
+        self
+    }
+    pub fn with_margin(mut self, m: UiRect) -> Self {
+        self.node.margin = m;
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct TextOpts {
+    pub text: String,
+    pub font: TextFont,
+}
+
+impl TextOpts {
+    pub fn with_text(mut self, text: impl Into<String>) -> Self {
+        self.text = text.into();
+        self
+    }
+    pub fn with_font(mut self, font: TextFont) -> Self {
+        self.font = font;
+        self
+    }
+    pub fn with_size(mut self, s: f32) -> Self {
+        self.font.font_size = s;
+        self
+    }
+}
+
+// For something like "my-label".into()
+impl<T: Into<String>> From<T> for TextOpts {
+    fn from(value: T) -> Self {
+        Self {
+            text: value.into(),
+            font: TextFont::from_font_size(FONT_SIZE),
+        }
+    }
+}

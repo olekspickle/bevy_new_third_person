@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use bevy::{ecs::system::EntityCommands, prelude::*, ui::Val::*};
+use super::*;
 
 /// # Example
 /// ```rust,no_run
@@ -38,6 +37,7 @@ impl<T: Spawn> Labelable for T {
     ) -> EntityCommands {
         let (text_opts, layout) = (text_opts.into(), layout.into());
         let s = text_opts.text.clone();
+
         let short = if s.len() > 10 { &s[..8] } else { &s };
         let node = Node {
             // dynamic width calculated from font size

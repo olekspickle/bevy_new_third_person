@@ -13,7 +13,11 @@ pub fn plugin(app: &mut App) {
         .add_systems(OnExit(Screen::Gameplay), pause_audio)
         .add_systems(
             Update,
-            (trigger_interaction_sound_effect, movement_sound)
+            (
+                trigger_interaction_sound_effect,
+                pause_audio,
+                movement_sound,
+            )
                 .run_if(resource_exists::<AudioSources>)
                 .run_if(in_state(Screen::Gameplay)),
         );

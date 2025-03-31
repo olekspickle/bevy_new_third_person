@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use bevy::{prelude::*, ui::Val::*};
+use bevy::prelude::*;
 use iyes_perf_ui::{
     PerfUiPlugin,
     entries::{
@@ -30,18 +29,24 @@ pub fn plugin(app: &mut App) {
         interaction::plugin,
     ));
 
-    app.add_systems(OnEnter(Screen::Gameplay), setup_perf_ui);
+    app.add_systems(Startup, setup_perf_ui);
 }
+
+#[derive(Component)]
+pub struct PerfUiMarker;
+
+#[derive(Clone, Debug, Reflect, Asset, Resource)]
+pub struct Fira(pub Handle<Font>);
 
 fn setup_perf_ui(mut commands: Commands) {
     commands
         .container(Node {
-            align_items: AlignItems::End,
             flex_direction: FlexDirection::Column,
-            justify_content: JustifyContent::Start,
+            align_items: AlignItems::End,
             ..Default::default()
         })
         .spawn((
+            PerfUiMarker,
             // Contains everything related to FPS and frame time
             PerfUiFramerateEntries::default(),
             // Contains everything related to the window and cursor
@@ -51,77 +56,4 @@ fn setup_perf_ui(mut commands: Commands) {
             // Contains everything related to fixed timestep
             PerfUiFixedTimeEntries::default(),
         ));
-
-    // Demo keys
-    commands
-        .container(Node {
-            flex_direction: FlexDirection::Row,
-            ..Default::default()
-        })
-        .with_children(|children| {
-            ChildBuild::spawn(
-                children,
-                Node {
-                    flex_direction: FlexDirection::Column,
-                    justify_content: JustifyContent::Start,
-                    align_items: AlignItems::Start,
-                    ..Default::default()
-                },
-            )
-            .with_children(|children| {
-                children.label("P - pause", LayoutOpts::label());
-                children.label("M - mute", LayoutOpts::label());
-            });
-        });
-}
-
-#[derive(Clone, Debug, Reflect, Asset, Resource)]
-pub struct Fira(pub Handle<Font>);
-
-/// Ideally, this trait should be [part of Bevy itself](https://github.com/bevyengine/bevy/issues/14231).
-pub trait Spawn {
-    fn spawn<B: Bundle>(&mut self, bundle: B) -> EntityCommands;
-}
-
-impl Spawn for Commands<'_, '_> {
-    fn spawn<B: Bundle>(&mut self, bundle: B) -> EntityCommands {
-        self.spawn(bundle)
-    }
-}
-
-impl Spawn for ChildBuilder<'_> {
-    fn spawn<B: Bundle>(&mut self, bundle: B) -> EntityCommands {
-        ChildBuild::spawn(self, bundle)
-    }
-}
-
-impl Spawn for EntityCommands<'_> {
-    fn spawn<B: Bundle>(&mut self, bundle: B) -> EntityCommands {
-        self.insert(bundle).reborrow()
-    }
-}
-
-/// An extension trait for spawning UI containers.
-pub trait UiRoot {
-    /// Spawns a root node that covers the full screen
-    /// and centers its content horizontally and vertically.
-    fn ui_root(&mut self) -> EntityCommands;
-}
-
-impl UiRoot for Commands<'_, '_> {
-    fn ui_root(&mut self) -> EntityCommands {
-        self.spawn((
-            Name::new("UI Root"),
-            Node {
-                width: Percent(100.0),
-                height: Percent(100.0),
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
-                align_items: AlignItems::Center,
-                position_type: PositionType::Absolute,
-                row_gap: Px(10.0),
-                ..default()
-            },
-        ))
-    }
 }
