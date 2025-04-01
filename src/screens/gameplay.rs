@@ -8,9 +8,9 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 #[derive(Component)]
-pub struct PauseMarker;
+pub struct PauseLabel;
 #[derive(Component)]
-pub struct MuteMarker;
+pub struct MuteLabel;
 
 fn spawn_gameplay_ui(mut commands: Commands) {
     commands
@@ -47,8 +47,9 @@ fn spawn_gameplay_ui(mut commands: Commands) {
                 });
                 children
                     .label("P - pause", layout.clone())
-                    .spawn(PauseMarker);
-                children.label("M - mute", layout).spawn(MuteMarker);
+                    .spawn(PauseLabel);
+                children.label("M - mute", layout.clone()).spawn(MuteLabel);
+                children.label("F - diagnostics", layout);
             });
         });
 }

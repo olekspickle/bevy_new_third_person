@@ -81,41 +81,4 @@ pub fn setup(
         color: Color::WHITE,
         brightness: 200.0,
     });
-
-    //// setup point light grid
-    //for i in (-PLANE_WIDTH_INT..PLANE_WIDTH_INT).step_by(50) {
-    //    for j in (-PLANE_WIDTH_INT..PLANE_WIDTH_INT).step_by(50) {
-    //        commands.spawn((
-    //            PointLight {
-    //                color: Color::srgb(
-    //                    rng.gen_range(0.01..0.9),
-    //                    rng.gen_range(0.01..0.9),
-    //                    rng.gen_range(0.01..0.9),
-    //                ),
-    //                radius: 30.0,
-    //                range: 100.,
-    //                ..default()
-    //            },
-    //            Transform::from_xyz(i as f32, 20.0, j as f32),
-    //        ));
-    //    }
-    //}
 }
-
-// This system logs all Mesh3d components in our world. Try making a change to a ComponentA in
-// load_scene_example.scn. If you enable the `file_watcher` cargo feature you should immediately see
-// the changes appear in the console whenever you make a change.
-//fn log_system(
-//    query: Query<(Entity, &Mesh3d), Changed<Mesh3d>>,
-//    res: Option<Res<MeshMaterial3d<StandardMaterial>>>,
-//) {
-//    for (entity, mesh) in &query {
-//        info!("  Entity({})", entity.index());
-//        info!("    Mesh: {{ x: {} y: {} }}\n", mesh.x, mesh.y);
-//    }
-//    if let Some(res) = res {
-//        if res.is_added() {
-//            info!("  New ResourceA: {{ score: {} }}\n", res.score);
-//        }
-//    }
-//}

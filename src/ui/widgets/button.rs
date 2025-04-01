@@ -45,10 +45,6 @@ impl<T: Spawn> Buttonable for T {
     ) -> EntityCommands {
         let (text_opts, layout) = (text_opts.into(), layout.into());
 
-        info!(
-            "text:{text_opts:?}, border color: {:?}",
-            layout.border_color
-        );
         let mut entity = self.spawn((
             Name::new(format!("Button {}", text_opts.text)),
             Button,

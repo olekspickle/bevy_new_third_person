@@ -32,6 +32,7 @@ pub struct AudioInstances {
 
 fn start_or_resume_audio(
     audio: Res<Audio>,
+    settings: Res<Settings>,
     sources: ResMut<AudioSources>,
     mut instances: ResMut<AudioInstances>,
     mut audio_instances: ResMut<Assets<AudioInstance>>,
@@ -51,7 +52,7 @@ fn start_or_resume_audio(
         let handle = audio
             .play(bg_source.clone())
             .looped()
-            .with_volume(0.1)
+            .with_volume(settings.sound.music)
             .handle();
         instances.bg_music = Some(handle);
     }
@@ -70,6 +71,7 @@ fn pause_audio(action: Query<&ActionState<Action>>, global_audio: Res<Audio>) {
 
 fn trigger_interaction_sound_effect(
     audio: Res<Audio>,
+    settings: Res<Settings>,
     audio_sources: Res<AudioSources>,
     interaction_query: Query<&Interaction, Changed<Interaction>>,
 ) {
@@ -79,7 +81,7 @@ fn trigger_interaction_sound_effect(
             Interaction::Pressed => audio_sources.btn_press.clone(),
             _ => continue,
         };
-        audio.play(source.clone()).with_volume(0.2);
+        audio.play(source.clone()).with_volume(settings.sound.sfx);
     }
 }
 
@@ -87,8 +89,9 @@ fn trigger_interaction_sound_effect(
 struct StepTimer(Timer);
 
 fn movement_sound(
-    audio: Res<Audio>,
     time: Res<Time>,
+    audio: Res<Audio>,
+    settings: Res<Settings>,
     mut timer: ResMut<StepTimer>,
     sources: ResMut<AudioSources>,
     action: Query<&ActionState<Action>>,
@@ -102,7 +105,9 @@ fn movement_sound(
     {
         let mut rng = thread_rng();
         let i = rng.gen_range(0..sources.steps.len());
-        audio.play(sources.steps[i].clone()).with_volume(0.5);
+        audio
+            .play(sources.steps[i].clone())
+            .with_volume(settings.sound.sfx);
     }
 }
 
