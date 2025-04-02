@@ -28,7 +28,7 @@ env:
   upload: {
     # The itch.io project to upload to in the format `user-name/project-name`.
     itch: olekspickle/bevy-third-person,
-    github: false
+    github: olekspickle
   }
   pkg_name: bevy-third-person
   # The path to the assets directory.
@@ -50,10 +50,24 @@ jobs:
     outputs:
       version: ${{ inputs.version || steps.tag.outputs.tag }}
 
+  # Check flags configuring build and upload conditions
+  # This is needed because the `env` context can't be used in the `if:` condition of a job:
+  # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
+  check-flags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Do nothing
+        run: 'true'
+    outputs:
+      build: ${{ env.build }}
+      upload: ${{ env.upload }}
+
   build-macOS:
     runs-on: macos-latest
-    needs: get-version
-    if: ${{ env.build.macos }}
+    needs:
+      - get-version
+      - check-flags
+    if: ${{ needs.check-flags.outputs.build.macos != '' }}
     env:
       # macOS 11.0 Big Sur is the first version to support universal binaries
       MACOSX_DEPLOYMENT_TARGET: 11.0
@@ -102,6 +116,7 @@ jobs:
 
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
+        if: ${{ needs.check-flags.outputs.upload.github != '' }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.GAME_EXECUTABLE_NAME }}.dmg
@@ -112,8 +127,10 @@ jobs:
 
   build-linux:
     runs-on: ubuntu-latest
-    needs: get-version
-    if: ${{ env.build.linux }}
+    needs:
+      - get-version
+      - check-flags
+    if: ${{ needs.check-flags.outputs.build.linux != '' }}
     env:
       VERSION: ${{needs.get-version.outputs.version}}
     steps:
@@ -145,6 +162,7 @@ jobs:
 
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
+        if: ${{ needs.check-flags.outputs.upload.github != '' }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.GAME_EXECUTABLE_NAME }}_linux.tar.gz
@@ -156,7 +174,10 @@ jobs:
   build-windows:
     runs-on: windows-latest
     needs: get-version
-    if: ${{ env.build.windows }}
+    needs:
+      - get-version
+      - check-flags
+    if: ${{ needs.check-flags.outputs.build.windows != '' }}
     env:
       VERSION: ${{needs.get-version.outputs.version}}
       BUILD_INSTALLER: ${{ false }}
@@ -197,6 +218,7 @@ jobs:
 
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
+        if: ${{ needs.check-flags.outputs.upload.github != '' }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ env.GAME_EXECUTABLE_NAME }}_windows.zip
@@ -206,6 +228,7 @@ jobs:
       - name: Upload installer
         if: ${{ env.BUILD_INSTALLER }}
         uses: svenstaro/upload-release-action@v2
+        if: ${{ needs.check-flags.outputs.upload.github != '' }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: installer/en-US/installer.msi
@@ -218,7 +241,10 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 30
     needs: get-version
-    if: ${{ env.build.ios }}
+    needs:
+      - get-version
+      - check-flags
+    if: ${{ needs.check-flags.outputs.build.ios != '' }}
     env:
       VERSION: ${{needs.get-version.outputs.version}}
     steps:
@@ -244,6 +270,7 @@ jobs:
 
       - name: Upload release
         uses: svenstaro/upload-release-action@v2
+        if: ${{ needs.check-flags.outputs.upload.github != '' }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: mobile/${{ env.GAME_EXECUTABLE_NAME }}.ipa
@@ -255,7 +282,10 @@ jobs:
   build-for-Android:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    if: ${{ env.build.android }}
+    needs:
+      - get-version
+      - check-flags
+    if: ${{ needs.check-flags.outputs.build.android != '' }}
     needs: get-version
     env:
       VERSION: ${{needs.get-version.outputs.version}}
@@ -282,6 +312,7 @@ jobs:
       - name: Upload release
         if: ${{ env.upload.github }}
         uses: svenstaro/upload-release-action@v2
+        if: ${{ needs.check-flags.outputs.upload.github != '' }}
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: target/debug/apk/${{ env.GAME_OSX_APP_NAME }}.apk
@@ -292,8 +323,10 @@ jobs:
 
   build-web:
     runs-on: ubuntu-latest
-    needs: get-version
-    if: ${{ env.build.web }}
+    needs:
+      - get-version
+      - check-flags
+    if: ${{ needs.check-flags.outputs.build.web != '' }}
     env:
       VERSION: ${{needs.get-version.outputs.version}}
     steps:
@@ -333,36 +366,24 @@ jobs:
           retention-days: 1
           overwrite: true
 
-      - name: Upload release
-        if: ${{ env.upload.github }}
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ env.GAME_EXECUTABLE_NAME }}_web.zip
-          asset_name: ${{ env.GAME_EXECUTABLE_NAME }}_${{ env.VERSION }}_web.zip
-          release_name: ${{ env.VERSION }}
-          tag: ${{ env.VERSION }}
-          overwrite: true
-
-  # Check if upload to itch.io is enabled.
-  # This is needed because the `env` context can't be used in the `if:` condition of a job:
-  # https://docs.github.com/en/actions/learn-github-actions/contexts#context-availability
-  check-upload-to-itch:
-    runs-on: ubuntu-latest
-    if: ${{ env.upload.itch != '' }}
-    steps:
-      - name: Do nothing
-        run: 'true'
-    outputs:
-      target: ${{ env.upload.itch }}
+      # just does not make sense to me, but for some it can
+      # - name: Upload release
+      #   if: ${{ env.upload.github }}
+      #   uses: svenstaro/upload-release-action@v2
+      #   if: ${{ needs.check-flags.outputs.upload.github != '' }}
+      #   with:
+      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #     file: ${{ env.GAME_EXECUTABLE_NAME }}_web.zip
+      #     asset_name: ${{ env.GAME_EXECUTABLE_NAME }}_${{ env.VERSION }}_web.zip
+      #     release_name: ${{ env.VERSION }}
+      #     tag: ${{ env.VERSION }}
+      #     overwrite: true
 
   upload-to-itch:
     runs-on: ubuntu-latest
     needs:
-      - get-version
-      - check-upload-to-itch
       - build-web
-    if: ${{ needs.check-upload-to-itch.outputs.target != '' }}
+    if: ${{ needs.check-flags.outputs.upload.itch != '' }}
 
     steps:
       - name: Download web build
@@ -379,7 +400,7 @@ jobs:
 
       - name: Upload all packages to itch.io
         env:
-          BUTLER_API_KEY: ${{ secrets.BUTLER_CREDENTIALS }}
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         run: |
           for channel in $(ls); do
             ./butler push \

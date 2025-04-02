@@ -15,8 +15,9 @@ pub mod prelude {
     pub use assets::{AudioSources, Config, Models, Textures};
     pub use game::{
         Score,
-        audio::{AudioInstances, Music, SoundEffect},
+        audio::{AudioInstances, Sound},
         camera::SceneCamera,
+        player::Player,
         skybox::Sun,
     };
     pub use screens::{

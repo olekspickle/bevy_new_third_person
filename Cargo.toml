@@ -7,7 +7,7 @@ edition = "2024"
 license = "MIT OR Apache-2.0"
 exclude = ["dist", "build", "assets", "credits"]
 repository = "https://github.com/olekspickle/bevy_new_third_person"
-description = "Simple third person view 3D game template"
+description = "Simple opinionated third person view 3D game template"
 
 [workspace]
 members = ["mobile"]
@@ -33,45 +33,10 @@ dev_native = [
 ]
 physics_debug = []
 
-# All of Bevy's default features exept for the audio related ones (bevy_audio, vorbis), since they clash with bevy_kira_audio
-#   and android_shared_stdcxx/android-game-activity, since those are covered in `mobile`
 [dependencies]
-bevy = { version = "0.15", default-features = false, features = [
-    "animation",
-    "bevy_asset",
-    "bevy_color",
-    "bevy_core_pipeline",
-    "bevy_gilrs",
-    "bevy_gizmos",
-    "bevy_gltf",
-    "bevy_mesh_picking_backend",
-    "bevy_pbr",
-    "bevy_picking",
-    "bevy_render",
-    "bevy_scene",
-    "bevy_sprite",
-    "bevy_sprite_picking_backend",
-    "bevy_state",
-    "bevy_text",
-    "bevy_ui",
-    "bevy_ui_picking_backend",
-    "bevy_window",
-    "bevy_winit",
-    "custom_cursor",
-    "default_font",
-    "hdr",
-    "multi_threaded",
-    "png",
-    "smaa_luts",
-    "sysinfo_plugin",
-    "tonemapping_luts",
-    "webgl2",
-    "x11",
-    "wayland"
-] }
+bevy = { version = "0.15", features = ["wayland"] }
 bevy_common_assets = {version="0.12.0", features=["ron"]}
 bevy_third_person_camera = "0.2.0"
-bevy_kira_audio = { version = "0.22.0", features = ["android_shared_stdcxx"] }
 bevy_atmosphere = "0.12.2"
 bevy-tnua = "0.21.0"
 bevy-tnua-avian3d = "0.2.0"
@@ -85,6 +50,15 @@ rand = { version = "0.8.3" }
 serde = "1"
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.30", default-features = false }
+
+[lints.clippy]
+# Bevy supplies arguments to systems via dependency injection, so it's natural for systems to
+# request more than 7 arguments, which would undesirably trigger this lint.
+too_many_arguments = "allow"
+# Queries may access many components, which would undesirably trigger this lint.
+type_complexity = "allow"
+# Make sure macros use their standard braces, such as `[]` for `bevy_ecs::children!`.
+nonstandard_macro_braces = "warn"
 
 [profile.dev.package."*"]
 opt-level = 3

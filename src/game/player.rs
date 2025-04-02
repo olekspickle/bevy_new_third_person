@@ -153,7 +153,7 @@ pub fn movement(
         desired_forward: Dir3::new(direction).ok(),
         // The `float_height` must be greater (even if by little) from the distance between the
         // character's center and the lowest point of its collider.
-        float_height: 0.06,
+        float_height: 0.0001,
         // `TnuaBuiltinWalk` has many other fields for customizing the movement - but they have
         // sensible defaults. Refer to the `TnuaBuiltinWalk`'s documentation to learn what they do.
         ..Default::default()

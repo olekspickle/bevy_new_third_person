@@ -30,6 +30,28 @@ pub struct AudioInstances {
     pub bg_music: Option<Handle<AudioInstance>>,
 }
 
+#[derive(Resource, Default)]
+pub struct Sound {
+    pub general: f64,
+    pub music: f64,
+    pub sfx: f64,
+}
+
+impl Sound {
+    pub const DEFAULT: Self = Sound {
+        general: 0.2,
+        music: 0.1,
+        sfx: 0.3,
+    };
+    //fn splat(level: f64) -> Self {
+    //    Self {
+    //        general: level,
+    //        music: level,
+    //        sfx: level,
+    //    }
+    //}
+}
+
 fn start_or_resume_audio(
     audio: Res<Audio>,
     settings: Res<Settings>,
@@ -49,16 +71,17 @@ fn start_or_resume_audio(
         }
     } else {
         let bg_source = *[&sources.bg_music].choose(&mut thread_rng()).unwrap();
+        let Sound { general, music, .. } = settings.sound;
         let handle = audio
             .play(bg_source.clone())
             .looped()
-            .with_volume(settings.sound.music)
+            .with_volume(music * general)
             .handle();
         instances.bg_music = Some(handle);
     }
 }
 
-fn pause_audio(action: Query<&ActionState<Action>>, global_audio: Res<Audio>) {
+fn pause_audio(action: Query<&ActionState<Action>>) {
     let state = action.single();
     if state.just_pressed(&Action::Pause) {
         global_audio.pause();
@@ -95,13 +118,15 @@ fn movement_sound(
     mut timer: ResMut<StepTimer>,
     sources: ResMut<AudioSources>,
     action: Query<&ActionState<Action>>,
+    position: Query<&Transform, With<Player>>,
 ) {
-    let state = action.single();
+    let (player_pos, state) = (position.single(), action.single());
     if state.pressed(&Action::Forward)
         | state.pressed(&Action::Backward)
         | state.pressed(&Action::Left)
         | state.pressed(&Action::Right)
         && timer.0.tick(time.delta()).just_finished()
+        && player_pos.translation.y == 0.0
     {
         let mut rng = thread_rng();
         let i = rng.gen_range(0..sources.steps.len());

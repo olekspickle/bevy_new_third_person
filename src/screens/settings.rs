@@ -53,28 +53,6 @@ fn spawn_player_input_map(mut commands: Commands) {
     commands.spawn(InputManagerBundle::with_map(input_map));
 }
 
-#[derive(Resource, Default)]
-pub struct Sound {
-    pub general: f64,
-    pub music: f64,
-    pub sfx: f64,
-}
-
-impl Sound {
-    const DEFAULT: Self = Sound {
-        general: 0.5,
-        music: 0.1,
-        sfx: 0.3,
-    };
-    //fn splat(level: f64) -> Self {
-    //    Self {
-    //        general: level,
-    //        music: level,
-    //        sfx: level,
-    //    }
-    //}
-}
-
 #[derive(Resource)]
 pub struct Settings {
     pub muted: bool,
