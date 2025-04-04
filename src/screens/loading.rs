@@ -22,7 +22,7 @@ fn spawn_loading_screen(mut commands: Commands) {
 }
 
 fn continue_to_menu_screen(mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Menu);
+    next_screen.set(Screen::Title);
 }
 
 fn all_assets_loaded(resource_handles: Res<ResourceHandles>) -> bool {

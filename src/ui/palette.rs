@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-pub const NODE_BG: Color = Color::srgb(0.25, 0.25, 0.25);
+pub const NODE_BG: Color = Color::srgb(0.157, 0.157, 0.157);
 
 pub const BTN: Color = Color::srgb(0.925, 0.925, 0.925);
 //pub const BTN_BG: Color = Color::srgb(0.286, 0.478, 0.773);

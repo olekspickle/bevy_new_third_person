@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use bevy::{prelude::*, ui::Display as NodeDisplay};
-use bevy_kira_audio::*;
+use bevy_seedling::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 use super::gameplay::{MuteLabel, PauseLabel};
@@ -20,6 +20,7 @@ pub enum Action {
     Left,
     Right,
     Jump,
+    Dash,
     Crouch,
 
     // Miscellaneous
@@ -44,6 +45,7 @@ fn spawn_player_input_map(mut commands: Commands) {
 
     input_map.insert(Action::Jump, KeyCode::Space);
     input_map.insert(Action::Crouch, KeyCode::ControlLeft);
+    input_map.insert(Action::Dash, KeyCode::ShiftLeft);
 
     input_map.insert(Action::Pause, KeyCode::KeyP);
     input_map.insert(Action::Mute, KeyCode::KeyM);
@@ -72,14 +74,18 @@ impl Default for Settings {
 
 #[allow(clippy::type_complexity)]
 fn toggle_global(
-    global_audio: Res<Audio>,
     mut settings: ResMut<Settings>,
     mut time: ResMut<Time<Virtual>>,
     action: Query<&ActionState<Action>>,
-    mut set: ParamSet<(
+    mut label_set: ParamSet<(
         Query<(&mut BackgroundColor, &mut TextColor), With<PauseLabel>>,
         Query<(&mut BackgroundColor, &mut TextColor), With<MuteLabel>>,
     )>,
+    mut music: Query<
+        (&mut SamplePlayer, &mut PlaybackSettings),
+        (With<Music>, Without<SoundEffect>),
+    >,
+    mut sfx: Query<(&mut SamplePlayer, &mut PlaybackSettings), (With<SoundEffect>, Without<Music>)>,
     mut perf_ui: Query<&mut Node, With<PerfUiMarker>>,
 ) {
     let state = action.single();
@@ -95,14 +101,14 @@ fn toggle_global(
     }
 
     if state.just_pressed(&Action::Pause) {
-        if let Ok((mut bg, mut color)) = set.p0().get_single_mut() {
+        if let Ok((mut bg, mut color)) = label_set.p0().get_single_mut() {
             if time.is_paused() || settings.paused {
-                global_audio.resume();
+                // TODO: when seedling. actually query sample player and unpause
                 time.unpause();
                 *color = TextColor(LABEL);
                 *bg = BackgroundColor(NODE_BG);
             } else {
-                global_audio.pause();
+                // TODO: when seedling. actually query sample player and pause
                 time.pause();
                 *color = TextColor(NODE_BG);
                 *bg = BackgroundColor(LABEL);
@@ -112,13 +118,23 @@ fn toggle_global(
     }
 
     if state.just_pressed(&Action::Mute) {
-        if let Ok((mut bg, mut color)) = set.p1().get_single_mut() {
+        if let Ok((mut bg, mut color)) = label_set.p1().get_single_mut() {
             if settings.muted {
-                global_audio.set_volume(settings.sound.general);
+                if let Ok((_, mut pb)) = music.get_single_mut() {
+                    pb.volume = Volume::Linear(settings.sound.general);
+                }
+                if let Ok((_, mut pb)) = sfx.get_single_mut() {
+                    pb.volume = Volume::Linear(settings.sound.general);
+                }
                 *color = TextColor(LABEL);
                 *bg = BackgroundColor(NODE_BG);
             } else {
-                global_audio.set_volume(0.0);
+                if let Ok((_, mut pb)) = music.get_single_mut() {
+                    pb.volume = Volume::Linear(0.0);
+                }
+                if let Ok((_, mut pb)) = sfx.get_single_mut() {
+                    pb.volume = Volume::Linear(0.0);
+                }
                 *color = TextColor(NODE_BG);
                 *bg = BackgroundColor(LABEL);
             }

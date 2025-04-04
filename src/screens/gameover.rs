@@ -23,7 +23,7 @@ fn spawn_screen(mut commands: Commands, score: Res<Score>) {
 }
 
 fn enter_gameplay_screen(_trigger: Trigger<OnPress>, mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Menu);
+    next_screen.set(Screen::Title);
 }
 
 #[cfg(not(target_family = "wasm"))]

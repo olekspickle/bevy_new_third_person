@@ -5,9 +5,9 @@ use bevy::prelude::*;
 mod gameover;
 mod gameplay;
 pub mod loading;
-mod menu;
 pub mod settings;
 mod splash;
+mod title;
 
 pub(super) fn plugin(app: &mut App) {
     app.init_state::<Screen>();
@@ -16,7 +16,7 @@ pub(super) fn plugin(app: &mut App) {
     app.add_plugins((
         splash::plugin,
         loading::plugin,
-        menu::plugin,
+        title::plugin,
         settings::plugin,
         gameplay::plugin,
         gameover::plugin,
@@ -36,7 +36,7 @@ pub enum Screen {
     // During this State the actual game logic is executed
     Gameplay,
     // Here the menu is drawn and waiting for player interaction
-    Menu,
+    Title,
     // Settings screen
     Settings,
     GameOver,

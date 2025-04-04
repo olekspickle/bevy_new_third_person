@@ -1,40 +1,16 @@
-use crate::prelude::*;
+//use crate::prelude::*;
 use bevy::prelude::*;
-use bevy_kira_audio::prelude::*;
-use leafwing_input_manager::prelude::ActionState;
-use rand::prelude::*;
+use bevy_seedling::prelude::*;
 
-// This plugin is responsible to control the game audio
 pub fn plugin(app: &mut App) {
-    app.insert_resource(StepTimer(Timer::from_seconds(0.5, TimerMode::Repeating)));
-
-    app.add_plugins(AudioPlugin)
-        .add_systems(OnEnter(Screen::Gameplay), start_or_resume_audio)
-        .add_systems(OnExit(Screen::Gameplay), pause_audio)
-        .add_systems(
-            Update,
-            (
-                trigger_interaction_sound_effect,
-                pause_audio,
-                movement_sound,
-            )
-                .run_if(resource_exists::<AudioSources>)
-                .run_if(in_state(Screen::Gameplay)),
-        );
-}
-
-/// struct of handles for long standing sounds for pause/unpase
-/// or going to menu and resuming the game
-#[derive(Resource, Default)]
-pub struct AudioInstances {
-    pub bg_music: Option<Handle<AudioInstance>>,
+    app.add_plugins(SeedlingPlugin::default());
 }
 
 #[derive(Resource, Default)]
 pub struct Sound {
-    pub general: f64,
-    pub music: f64,
-    pub sfx: f64,
+    pub general: f32,
+    pub music: f32,
+    pub sfx: f32,
 }
 
 impl Sound {
@@ -43,97 +19,6 @@ impl Sound {
         music: 0.1,
         sfx: 0.3,
     };
-    //fn splat(level: f64) -> Self {
-    //    Self {
-    //        general: level,
-    //        music: level,
-    //        sfx: level,
-    //    }
-    //}
-}
-
-fn start_or_resume_audio(
-    audio: Res<Audio>,
-    settings: Res<Settings>,
-    sources: ResMut<AudioSources>,
-    mut instances: ResMut<AudioInstances>,
-    mut audio_instances: ResMut<Assets<AudioInstance>>,
-) {
-    audio.resume();
-
-    // If there is an instance pause it
-    if let Some(instance) = &instances.bg_music {
-        if let Some(instance) = audio_instances.get_mut(instance) {
-            let state = instance.state();
-            if let PlaybackState::Playing { .. } = state {
-                instance.pause(AudioTween::default());
-            }
-        }
-    } else {
-        let bg_source = *[&sources.bg_music].choose(&mut thread_rng()).unwrap();
-        let Sound { general, music, .. } = settings.sound;
-        let handle = audio
-            .play(bg_source.clone())
-            .looped()
-            .with_volume(music * general)
-            .handle();
-        instances.bg_music = Some(handle);
-    }
-}
-
-fn pause_audio(action: Query<&ActionState<Action>>) {
-    let state = action.single();
-    if state.just_pressed(&Action::Pause) {
-        global_audio.pause();
-    }
-
-    //if let Some(instance) = audio_instances.get_mut(&audio.0) {
-    //    instance.pause(AudioTween::default());
-    //}
-}
-
-fn trigger_interaction_sound_effect(
-    audio: Res<Audio>,
-    settings: Res<Settings>,
-    audio_sources: Res<AudioSources>,
-    interaction_query: Query<&Interaction, Changed<Interaction>>,
-) {
-    for interaction in &interaction_query {
-        let source = match interaction {
-            Interaction::Hovered => audio_sources.btn_hover.clone(),
-            Interaction::Pressed => audio_sources.btn_press.clone(),
-            _ => continue,
-        };
-        audio.play(source.clone()).with_volume(settings.sound.sfx);
-    }
-}
-
-#[derive(Resource)]
-struct StepTimer(Timer);
-
-fn movement_sound(
-    time: Res<Time>,
-    audio: Res<Audio>,
-    settings: Res<Settings>,
-    mut timer: ResMut<StepTimer>,
-    sources: ResMut<AudioSources>,
-    action: Query<&ActionState<Action>>,
-    position: Query<&Transform, With<Player>>,
-) {
-    let (player_pos, state) = (position.single(), action.single());
-    if state.pressed(&Action::Forward)
-        | state.pressed(&Action::Backward)
-        | state.pressed(&Action::Left)
-        | state.pressed(&Action::Right)
-        && timer.0.tick(time.delta()).just_finished()
-        && player_pos.translation.y == 0.0
-    {
-        let mut rng = thread_rng();
-        let i = rng.gen_range(0..sources.steps.len());
-        audio
-            .play(sources.steps[i].clone())
-            .with_volume(settings.sound.sfx);
-    }
 }
 
 /// An organizational marker component that should be added to a spawned [`AudioPlayer`] if it is in the
@@ -143,11 +28,12 @@ fn movement_sound(
 ///
 /// ```
 /// use bevy::{audio::Volume, prelude::*};
+/// use bevy_seedling::prelude::*;
 /// use crate::prelude::*;
 ///
-/// fn set_music_volume(mut sink_query: Query<&mut AudioSink, With<Music>>) {
-///     for mut sink in &mut sink_query {
-///         sink.set_volume(Volume::Linear(0.5));
+/// fn set_music_volume(mut query: Query<&mut PlaybackSettings, With<Music>>) {
+///     for mut playback in &mut query {
+///         playback.set_volume(Volume::Linear(0.5));
 ///     }
 /// }
 /// ```
@@ -163,9 +49,9 @@ pub struct Music;
 /// use bevy::prelude::*;
 /// use crate::prelude::*;
 ///
-/// fn set_sound_effect_volume(sink_query: Query<&mut AudioSink, With<SoundEffect>>) {
-///     for mut sink in &mut sink_query {
-///         sink.set_volume(Volume::Linear(0.5));
+/// fn set_sfx_volume(mut query: Query<&mut PlaybackSettings, With<SoundEffect>>) {
+///     for mut playback in &mut query {
+///         playback.set_volume(Volume::Linear(0.5));
 ///     }
 /// }
 /// ```

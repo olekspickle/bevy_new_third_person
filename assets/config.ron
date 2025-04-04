@@ -4,5 +4,14 @@
     geometry: (
         main_plane: 200,
         quantity: 10,
+    ),
+    movement: (
+        speed: 50,
+        actions_in_air: 2,
+        collider_capsule:(
+            radius: 0.1,
+            height: 0.3
+        ),
+        dash_distance: 10,
     )
 )

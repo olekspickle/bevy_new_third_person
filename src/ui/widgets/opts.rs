@@ -37,6 +37,7 @@ impl LayoutOpts {
                 align_self: AlignSelf::Center,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                justify_items: JustifyItems::Center,
                 ..Default::default()
             },
             color: LABEL,

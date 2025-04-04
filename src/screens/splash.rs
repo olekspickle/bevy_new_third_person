@@ -1,5 +1,5 @@
 //! A splash screen that plays briefly at startup.
-use crate::prelude::*;
+use crate::{AppSet, prelude::*};
 use bevy::{
     image::{ImageLoaderSettings, ImageSampler},
     input::common_conditions::input_just_pressed,
@@ -7,9 +7,6 @@ use bevy::{
     ui::Val::*,
 };
 
-use crate::{AppSet, screens::Screen};
-
-const SPLASH_BACKGROUND_COLOR: Color = Color::srgb(0.157, 0.157, 0.157);
 const SPLASH_DURATION_SECS: f32 = 1.8;
 const SPLASH_FADE_DURATION_SECS: f32 = 0.3;
 
@@ -17,11 +14,8 @@ pub(super) fn plugin(app: &mut App) {
     // start asset loading
     app.load_resource::<Models>();
     app.load_resource::<Textures>();
-    app.load_resource::<AudioSources>()
-        .insert_resource(AudioInstances::default());
+    app.load_resource::<AudioSources>();
 
-    // Spawn splash screen.
-    app.insert_resource(ClearColor(SPLASH_BACKGROUND_COLOR));
     app.add_systems(OnEnter(Screen::Splash), spawn_splash_screen);
 
     // Animate splash screen.
@@ -60,7 +54,7 @@ fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
         .ui_root()
         .insert((
             Name::new("Splash screen"),
-            BackgroundColor(SPLASH_BACKGROUND_COLOR),
+            BackgroundColor(NODE_BG),
             StateScoped(Screen::Splash),
         ))
         .with_children(|children| {

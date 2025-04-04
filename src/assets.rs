@@ -1,7 +1,7 @@
 use crate::prelude::*;
 use bevy::prelude::*;
 use bevy_common_assets::ron::RonAssetPlugin;
-use bevy_kira_audio::prelude::*;
+use bevy_seedling::sample::Sample;
 use serde::{Deserialize, Serialize};
 
 pub fn plugin(app: &mut App) {
@@ -15,11 +15,26 @@ pub struct Geometry {
     pub quantity: u32,
 }
 
+#[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
+pub struct PlayerCollider {
+    pub radius: f32,
+    pub height: f32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
+pub struct Movement {
+    pub dash_distance: f32,
+    pub speed: f32,
+    pub actions_in_air: u8,
+    pub collider_capsule: PlayerCollider,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
 pub struct Config {
     pub scale: f32,
     pub zoom: (f32, f32),
     pub geometry: Geometry,
+    pub movement: Movement,
 }
 
 #[derive(Asset, Clone, Reflect, Resource)]
@@ -59,15 +74,15 @@ impl FromWorld for Models {
 pub struct AudioSources {
     // SFX
     #[dependency]
-    pub btn_hover: Handle<AudioSource>,
+    pub btn_hover: Handle<Sample>,
     #[dependency]
-    pub btn_press: Handle<AudioSource>,
+    pub btn_press: Handle<Sample>,
     #[dependency]
-    pub steps: Vec<Handle<AudioSource>>,
+    pub steps: Vec<Handle<Sample>>,
 
     // music
     #[dependency]
-    pub bg_music: Handle<AudioSource>,
+    pub bg_music: Handle<Sample>,
 }
 
 impl AudioSources {

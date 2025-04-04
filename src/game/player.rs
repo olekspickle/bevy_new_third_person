@@ -3,8 +3,10 @@ use avian3d::prelude::*;
 use bevy::prelude::*;
 use bevy_third_person_camera::*;
 use bevy_tnua::{
-    TnuaAnimatingState, TnuaAnimatingStateDirective, builtins::TnuaBuiltinJumpState,
-    control_helpers::TnuaSimpleAirActionsCounter, prelude::*,
+    TnuaAnimatingState, TnuaAnimatingStateDirective,
+    builtins::{TnuaBuiltinCrouch, TnuaBuiltinCrouchState, TnuaBuiltinDash, TnuaBuiltinJumpState},
+    control_helpers::TnuaSimpleAirActionsCounter,
+    prelude::*,
 };
 use bevy_tnua_avian3d::*;
 use leafwing_input_manager::prelude::ActionState;
@@ -66,7 +68,7 @@ fn spawn(
     let camera_transform = camera.single();
     let mut forward = camera_transform.forward().normalize();
     forward.x = -forward.x;
-    let player_rot = Quat::from_rotation_arc(Vec3::X, forward);
+    //let player_rot = Quat::from_rotation_arc(Vec3::X, forward);
 
     let mesh = SceneRoot(gltf.scenes[0].clone());
     let color: MeshMaterial3d<StandardMaterial> =
@@ -97,6 +99,7 @@ fn spawn(
 }
 
 pub fn movement(
+    cfg: Res<Config>,
     time: Res<Time<Virtual>>,
     //touch_input: Res<Touches>,
     action: Query<&ActionState<Action>>,
@@ -109,17 +112,14 @@ pub fn movement(
         return;
     };
     let mut direction = Vec3::ZERO;
-    let speed = 300.0 * time.delta_secs();
+    let speed = cfg.movement.speed * time.delta_secs();
 
     let (state, camera_transform) = (action.single(), camera.single());
     let forward = camera_transform.forward().normalize();
+    let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
 
     // Rotate player
-    //let mut player = player.single_mut();
-    //let mut forward_dir = forward;
-    //forward_dir.y = 0.0;
     //let player_rot = Quat::from_rotation_arc(Vec3::X, forward_dir);
-    //player.rotation = player_rot;
 
     if state.pressed(&Action::Right) {
         let right = camera_transform.right().normalize();
@@ -134,7 +134,6 @@ pub fn movement(
     }
 
     if state.pressed(&Action::Forward) {
-        let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
         direction += forward_flat;
     }
 
@@ -161,8 +160,8 @@ pub fn movement(
 
     // Feed the jump action every frame as long as the player holds the jump button. If the player
     // stops holding the jump button, simply stop feeding the action.
-    //let mut air_counter = air_counter.single_mut();
-    //air_counter.update(controller.as_mut());
+    let mut air_counter = air_counter.single_mut();
+    air_counter.update(controller.as_mut());
 
     if state.just_pressed(&Action::Jump) {
         //let jump = jump.single();
@@ -170,6 +169,26 @@ pub fn movement(
             // The height is the only mandatory field of the jump button.
             height: 4.0,
             allow_in_air: true,
+            ..Default::default()
+        });
+    }
+
+    if state.just_pressed(&Action::Dash) {
+        controller.action(TnuaBuiltinDash {
+            // Dashing is also an action, but because it has directions we need to provide said
+            // directions. `displacement` is a vector that determines where the jump will bring
+            // us. Note that even after reaching the displacement, the character may still have
+            // some leftover velocity (configurable with the other parameters of the action)
+            //
+            // The displacement is "frozen" when the action starts - user code does not have to
+            // worry about storing the original direction
+            displacement: direction.normalize() * cfg.movement.dash_distance,
+            // When set, the `desired_forward` of the dash action "overrides" the
+            // `desired_forward` of the walk basis. Like the displacement, it gets "frozen" -
+            // allowing to easily maintain a forward direction during the dash.
+            desired_forward: Dir3::new(direction).ok(),
+            allow_in_air: air_counter.air_count_for(TnuaBuiltinDash::NAME)
+                <= cfg.movement.actions_in_air.into(),
             ..Default::default()
         });
     }
