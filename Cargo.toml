@@ -34,19 +34,53 @@ dev_native = [
 physics_debug = []
 
 [dependencies]
-bevy = { version = "0.15", features = ["wayland"] }
+bevy_seedling = "0.3"
+# exclude audio feature
+bevy = { version = "0.15", default-features = false, features = [
+  "animation",
+  "bevy_asset",
+  "bevy_color",
+  "bevy_core_pipeline",
+  "bevy_gilrs",
+  "bevy_gizmos",
+  "bevy_gltf",
+  "bevy_mesh_picking_backend",
+  "bevy_pbr",
+  "bevy_picking",
+  "bevy_render",
+  "bevy_scene",
+  "bevy_sprite",
+  "bevy_sprite_picking_backend",
+  "bevy_state",
+  "bevy_text",
+  "bevy_ui",
+  "bevy_ui_picking_backend",
+  "bevy_window",
+  "bevy_winit",
+  "custom_cursor",
+  "default_font",
+  "hdr",
+  "multi_threaded",
+  "png",
+  "smaa_luts",
+  "sysinfo_plugin",
+  "tonemapping_luts",
+  "webgl2",
+  "x11",
+  "wayland",
+] }
 bevy_common_assets = {version="0.12.0", features=["ron"]}
-bevy_third_person_camera = "0.2.0"
-bevy_atmosphere = "0.12.2"
-bevy-tnua = "0.21.0"
-bevy-tnua-avian3d = "0.2.0"
-avian3d = "0.2.1"
+bevy_third_person_camera = "0.2"
+bevy_atmosphere = "0.12"
+bevy-tnua = "0.21"
+bevy-tnua-avian3d = "0.2"
+avian3d = "0.2"
 image = { version = "0.25", default-features = false }
-iyes_perf_ui = "0.4.0"
-leafwing-input-manager = "0.16.0"
+iyes_perf_ui = "0.4"
+leafwing-input-manager = "0.16"
 ## This greatly improves WGPU's performance due to its heavy use of trace! calls
 log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
-rand = { version = "0.8.3" }
+rand = { version = "0.8" }
 serde = "1"
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.30", default-features = false }
@@ -60,17 +94,20 @@ type_complexity = "allow"
 # Make sure macros use their standard braces, such as `[]` for `bevy_ecs::children!`.
 nonstandard_macro_braces = "warn"
 
+
+# Enable a small amount of optimization in the dev profile.
+[profile.dev]
+opt-level = 1
+# Enable a large amount of optimization in the dev profile for dependencies.
 [profile.dev.package."*"]
 opt-level = 3
 
-[profile.dev]
-opt-level = 1
-
-# This is used by trunk as it doesn't support custom profiles: https://github.com/trunk-rs/trunk/issues/605
-# xbuild also uses this profile for building android AABs because I couldn't find a configuration for it
 [profile.release]
+# Do a second optimization pass over the entire program, including dependencies.
+# Slows compile times, marginal improvements.
+lto = "thin"
 opt-level = "s"
-lto = true
+# Compile the entire crate as one unit. Slows compile times, marginal improvements.
 codegen-units = 1
 strip = true
 

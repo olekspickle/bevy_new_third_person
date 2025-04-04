@@ -1,15 +1,18 @@
 
 
-# WIP: this template is just an attempt to create simpler and up to date template unlike foxtrot.
+# WIP: this template is just an attempt to create simple and up to date template
 ## Simple Third Person Bevy game template
 Current status - not much done:
-- [x] simple asset loading from [BevyFlock] example
-- [x] import and usage of game mechanics from .ron config
-- [x] simple skybox sun cycle using bevy_atmosphere
-- [x] third person camera with bevy_third_person_camera
-- [x] simple player movement using bevy_tnua
-- [x] simple scene with random objects with colliders and rigid body using avian3d
-- [ ] rig and animations using [Universal Animation Library](ual) from quaternius
+- [x] simple asset loading from [BevyFlock] example with path addition
+- [x] import and usage of game mechanics and parameters from .ron config
+- [x] simple skybox sun cycle using [bevy_atmosphere]
+- [x] third person camera with [bevy_third_person_camera]
+- [x] simple key mapping to game actions using [leafwing-input-manager]
+- [x] simple player movement using [bevy_tnua]
+- [x] simple scene with random objects with colliders and rigid body using [avian3d]
+- [x] ui widget traits for simpler ui building (kudos for the idea to RynKitty)
+- [ ] experimental sound with [bevy_seedling] (which will probably replace bevy_audio)
+- [ ] rig and animations using [Universal Animation Library] from quaternius
 - [ ] jumping and vault mechanics
 
 
@@ -95,22 +98,27 @@ You should check out the Bevy website for [links to resources][bevy-learn] and t
 
 # Known issues
 
-Audio in web-builds can have issues in some browsers. This seems to be a general performance issue and not due to the audio itself (see [bevy_kira_audio/#9][firefox-sound-issue]).
+Audio in web-builds can have issues in some browsers. This seems to be a general performance issue with wasm builds in all engines, the best solution is just to artificially extend loading phase(seems to be a solution people go for in other engines)
 
 # License
 
 This project is licensed under [CC0 1.0 Universal](LICENSE) except some content of `assets` and the Bevy icons in the `build` directory (see [Credits](credits/CREDITS.md)).
 
 [android-instructions]: https://github.com/bevyengine/bevy/blob/latest/examples/README.md#setup
+[avian3d]: https://github.com/Jondolf/avian/tree/main/crates/avian3d
 [bevy]: https://bevyengine.org/
-[bevy-learn]: https://bevyengine.org/learn/
+[bevy_atmosphere]: https://github.com/JonahPlusPlus/bevy_atmosphere
 [bevy-discord]: https://discord.gg/bevy
+[bevy-learn]: https://bevyengine.org/learn/
+[bevy_third_person_camera]: https://github.com/The-DevBlog/bevy_third_person_camera
+[bevy_tnua]: https://github.com/idanarye/bevy-tnua
+[bevy_seedling]: https://github.com/CorvusPrudens/bevy_seedling
 [Bevy Cheat Book]: https://bevy-cheatbook.github.io/introduction.html
 [BevyFlock]: https://github.com/TheBevyFlock/bevy_new_2d
 [ios-instructions]: https://github.com/bevyengine/bevy/blob/latest/examples/README.md#setup-1
-[firefox-sound-issue]: https://github.com/NiklasEi/bevy_kira_audio/issues/9
+[leafwing-input-manager]: https://github.com/Leafwing-Studios/leafwing-input-manager
 [mobile_dev_with_bevy_2]: https://www.nikl.me/blog/2023/notes_on_mobile_development_with_bevy_2/
 [trunk]: https://trunkrs.dev/
-[ual]: https://quaternius.itch.io/universal-animation-library
+[Universal Animation Library]: https://quaternius.itch.io/universal-animation-library
 [workflow_bevy_android]: https://www.nikl.me/blog/2023/github_workflow_to_publish_android_app/
 [workflow_bevy_ios]: https://www.nikl.me/blog/2023/github_workflow_to_publish_ios_app/
