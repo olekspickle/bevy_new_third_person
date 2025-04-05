@@ -15,7 +15,7 @@ pub struct Sound {
 
 impl Sound {
     pub const DEFAULT: Self = Sound {
-        general: 0.2,
+        general: 0.3,
         music: 0.1,
         sfx: 0.3,
     };

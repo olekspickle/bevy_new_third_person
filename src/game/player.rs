@@ -1,6 +1,6 @@
 use crate::prelude::*;
-use avian3d::prelude::*;
-use bevy::prelude::*;
+use avian3d::{math::PI, prelude::*};
+use bevy::{math::VectorSpace, prelude::*};
 use bevy_third_person_camera::*;
 use bevy_tnua::{
     TnuaAnimatingState, TnuaAnimatingStateDirective,
@@ -24,7 +24,8 @@ pub fn plugin(app: &mut App) {
         .configure_sets(PostUpdate, CameraSyncSet.after(PhysicsSet::Sync))
         .add_systems(
             Update,
-            (movement.in_set(TnuaUserControlsSystemSet), handle_animating)
+            (movement, handle_animating)
+                .in_set(TnuaUserControlsSystemSet)
                 .run_if(in_state(Screen::Gameplay)),
         );
 }
@@ -56,6 +57,7 @@ struct AnimationNodes {
 }
 
 fn spawn(
+    cfg: Res<Config>,
     meshes: Res<Models>,
     mut commands: Commands,
     gltf_assets: Res<Assets<Gltf>>,
@@ -67,15 +69,15 @@ fn spawn(
     };
     let camera_transform = camera.single();
     let mut forward = camera_transform.forward().normalize();
-    forward.x = -forward.x;
-    //let player_rot = Quat::from_rotation_arc(Vec3::X, forward);
+    forward.y = 0.0;
+    let player_rot = Quat::from_rotation_y(4.0);
 
     let mesh = SceneRoot(gltf.scenes[0].clone());
     let color: MeshMaterial3d<StandardMaterial> =
         MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
-    let pos = Transform::from_translation(Vec3::new(0.0, 0.5, 0.0));
+    let pos = Transform::from_translation(Vec3::new(0.0, 0.5, 0.0)).with_rotation(player_rot);
+    let collider = Collider::cylinder(cfg.player.hitbox.radius, cfg.player.hitbox.height);
     //let collider = Collider::trimesh_from_mesh(&mesh).unwrap();
-    let collider = Collider::cylinder(0.2, 0.1);
     commands.spawn((
         color,
         mesh,
@@ -106,20 +108,16 @@ pub fn movement(
     mut tnua: Query<&mut TnuaController>,
     mut air_counter: Query<&mut TnuaSimpleAirActionsCounter>,
     camera: Query<&Transform, With<SceneCamera>>,
-    //mut player: Query<&mut Transform, (With<Player>, Without<SceneCamera>)>,
 ) {
     let Ok(mut controller) = tnua.get_single_mut() else {
         return;
     };
     let mut direction = Vec3::ZERO;
-    let speed = cfg.movement.speed * time.delta_secs();
+    let speed = cfg.player.movement.speed * time.delta_secs();
 
     let (state, camera_transform) = (action.single(), camera.single());
     let forward = camera_transform.forward().normalize();
     let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
-
-    // Rotate player
-    //let player_rot = Quat::from_rotation_arc(Vec3::X, forward_dir);
 
     if state.pressed(&Action::Right) {
         let right = camera_transform.right().normalize();
@@ -143,13 +141,14 @@ pub fn movement(
         direction += back_flat;
     }
 
+    let player_rot = Quat::from_rotation_y(PI) * direction;
     // Feed the basis every frame. Even if the player doesn't move - just use `desired_velocity:
     // Vec3::ZERO`. `TnuaController` starts without a basis, which will make the character collider
     // just fall.
     controller.basis(TnuaBuiltinWalk {
         // The `desired_velocity` determines how the character will move.
         desired_velocity: direction.normalize_or_zero() * speed,
-        desired_forward: Dir3::new(direction).ok(),
+        desired_forward: Dir3::new(player_rot).ok(),
         // The `float_height` must be greater (even if by little) from the distance between the
         // character's center and the lowest point of its collider.
         float_height: 0.0001,
@@ -182,13 +181,13 @@ pub fn movement(
             //
             // The displacement is "frozen" when the action starts - user code does not have to
             // worry about storing the original direction
-            displacement: direction.normalize() * cfg.movement.dash_distance,
+            displacement: direction.normalize() * cfg.player.movement.dash_distance,
             // When set, the `desired_forward` of the dash action "overrides" the
             // `desired_forward` of the walk basis. Like the displacement, it gets "frozen" -
             // allowing to easily maintain a forward direction during the dash.
-            desired_forward: Dir3::new(direction).ok(),
+            desired_forward: Dir3::new(player_rot).ok(),
             allow_in_air: air_counter.air_count_for(TnuaBuiltinDash::NAME)
-                <= cfg.movement.actions_in_air.into(),
+                <= cfg.player.movement.actions_in_air.into(),
             ..Default::default()
         });
     }
@@ -200,10 +199,6 @@ pub fn movement(
     //            player_movement = diff.normalize();
     //        }
     //    }
-    //}
-
-    //if direction != Vec3::ZERO {
-    //    player.translation = direction;
     //}
 }
 

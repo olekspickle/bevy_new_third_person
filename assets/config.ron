@@ -5,13 +5,15 @@
         main_plane: 200,
         quantity: 10,
     ),
-    movement: (
-        speed: 50,
-        actions_in_air: 2,
-        collider_capsule:(
+    player:(
+        movement: (
+            speed: 500,
+            actions_in_air: 2,
+            dash_distance: 10,
+        ),
+        hitbox:(
             radius: 0.1,
             height: 0.3
         ),
-        dash_distance: 10,
     )
 )

@@ -16,7 +16,7 @@ pub struct Geometry {
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
-pub struct PlayerCollider {
+pub struct Hitbox {
     pub radius: f32,
     pub height: f32,
 }
@@ -26,7 +26,12 @@ pub struct Movement {
     pub dash_distance: f32,
     pub speed: f32,
     pub actions_in_air: u8,
-    pub collider_capsule: PlayerCollider,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
+pub struct PlayerConfig {
+    pub movement: Movement,
+    pub hitbox: Hitbox,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
@@ -34,7 +39,7 @@ pub struct Config {
     pub scale: f32,
     pub zoom: (f32, f32),
     pub geometry: Geometry,
-    pub movement: Movement,
+    pub player: PlayerConfig,
 }
 
 #[derive(Asset, Clone, Reflect, Resource)]
