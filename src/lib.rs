@@ -18,6 +18,7 @@ pub mod prelude {
         audio::{Music, Sound, SoundEffect},
         camera::SceneCamera,
         player::Player,
+        scene::uv_debug_texture,
         skybox::Sun,
     };
     pub use screens::{

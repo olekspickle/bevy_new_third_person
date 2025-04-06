@@ -74,7 +74,7 @@ bevy_third_person_camera = "0.2"
 bevy_atmosphere = "0.12"
 bevy-tnua = "0.21"
 bevy-tnua-avian3d = "0.2"
-avian3d = "0.2"
+avian3d = { version = "0.2", features = ["3d", "parallel"] }
 image = { version = "0.25", default-features = false }
 iyes_perf_ui = "0.4"
 leafwing-input-manager = "0.16"

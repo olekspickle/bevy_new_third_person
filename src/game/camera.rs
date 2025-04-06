@@ -21,13 +21,17 @@ pub fn spawn_scene_camera(mut commands: Commands) {
     ));
 }
 
-fn add_third_person_camera(mut commands: Commands, mut camera: Query<Entity, With<SceneCamera>>) {
+fn add_third_person_camera(
+    cfg: Res<Config>,
+    mut commands: Commands,
+    mut camera: Query<Entity, With<SceneCamera>>,
+) {
     let camera = camera.single_mut();
     commands.entity(camera).insert(ThirdPersonCamera {
         aim_speed: 3.0,     // default
         aim_zoom: 0.7,      // default
         zoom_enabled: true, // default
-        zoom: Zoom::new(1.5, 30.0),
+        zoom: Zoom::new(cfg.player.zoom.0, cfg.player.zoom.1),
         aim_enabled: true,
         offset_enabled: true,
         offset_toggle_enabled: true,

@@ -32,12 +32,12 @@ pub struct Movement {
 pub struct PlayerConfig {
     pub movement: Movement,
     pub hitbox: Hitbox,
+    pub zoom: (f32, f32),
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
 pub struct Config {
     pub scale: f32,
-    pub zoom: (f32, f32),
     pub geometry: Geometry,
     pub player: PlayerConfig,
 }

@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use avian3d::{math::PI, prelude::*};
-use bevy::{math::VectorSpace, prelude::*};
+use bevy::prelude::*;
 use bevy_third_person_camera::*;
 use bevy_tnua::{
     TnuaAnimatingState, TnuaAnimatingStateDirective,
@@ -43,6 +43,8 @@ pub enum AnimationState {
     JumpStart,
     JumpLand,
     Falling,
+    CrouchWalk,
+    Crouch,
 }
 
 // Bevy's animation handling is a bit manual. We'll use this struct to register the animation clips
@@ -54,37 +56,44 @@ struct AnimationNodes {
     jump_land: AnimationNodeIndex,
     jump_start: AnimationNodeIndex,
     falling: AnimationNodeIndex,
+    crouch_walk: AnimationNodeIndex,
+    crouch: AnimationNodeIndex,
 }
 
 fn spawn(
     cfg: Res<Config>,
-    meshes: Res<Models>,
+    models: Res<Models>,
     mut commands: Commands,
     gltf_assets: Res<Assets<Gltf>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut meshes: ResMut<Assets<Mesh>>,
     camera: Query<&Transform, With<SceneCamera>>,
 ) {
-    let Some(gltf) = gltf_assets.get(&meshes.player) else {
+    let Some(gltf) = gltf_assets.get(&models.player) else {
         return;
     };
     let camera_transform = camera.single();
     let mut forward = camera_transform.forward().normalize();
     forward.y = 0.0;
-    let player_rot = Quat::from_rotation_y(4.0);
+    let player_rot = Quat::from_rotation_y(PI);
 
     let mesh = SceneRoot(gltf.scenes[0].clone());
-    let color: MeshMaterial3d<StandardMaterial> =
-        MeshMaterial3d(materials.add(Color::srgb_u8(124, 144, 255)));
-    let pos = Transform::from_translation(Vec3::new(0.0, 0.5, 0.0)).with_rotation(player_rot);
-    let collider = Collider::cylinder(cfg.player.hitbox.radius, cfg.player.hitbox.height);
-    //let collider = Collider::trimesh_from_mesh(&mesh).unwrap();
+    let pos = Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)).with_rotation(player_rot);
+
+    let collider = Collider::capsule(cfg.player.hitbox.radius, cfg.player.hitbox.height);
+    let collider_mesh = Mesh::from(Capsule3d::new(
+        cfg.player.hitbox.radius,
+        cfg.player.hitbox.height,
+    ));
+    let debug_collider_mesh = Mesh3d(meshes.add(collider_mesh.clone()));
+    let debug_collider_color: MeshMaterial3d<StandardMaterial> =
+        MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 0.2)));
+
     commands.spawn((
-        color,
         mesh,
         pos,
         Player::default(),
         ThirdPersonCameraTarget,
-        //Transform::from_rotation(player_rot),
         // tnua stuff
         TnuaController::default(),
         // Tnua can fix the rotation, but the character will still get rotated before it can do so.
@@ -92,11 +101,13 @@ fn spawn(
         LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
         TnuaAnimatingState::<AnimationState>::default(),
         TnuaSimpleAirActionsCounter::default(),
+        // physics
         // A sensor shape is not strictly necessary, but without it we'll get weird results.
         TnuaAvian3dSensorShape(collider.clone()),
-        // physics
         RigidBody::Dynamic,
         collider,
+        debug_collider_mesh,
+        debug_collider_color,
     ));
 }
 
@@ -141,6 +152,7 @@ pub fn movement(
         direction += back_flat;
     }
 
+    // NOTE: subject to change. UAL model is imported rotated 180 so we rotate it back
     let player_rot = Quat::from_rotation_y(PI) * direction;
     // Feed the basis every frame. Even if the player doesn't move - just use `desired_velocity:
     // Vec3::ZERO`. `TnuaController` starts without a basis, which will make the character collider
@@ -229,6 +241,16 @@ fn prepare_animations(
         jump_start: graph.add_clip(gltf.named_animations["Jump_Start"].clone(), 1.0, root_node),
         jump_land: graph.add_clip(gltf.named_animations["Jump_Land"].clone(), 1.0, root_node),
         falling: graph.add_clip(gltf.named_animations["Jump_Loop"].clone(), 1.0, root_node),
+        crouch_walk: graph.add_clip(
+            gltf.named_animations["Crouch_Fwd_Loop"].clone(),
+            1.0,
+            root_node,
+        ),
+        crouch: graph.add_clip(
+            gltf.named_animations["Crouch_Idle_Loop"].clone(),
+            1.0,
+            root_node,
+        ),
     });
 
     commands
@@ -259,6 +281,17 @@ fn handle_animating(
     // First we look at the `action_name` to determine which action (if at all) the character is
     // currently performing:
     let current_status_for_animating = match controller.action_name() {
+        Some(TnuaBuiltinCrouch::NAME) => {
+            let (_, crouch_state) = controller
+                .concrete_action::<TnuaBuiltinCrouch>()
+                .expect("action name mismatch");
+            // TODO: have transition from/to crouch
+            match crouch_state {
+                TnuaBuiltinCrouchState::Maintaining => AnimationState::Crouch,
+                TnuaBuiltinCrouchState::Rising => AnimationState::Crouch,
+                TnuaBuiltinCrouchState::Sinking => AnimationState::Crouch,
+            }
+        }
         // Unless you provide the action names yourself, prefer matching against the `NAME` const
         // of the `TnuaAction` trait. Once `type_name` is stabilized as `const` Tnua will use it to
         // generate these names automatically, which may result in a change to the name.
@@ -368,6 +401,16 @@ fn handle_animating(
                 AnimationState::Falling => {
                     animation_player
                         .start(animation_nodes.falling)
+                        .set_speed(1.0);
+                }
+                AnimationState::CrouchWalk => {
+                    animation_player
+                        .start(animation_nodes.crouch_walk)
+                        .set_speed(1.0);
+                }
+                AnimationState::Crouch => {
+                    animation_player
+                        .start(animation_nodes.crouch)
                         .set_speed(1.0);
                 }
             }

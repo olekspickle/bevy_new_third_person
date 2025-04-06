@@ -11,3 +11,5 @@ pub const LABEL: Color = Color::srgb(0.925, 0.925, 0.925);
 
 pub const TRANSPARENT: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
 pub const TRANSLUCENT: Color = Color::srgba(0.0, 0.0, 0.0, 0.2);
+
+pub const SUN: Color = Color::srgb(248.0 / 255.0, 176.0 / 255.0, 14.0 / 255.0);
