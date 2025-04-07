@@ -40,7 +40,7 @@ impl<T: Spawn> Labelable for T {
 
         let short = if s.len() > 10 { &s[..8] } else { &s };
         let node = Node {
-            // dynamic width calculated from font size
+            // dynamic width calculated from font size so that label node does not cut it out
             width: Px(s.len() as f32 * text_opts.font.font_size),
             ..layout.node.clone()
         };
@@ -52,6 +52,7 @@ impl<T: Spawn> Labelable for T {
             Text(s),
             TextColor(layout.color),
             BackgroundColor(layout.bg_color),
+            TextLayout::new_with_justify(JustifyText::Center),
         ));
         entity
     }

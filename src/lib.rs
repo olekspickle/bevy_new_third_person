@@ -3,6 +3,7 @@ use bevy::{app::App, asset::AssetMetaCheck, log, prelude::*};
 
 mod asset_tracking;
 mod assets;
+mod config;
 mod game;
 mod screens;
 mod ui;
@@ -12,7 +13,8 @@ pub mod prelude {
     use super::*;
 
     pub use asset_tracking::{LoadResource, ResourceHandles};
-    pub use assets::{AudioSources, Config, Models, Textures};
+    pub use assets::{AudioSources, Models, Textures};
+    pub use config::Config;
     pub use game::{
         Score,
         audio::{Music, Sound, SoundEffect},

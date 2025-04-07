@@ -89,46 +89,75 @@ fn spawn(
     let debug_collider_color: MeshMaterial3d<StandardMaterial> =
         MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 0.2)));
 
-    commands.spawn((
-        mesh,
-        pos,
-        Player::default(),
-        ThirdPersonCameraTarget,
-        // tnua stuff
-        TnuaController::default(),
-        // Tnua can fix the rotation, but the character will still get rotated before it can do so.
-        // By locking the rotation we can prevent this.
-        LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
-        TnuaAnimatingState::<AnimationState>::default(),
-        TnuaSimpleAirActionsCounter::default(),
-        // physics
-        // A sensor shape is not strictly necessary, but without it we'll get weird results.
-        TnuaAvian3dSensorShape(collider.clone()),
-        RigidBody::Dynamic,
-        collider,
-        debug_collider_mesh,
-        debug_collider_color,
-    ));
+    commands
+        .spawn((
+            pos,
+            Player::default(),
+            ThirdPersonCameraTarget,
+            // tnua stuff
+            TnuaController::default(),
+            // Tnua can fix the rotation, but the character will still get rotated before it can do so.
+            // By locking the rotation we can prevent this.
+            LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
+            TnuaAnimatingState::<AnimationState>::default(),
+            TnuaSimpleAirActionsCounter::default(),
+            // physics
+            // A sensor shape is not strictly necessary, but without it we'll get weird results.
+            TnuaAvian3dSensorShape(collider.clone()),
+            RigidBody::Dynamic,
+            collider,
+            debug_collider_mesh,
+            debug_collider_color,
+        ))
+        .with_child((Transform::from_xyz(0.0, -1.0, 0.0), mesh));
 }
 
+/// Tnua configuration is not intuitive, this is the best demo I saw:
+/// https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_control_systems/platformer_control_systems.rs
 pub fn movement(
     cfg: Res<Config>,
     time: Res<Time<Virtual>>,
     //touch_input: Res<Touches>,
     action: Query<&ActionState<Action>>,
-    mut tnua: Query<&mut TnuaController>,
+    mut tnua: Query<
+        (
+            &mut TnuaController,
+            &mut TnuaAvian3dSensorShape,
+            &mut Collider,
+            &mut Transform,
+        ),
+        (With<Player>, Without<SceneCamera>),
+    >,
     mut air_counter: Query<&mut TnuaSimpleAirActionsCounter>,
     camera: Query<&Transform, With<SceneCamera>>,
 ) {
-    let Ok(mut controller) = tnua.get_single_mut() else {
+    let Ok((mut controller, mut avian_collider, mut collider, mut capsule)) = tnua.get_single_mut()
+    else {
         return;
     };
     let mut direction = Vec3::ZERO;
-    let speed = cfg.player.movement.speed * time.delta_secs();
+
+    let mut speed = cfg.player.movement.speed * time.delta_secs();
 
     let (state, camera_transform) = (action.single(), camera.single());
     let forward = camera_transform.forward().normalize();
     let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
+
+    if state.pressed(&Action::Crouch) {
+        // TODO: decrease collider
+
+        capsule.scale.y = 0.5;
+        collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
+        avian_collider.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
+        speed /= 2.0;
+    }
+    if state.just_released(&Action::Crouch) {
+        // TODO: increase collider
+
+        collider.set_scale(Vec3::ONE, 4);
+        avian_collider.0.set_scale(Vec3::ONE, 4);
+        capsule.scale.y = 1.0;
+    }
 
     if state.pressed(&Action::Right) {
         let right = camera_transform.right().normalize();
@@ -173,6 +202,10 @@ pub fn movement(
     // stops holding the jump button, simply stop feeding the action.
     let mut air_counter = air_counter.single_mut();
     air_counter.update(controller.as_mut());
+    //info!(
+    //    "air counter:{}",
+    //    air_counter.get_count_mut().unwrap_or(&mut 0)
+    //);
 
     if state.just_pressed(&Action::Jump) {
         //let jump = jump.single();

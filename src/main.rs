@@ -7,10 +7,10 @@ use std::io::Cursor;
 use winit::window::Icon;
 
 fn main() {
-    let mut app = App::new();
-    app.add_plugins(game).add_systems(Startup, set_window_icon);
-
-    app.run();
+    App::new()
+        .add_plugins(game)
+        .add_systems(Startup, set_window_icon)
+        .run();
 }
 
 /// Sets the icon on windows and X11
@@ -23,7 +23,7 @@ fn set_window_icon(
     let Some(primary) = windows.get_window(primary_entity) else {
         return;
     };
-    let icon_buf = Cursor::new(include_bytes!("../assets/images/icon.png"));
+    let icon_buf = Cursor::new(include_bytes!("../assets/textures/icon.png"));
     if let Ok(image) = image::load(icon_buf, image::ImageFormat::Png) {
         let image = image.into_rgba8();
         let (width, height) = image.dimensions();

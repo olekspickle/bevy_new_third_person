@@ -18,11 +18,13 @@ impl LayoutOpts {
                 align_self: AlignSelf::Center,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
+                justify_items: JustifyItems::Center,
                 border: UiRect::all(Px(2.0)),
+                padding: UiRect::horizontal(Percent(5.0)),
                 ..Default::default()
             },
             color: BTN,
-            bg_color: NODE_BG,
+            bg_color: BTN_BG,
             border_color: BTN,
             border_radius: BORDER_RADIUS,
         }
@@ -34,14 +36,14 @@ impl LayoutOpts {
                 width: Px(150.0),
                 height: Px(FONT_SIZE),
                 border: UiRect::ZERO,
-                align_self: AlignSelf::Center,
+                //align_self: AlignSelf::Center,
                 align_items: AlignItems::Center,
                 justify_content: JustifyContent::Center,
                 justify_items: JustifyItems::Center,
                 ..Default::default()
             },
             color: LABEL,
-            bg_color: NODE_BG,
+            bg_color: TRANSPARENT,
             border_color: NODE_BG,
             border_radius: BORDER_RADIUS,
         }

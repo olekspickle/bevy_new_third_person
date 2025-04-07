@@ -61,9 +61,13 @@ fn spawn_gameplay_ui(mut commands: Commands) {
 
                 children
                     .label("P - pause", layout.clone())
-                    .spawn(PauseLabel);
-                children.label("M - mute", layout.clone()).spawn(MuteLabel);
-                children.label("F - diagnostics", layout);
+                    .spawn((PauseLabel, TextLayout::new_with_justify(JustifyText::Left)));
+                children
+                    .label("M - mute", layout.clone())
+                    .spawn((MuteLabel, TextLayout::new_with_justify(JustifyText::Left)));
+                children
+                    .label("F - diagnostics", layout)
+                    .spawn(TextLayout::new_with_justify(JustifyText::Left));
             });
         });
 }
@@ -77,7 +81,7 @@ fn invoke_settings(
     mut sfx: Query<(&mut SamplePlayer, &mut PlaybackSettings), (With<SoundEffect>, Without<Music>)>,
 ) {
     let state = action.single();
-    if state.just_pressed(&Action::Pause) {}
+    if state.just_pressed(&Action::Settings) {}
 }
 
 fn start_or_resume_bg_music(

@@ -57,8 +57,10 @@ fn spawn_player_input_map(mut commands: Commands) {
 
 #[derive(Resource)]
 pub struct Settings {
+    pub fov: f32,
     pub muted: bool,
     pub paused: bool,
+    pub diagnostics: bool,
     pub sound: Sound,
 }
 
@@ -66,8 +68,10 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             sound: Sound::DEFAULT,
+            diagnostics: false,
             paused: false,
             muted: false,
+            fov: 90.0,
         }
     }
 }
@@ -97,10 +101,11 @@ fn toggle_global(
             } else {
                 perf_ui.display = NodeDisplay::None;
             }
+            settings.diagnostics = !settings.diagnostics;
         }
     }
 
-    if state.just_pressed(&Action::Pause) {
+    if state.just_pressed(&Action::Pause) || state.just_pressed(&Action::Settings) {
         if let Ok((mut bg, mut color)) = label_set.p0().get_single_mut() {
             if time.is_paused() || settings.paused {
                 // TODO: when seedling. actually query sample player and unpause
@@ -127,7 +132,7 @@ fn toggle_global(
                     pb.volume = Volume::Linear(settings.sound.general);
                 }
                 *color = TextColor(LABEL);
-                *bg = BackgroundColor(NODE_BG);
+                *bg = BackgroundColor(TRANSPARENT);
             } else {
                 if let Ok((_, mut pb)) = music.get_single_mut() {
                     pb.volume = Volume::Linear(0.0);
@@ -139,6 +144,8 @@ fn toggle_global(
                 *bg = BackgroundColor(LABEL);
             }
         }
+
         settings.muted = !settings.muted;
+        info!("muted:{}", settings.muted);
     }
 }

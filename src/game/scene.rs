@@ -2,11 +2,12 @@ use crate::prelude::*;
 use avian3d::prelude::*;
 use bevy::{
     asset::RenderAssetUsages,
+    image::{ImageAddressMode, ImageLoaderSettings, ImageSampler, ImageSamplerDescriptor},
+    math::Affine2,
     pbr::DirectionalLightShadowMap,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
-use rand::{Rng, thread_rng};
 
 /// This plugin handles loading and saving scenes
 /// Scene logic is only active during the State `Screen::Playing`
@@ -29,12 +30,13 @@ pub fn setup(
     });
 
     let main_plane = config.geometry.main_plane;
+
     // Plane
     let mesh = Mesh3d(meshes.add(Cuboid::new(main_plane, 0., main_plane)));
-    let green = MeshMaterial3d(materials.add(Color::srgb(0.3, 0.9, 0.3)));
+    let mat = MeshMaterial3d(materials.add(GREY));
     commands.spawn((
+        mat,
         mesh,
-        green,
         Transform::default(),
         RigidBody::Static,
         Collider::half_space(Vec3::Y),
@@ -51,7 +53,7 @@ pub fn setup(
         let x_size = low + step * i;
         let (x, y, mut z) = (
             -size / 4.0 + i * x_size, // + step * 20.0,
-            y_size / 2.0,
+            y_size / 2.0 + i * step,
             -size / 4.0,
         );
         let mesh = if i % 2.0 == 0.0 {
