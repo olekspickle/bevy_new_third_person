@@ -37,7 +37,5 @@ pub enum Screen {
     Gameplay,
     // Here the menu is drawn and waiting for player interaction
     Title,
-    // Settings screen
-    Settings,
     GameOver,
 }

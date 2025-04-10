@@ -146,6 +146,5 @@ fn toggle_global(
         }
 
         settings.muted = !settings.muted;
-        info!("muted:{}", settings.muted);
     }
 }

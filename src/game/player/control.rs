@@ -1,4 +1,3 @@
-use super::AnimationState;
 use crate::prelude::*;
 use avian3d::{math::PI, prelude::*};
 use bevy::prelude::*;
@@ -7,11 +6,6 @@ use bevy_tnua::{
 };
 use bevy_tnua_avian3d::*;
 use leafwing_input_manager::prelude::ActionState;
-
-#[derive(Component, Default)]
-pub struct Player {
-    animation_state: AnimationState,
-}
 
 /// Tnua configuration is not intuitive, this is the best demo I saw:
 /// https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_control_systems/platformer_control_systems.rs

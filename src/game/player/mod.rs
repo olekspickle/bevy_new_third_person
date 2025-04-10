@@ -20,8 +20,8 @@ pub fn plugin(app: &mut App) {
         TnuaAvian3dPlugin::new(FixedUpdate),
     ));
 
-    app.add_systems(OnEnter(Screen::Gameplay), (prepare_animations, spawn))
-        .configure_sets(PostUpdate, CameraSyncSet.after(PhysicsSet::Sync))
+    app.configure_sets(PostUpdate, CameraSyncSet.after(PhysicsSet::Sync))
+        .add_systems(OnEnter(Screen::Gameplay), (prepare_animations, spawn))
         .add_systems(
             Update,
             (movement, handle_animating)
