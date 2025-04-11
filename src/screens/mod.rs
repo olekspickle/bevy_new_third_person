@@ -3,9 +3,8 @@
 use bevy::prelude::*;
 
 mod gameover;
-mod gameplay;
+pub mod gameplay;
 pub mod loading;
-pub mod settings;
 mod splash;
 mod title;
 
@@ -17,7 +16,6 @@ pub(super) fn plugin(app: &mut App) {
         splash::plugin,
         loading::plugin,
         title::plugin,
-        settings::plugin,
         gameplay::plugin,
         gameover::plugin,
     ));

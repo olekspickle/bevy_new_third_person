@@ -26,12 +26,12 @@ pub fn movement(
     mut air_counter: Query<&mut TnuaSimpleAirActionsCounter>,
     camera: Query<&Transform, With<SceneCamera>>,
 ) {
-    let Ok((mut controller, mut avian_collider, mut collider, mut capsule)) = tnua.get_single_mut()
+    let Ok((mut controller, mut avian_collider, mut collider, mut debug_capsule)) =
+        tnua.get_single_mut()
     else {
         return;
     };
     let mut direction = Vec3::ZERO;
-
     let mut speed = cfg.player.movement.speed * time.delta_secs();
 
     let (state, camera_transform) = (action.single(), camera.single());
@@ -43,7 +43,7 @@ pub fn movement(
     }
     if state.pressed(&Action::Crouch) {
         // TODO: replace with actual crouch animation instead of just scaling
-        capsule.scale.y = 0.5;
+        debug_capsule.scale.y = 0.5;
         collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
         avian_collider.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
         speed /= 2.0;
@@ -52,7 +52,7 @@ pub fn movement(
         // TODO: replace with actual rise animation instead of just scaling
         collider.set_scale(Vec3::ONE, 4);
         avian_collider.0.set_scale(Vec3::ONE, 4);
-        capsule.scale.y = 1.0;
+        debug_capsule.scale.y = 1.0;
     }
 
     if state.pressed(&Action::Right) {
@@ -79,6 +79,7 @@ pub fn movement(
 
     // NOTE: subject to change. UAL model is imported rotated 180 so we rotate it back
     let player_rot = Quat::from_rotation_y(PI) * direction;
+
     // Feed the basis every frame. Even if the player doesn't move - just use `desired_velocity:
     // Vec3::ZERO`. `TnuaController` starts without a basis, which will make the character collider
     // just fall.
@@ -88,7 +89,7 @@ pub fn movement(
         desired_forward: Dir3::new(player_rot).ok(),
         // The `float_height` must be greater (even if by little) from the distance between the
         // character's center and the lowest point of its collider.
-        float_height: 0.0001,
+        float_height: 0.01,
         // `TnuaBuiltinWalk` has many other fields for customizing the movement - but they have
         // sensible defaults. Refer to the `TnuaBuiltinWalk`'s documentation to learn what they do.
         ..Default::default()
@@ -98,13 +99,8 @@ pub fn movement(
     // stops holding the jump button, simply stop feeding the action.
     let mut air_counter = air_counter.single_mut();
     air_counter.update(controller.as_mut());
-    //info!(
-    //    "air counter:{}",
-    //    air_counter.get_count_mut().unwrap_or(&mut 0)
-    //);
 
     if state.pressed(&Action::Jump) {
-        //let jump = jump.single();
         controller.action(TnuaBuiltinJump {
             // The height is the only mandatory field of the jump button.
             height: 1.0,

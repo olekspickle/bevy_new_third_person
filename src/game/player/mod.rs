@@ -8,7 +8,7 @@ use bevy_tnua_avian3d::*;
 mod animation;
 mod control;
 
-use animation::{AnimationState, handle_animating, prepare_animations};
+use animation::{AnimationState, animating, prepare_animations};
 use control::movement;
 
 /// This plugin handles player related stuff like movement, shooting
@@ -21,10 +21,10 @@ pub fn plugin(app: &mut App) {
     ));
 
     app.configure_sets(PostUpdate, CameraSyncSet.after(PhysicsSet::Sync))
-        .add_systems(OnEnter(Screen::Gameplay), (prepare_animations, spawn))
+        .add_systems(OnEnter(Screen::Gameplay), spawn)
         .add_systems(
             Update,
-            (movement, handle_animating)
+            (movement, animating)
                 .in_set(TnuaUserControlsSystemSet)
                 .run_if(in_state(Screen::Gameplay)),
         );
@@ -84,5 +84,8 @@ fn spawn(
             debug_collider_mesh,
             debug_collider_color,
         ))
-        .with_child((Transform::from_xyz(0.0, -1.0, 0.0), mesh));
+        .with_children(|children| {
+            ChildBuild::spawn(children, (Transform::from_xyz(0.0, -1.0, 0.0), mesh))
+                .observe(prepare_animations);
+        });
 }

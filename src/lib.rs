@@ -21,12 +21,10 @@ pub mod prelude {
         camera::SceneCamera,
         player::Player,
         scene::uv_debug_texture,
+        settings::{Action, Settings},
         skybox::Sun,
     };
-    pub use screens::{
-        Screen, loading,
-        settings::{Action, Settings},
-    };
+    pub use screens::{Screen, loading};
     pub use ui::*;
     pub use utils::despawn;
 }

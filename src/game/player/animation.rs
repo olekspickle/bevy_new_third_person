@@ -1,11 +1,10 @@
 use crate::prelude::*;
-use bevy::prelude::*;
+use bevy::{prelude::*, scene::SceneInstanceReady};
 use bevy_tnua::{
     TnuaAnimatingState, TnuaAnimatingStateDirective,
     builtins::{TnuaBuiltinCrouch, TnuaBuiltinCrouchState, TnuaBuiltinDash, TnuaBuiltinJumpState},
     prelude::*,
 };
-use std::collections::HashMap;
 
 #[derive(Default)]
 pub enum AnimationState {
@@ -38,24 +37,50 @@ pub struct AnimationNodes {
     knockback: AnimationNodeIndex,
 }
 
+//fn play_gltf_mesh_animations(
+//    mut commands: Commands,
+//    children: Query<&Children>,
+//    animations: Query<&GltfPendingAnimation>,
+//    mut players: Query<&mut AnimationPlayer>,
+//) {
+//    commands
+//        .entity(trigger.target())
+//        .remove::<GltfPendingAnimation>();
+//
+//    if let Ok(animation) = animations.get(trigger.target()) {
+//        for child in children.iter_descendants(trigger.target()) {
+//            if let Ok(mut player) = players.get_mut(child) {
+//                player
+//                    .play(animation.graph_node_index)
+//                    .set_speed(animation.speed)
+//                    .repeat();
+//
+//                commands
+//                    .entity(child)
+//                    .insert(AnimationGraphHandle(animation.graph_handle.clone()));
+//            }
+//        }
+//    }
+//}
 pub fn prepare_animations(
+    _trigger: Trigger<SceneInstanceReady>,
     models: Res<Models>,
     gltf_assets: Res<Assets<Gltf>>,
     mut commands: Commands,
-    animation_player_query: Query<Entity, With<AnimationPlayer>>,
-    mut animation_graphs_assets: ResMut<Assets<AnimationGraph>>,
+    animation_player: Query<Entity, With<AnimationPlayer>>,
+    mut animation_graphs: ResMut<Assets<AnimationGraph>>,
 ) {
     let Some(gltf) = gltf_assets.get(&models.player) else {
         return;
     };
-    let Ok(animation_player_entity) = animation_player_query.get_single() else {
+
+    let Ok(animation_player_entity) = animation_player.get_single() else {
         return;
     };
 
     let mut graph = AnimationGraph::new();
     let root_node = graph.root;
-
-    commands.insert_resource(AnimationNodes {
+    let nodes = AnimationNodes {
         standing: graph.add_clip(gltf.named_animations["Idle_Loop"].clone(), 1.0, root_node),
         running: graph.add_clip(
             gltf.named_animations["Jog_Fwd_Loop"].clone(),
@@ -78,14 +103,16 @@ pub fn prepare_animations(
             1.0,
             root_node,
         ),
-    });
+    };
+
+    commands.insert_resource(nodes);
 
     commands
         .entity(animation_player_entity)
-        .insert(AnimationGraphHandle(animation_graphs_assets.add(graph)));
+        .insert(AnimationGraphHandle(animation_graphs.add(graph)));
 }
 
-pub fn handle_animating(
+pub fn animating(
     mut player_query: Query<(
         // The controller can be used to determine the state of the character - information crucial
         // for deciding which animation to play.
@@ -98,7 +125,7 @@ pub fn handle_animating(
         // on the enum's payload)
         &mut TnuaAnimatingState<AnimationState>,
     )>,
-    mut animation_player_query: Query<&mut AnimationPlayer>,
+    mut animation_player: Query<&mut AnimationPlayer>,
     animation_nodes: Option<Res<AnimationNodes>>,
 ) {
     // An actual game should match the animation player and the controller. Here we cheat for
@@ -106,7 +133,8 @@ pub fn handle_animating(
     let Ok((controller, mut animating_state)) = player_query.get_single_mut() else {
         return;
     };
-    let Ok(mut animation_player) = animation_player_query.get_single_mut() else {
+    let Ok(mut animation_player) = animation_player.get_single_mut() else {
+        info!("NO animation player in animating");
         return;
     };
     let Some(animation_nodes) = animation_nodes else {
@@ -123,9 +151,13 @@ pub fn handle_animating(
             let (_, crouch_state) = controller
                 .concrete_action::<TnuaBuiltinCrouch>()
                 .expect("action name mismatch: Crouch");
+            //let (_, walk_state) = controller
+            //    .concrete_action::<TnuaBuiltinWalk>()
+            //    .expect("action name mismatch: Walk");
+
             // TODO: have transition from/to crouch
             match crouch_state {
-                TnuaBuiltinCrouchState::Maintaining => AnimationState::CrouchIdle,
+                TnuaBuiltinCrouchState::Maintaining => AnimationState::CrouchWalk(1.0),
                 TnuaBuiltinCrouchState::Rising => AnimationState::CrouchIdle,
                 TnuaBuiltinCrouchState::Sinking => AnimationState::CrouchIdle,
             }
@@ -150,13 +182,14 @@ pub fn handle_animating(
             }
         }
         Some(TnuaBuiltinDash::NAME) => {
-            let (_, dash_state) = controller
+            let (_, _dash_state) = controller
                 .concrete_action::<TnuaBuiltinDash>()
                 .expect("action name mismatch: Dash");
             // TODO: replace roll with actual dash
-            match dash_state {
-                _ => AnimationState::Dash,
-            }
+            //match dash_state {
+            //    _ => AnimationState::Dash,
+            //}
+            AnimationState::Dash
         }
         Some(other) => panic!("Unknown action {other}"),
         // No action name means that no action is currently being performed - which means the
@@ -253,10 +286,10 @@ pub fn handle_animating(
                         .start(animation_nodes.falling)
                         .set_speed(1.0);
                 }
-                AnimationState::CrouchWalk(_) => {
+                AnimationState::CrouchWalk(speed) => {
                     animation_player
                         .start(animation_nodes.crouch_walk)
-                        .set_speed(1.0);
+                        .set_speed(*speed);
                 }
                 AnimationState::CrouchIdle => {
                     animation_player

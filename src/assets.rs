@@ -16,12 +16,6 @@ pub struct Textures {
     pub github: Handle<Image>,
 }
 
-#[derive(Asset, Clone, Reflect, Resource)]
-pub struct Models {
-    #[dependency]
-    pub player: Handle<Gltf>,
-}
-
 impl FromWorld for Textures {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
@@ -30,6 +24,12 @@ impl FromWorld for Textures {
             github: assets.load("textures/github.png"),
         }
     }
+}
+
+#[derive(Asset, Clone, Reflect, Resource)]
+pub struct Models {
+    #[dependency]
+    pub player: Handle<Gltf>,
 }
 
 impl FromWorld for Models {

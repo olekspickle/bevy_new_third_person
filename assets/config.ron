@@ -1,5 +1,5 @@
 (
-    scale: 3.0,
+    scale: 5.0,
     geometry: (
         main_plane: 200,
         quantity: 20,

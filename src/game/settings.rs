@@ -1,9 +1,10 @@
-use crate::prelude::*;
+use crate::{
+    prelude::*,
+    screens::gameplay::{MuteLabel, PauseLabel},
+};
 use bevy::{prelude::*, ui::Display as NodeDisplay};
 use bevy_seedling::prelude::*;
 use leafwing_input_manager::prelude::*;
-
-use super::gameplay::{MuteLabel, PauseLabel};
 
 pub fn plugin(app: &mut App) {
     app.init_resource::<Settings>();
