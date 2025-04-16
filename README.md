@@ -2,18 +2,19 @@
 
 # WIP: this template is just an attempt to create simple and up to date template
 ## Simple Third Person Bevy game template
-Current status - not much done:
-- [x] simple asset loading from [BevyFlock] example with path addition
+Current status:
+- [x] simple asset loading from [BevyFlock] example with loading from path addition
 - [x] import and usage of game mechanics and parameters from .ron config
 - [x] simple skybox sun cycle using [bevy_atmosphere]
 - [x] third person camera with [bevy_third_person_camera]
 - [x] simple key mapping to game actions using [leafwing-input-manager]
 - [x] simple player movement using [bevy_tnua]
-- [x] simple scene with random objects with colliders and rigid body using [avian3d]
-- [x] ui widget traits for simpler ui building (kudos for the idea to RynKitty)
-- [ ] experimental sound with [bevy_seedling] (which will probably replace bevy_audio)
-- [ ] rig and animations using [Universal Animation Library] from quaternius
-- [ ] jumping and vault mechanics
+- [x] simple scene with colliders and rigid bodies using [avian3d]
+- [x] ui widget traits for simpler ui building (RynKitty came up with it during a jam, I expanded it a bit)
+- [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio)
+- [x] rig and animations using [Universal Animation Library] from quaternius
+- [ ] vault mechanics
+- [ ] small door/portal demo
 
 
 Template for a Game using the awesome [Bevy engine][bevy] featuring out of the box builds for Windows, Linux, macOS, Web (Wasm), Android, and iOS.

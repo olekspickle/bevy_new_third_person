@@ -1,7 +1,6 @@
 //#![allow(clippy::type_complexity)]
 use bevy::{app::App, asset::AssetMetaCheck, log, prelude::*};
 
-mod asset_tracking;
 mod assets;
 mod config;
 mod game;
@@ -12,14 +11,16 @@ mod utils;
 pub mod prelude {
     use super::*;
 
-    pub use asset_tracking::{LoadResource, ResourceHandles};
-    pub use assets::{AudioSources, Models, Textures};
+    pub use assets::{
+        AudioSources, LoadResource, Models, ResourceHandles, RonAssetLoader, RonAssetPlugin,
+        Textures,
+    };
     pub use config::Config;
     pub use game::{
         Score,
         audio::{Music, Sound, SoundEffect},
         camera::SceneCamera,
-        player::Player,
+        player::{JumpTimer, Player, StepTimer},
         scene::uv_debug_texture,
         settings::{Action, Settings},
         skybox::Sun,
@@ -63,13 +64,7 @@ pub fn game(app: &mut App) {
 
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them
-    app.add_plugins((
-        asset_tracking::plugin,
-        game::plugin,
-        ui::plugin,
-        screens::plugin,
-        assets::plugin,
-    ));
+    app.add_plugins((game::plugin, ui::plugin, screens::plugin, assets::plugin));
 }
 
 /// High-level groupings of systems for the app in the `Update` schedule.

@@ -8,8 +8,8 @@ use bevy_tnua_avian3d::*;
 mod animation;
 mod control;
 
-use animation::{AnimationState, animating, prepare_animations};
-use control::movement;
+pub use animation::*;
+pub use control::*;
 
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `Screen::Playing`
@@ -30,9 +30,19 @@ pub fn plugin(app: &mut App) {
         );
 }
 
-#[derive(Component, Default)]
+#[derive(Component)]
 pub struct Player {
+    speed: f32,
     animation_state: AnimationState,
+}
+
+impl Default for Player {
+    fn default() -> Self {
+        Self {
+            speed: 1.0,
+            animation_state: AnimationState::StandIdle,
+        }
+    }
 }
 
 fn spawn(
@@ -54,6 +64,10 @@ fn spawn(
 
     let mesh = SceneRoot(gltf.scenes[0].clone());
     let pos = Transform::from_translation(Vec3::new(0.0, 0.0, 0.0)).with_rotation(player_rot);
+    let player = Player {
+        speed: cfg.player.movement.speed,
+        animation_state: AnimationState::StandIdle,
+    };
 
     let collider = Collider::capsule(cfg.player.hitbox.radius, cfg.player.hitbox.height);
     let collider_mesh = Mesh::from(Capsule3d::new(
@@ -67,7 +81,7 @@ fn spawn(
     commands
         .spawn((
             pos,
-            Player::default(),
+            player,
             ThirdPersonCameraTarget,
             // tnua stuff
             TnuaController::default(),
@@ -81,6 +95,8 @@ fn spawn(
             TnuaAvian3dSensorShape(collider.clone()),
             RigidBody::Dynamic,
             collider,
+            JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
+            StepTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
             debug_collider_mesh,
             debug_collider_color,
         ))

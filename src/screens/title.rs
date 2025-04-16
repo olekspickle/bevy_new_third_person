@@ -1,6 +1,5 @@
 use crate::prelude::*;
 use bevy::prelude::*;
-use bevy_seedling::prelude::*;
 
 /// This plugin is responsible for the game menu (containing only one button...)
 /// The menu is only drawn during the State `GameState::Menu` and is removed when that state is exited
@@ -61,11 +60,8 @@ fn btn_sounds(
         };
         commands.spawn((
             SoundEffect,
-            SamplePlayer::new(source),
-            PlaybackSettings {
-                volume: Volume::Linear(settings.sound.general),
-                ..Default::default()
-            },
+            AudioPlayer::new(source),
+            PlaybackSettings::ONCE,
         ));
     }
 }

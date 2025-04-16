@@ -1,11 +1,20 @@
 use crate::prelude::*;
-use bevy::prelude::*;
-use bevy_common_assets::ron::RonAssetPlugin;
-use bevy_seedling::sample::Sample;
+use bevy::{asset::Asset, prelude::*};
+
+mod ron;
+mod tracking;
+
+pub use ron::*;
+pub use tracking::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(RonAssetPlugin::<Config>::new(&["config.ron"]));
-    app.load_resource_from_path::<Config>("config.ron");
+    // start asset loading
+    app.add_plugins(tracking::plugin)
+        .add_plugins(RonAssetPlugin::<Config>::new(&["config.ron"]))
+        .load_resource_from_path::<Config>("config.ron")
+        .load_resource::<AudioSources>()
+        .load_resource::<Textures>()
+        .load_resource::<Models>();
 }
 
 #[derive(Asset, Clone, Reflect, Resource)]
@@ -45,15 +54,15 @@ impl FromWorld for Models {
 pub struct AudioSources {
     // SFX
     #[dependency]
-    pub btn_hover: Handle<Sample>,
+    pub btn_hover: Handle<AudioSource>,
     #[dependency]
-    pub btn_press: Handle<Sample>,
+    pub btn_press: Handle<AudioSource>,
     #[dependency]
-    pub steps: Vec<Handle<Sample>>,
+    pub steps: Vec<Handle<AudioSource>>,
 
     // music
     #[dependency]
-    pub bg_music: Handle<Sample>,
+    pub bg_music: Handle<AudioSource>,
 }
 
 impl AudioSources {

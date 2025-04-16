@@ -1,13 +1,12 @@
 [package]
 name = "bevy_new_third_person" # ToDo
 version = "0.1.0"
-publish = false
 authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
 edition = "2024"
 license = "MIT OR Apache-2.0"
 exclude = ["dist", "build", "assets", "credits"]
 repository = "https://github.com/olekspickle/bevy_new_third_person"
-description = "Simple opinionated third person view 3D game template"
+description = "Simple third person view 3D game template"
 
 [workspace]
 members = ["mobile"]
@@ -21,8 +20,7 @@ dev = [
     # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/dynamic_linking",
     "bevy/bevy_dev_tools",
-    # "bevy-inspector-egui",
-    # "avian2d/debug-plugin",
+    "aalo",
 ]
 dev_native = [
     "dev",
@@ -34,57 +32,44 @@ dev_native = [
 physics_debug = []
 
 [dependencies]
-bevy_seedling = "0.3"
-# exclude audio feature
-bevy = { version = "0.15", default-features = false, features = [
-  "animation",
-  "bevy_asset",
-  "bevy_color",
-  "bevy_core_pipeline",
-  "bevy_gilrs",
-  "bevy_gizmos",
-  "bevy_gltf",
-  "bevy_mesh_picking_backend",
-  "bevy_pbr",
-  "bevy_picking",
-  "bevy_render",
-  "bevy_scene",
-  "bevy_sprite",
-  "bevy_sprite_picking_backend",
-  "bevy_state",
-  "bevy_text",
-  "bevy_ui",
-  "bevy_ui_picking_backend",
-  "bevy_window",
-  "bevy_winit",
-  "custom_cursor",
-  "default_font",
-  "hdr",
-  "multi_threaded",
-  "png",
-  "jpeg",
-  "smaa_luts",
-  "sysinfo_plugin",
-  "tonemapping_luts",
-  "webgl2",
-  "x11",
-  "wayland",
-] }
-bevy_common_assets = {version="0.12.0", features=["ron"]}
-bevy_third_person_camera = "0.2"
-bevy_atmosphere = "0.12"
-bevy-tnua = "0.21"
-bevy-tnua-avian3d = "0.2"
+# use after 0.16 migration
+# bevy_common_assets = {version="0.12.0", features=["ron"]}
+bevy = { version = "0.15", features = [ "jpeg", "wayland", ] }
+
+# plugins
+# wireframes
+aalo = { version = "0.0.4", optional = true }
+
+# physics
 avian3d = { version = "0.2", features = ["3d", "parallel"] }
-image = { version = "0.25", default-features = false }
+
+# camera
+bevy_third_person_camera = "0.2"
+
+# skybox
+bevy_atmosphere = "0.12"
+
+# floating character control
+bevy-tnua = { version = "0.22.0", git = "https://github.com/idanarye/bevy-tnua", branch = "feature/opt-out-of-being-ground" }
+bevy-tnua-avian3d = { version = "0.3.1", git = "https://github.com/idanarye/bevy-tnua", branch = "feature/opt-out-of-being-ground" }
+
+# diagnostics overlay
 iyes_perf_ui = "0.4"
+
+# key binding
 leafwing-input-manager = "0.16"
-## This greatly improves WGPU's performance due to its heavy use of trace! calls
-log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
+
+# misc
+ron = "0.10"
 rand = { version = "0.8" }
 serde = "1"
+thiserror = "2.0.12"
+image = "0.25.6"
+## This greatly improves WGPU's performance due to its heavy use of trace! calls
+log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"] }
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.30", default-features = false }
+
 
 [lints.clippy]
 # Bevy supplies arguments to systems via dependency injection, so it's natural for systems to

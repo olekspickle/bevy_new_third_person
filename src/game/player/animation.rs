@@ -106,13 +106,13 @@ pub fn prepare_animations(
     };
 
     commands.insert_resource(nodes);
-
     commands
         .entity(animation_player_entity)
         .insert(AnimationGraphHandle(animation_graphs.add(graph)));
 }
 
 pub fn animating(
+    cfg: Res<Config>,
     mut player_query: Query<(
         // The controller can be used to determine the state of the character - information crucial
         // for deciding which animation to play.
@@ -126,6 +126,8 @@ pub fn animating(
         &mut TnuaAnimatingState<AnimationState>,
     )>,
     mut animation_player: Query<&mut AnimationPlayer>,
+    time: Res<Time>,
+    mut jump_timer: Query<&mut JumpTimer>,
     animation_nodes: Option<Res<AnimationNodes>>,
 ) {
     // An actual game should match the animation player and the controller. Here we cheat for
@@ -134,7 +136,6 @@ pub fn animating(
         return;
     };
     let Ok(mut animation_player) = animation_player.get_single_mut() else {
-        info!("NO animation player in animating");
         return;
     };
     let Some(animation_nodes) = animation_nodes else {
@@ -151,13 +152,17 @@ pub fn animating(
             let (_, crouch_state) = controller
                 .concrete_action::<TnuaBuiltinCrouch>()
                 .expect("action name mismatch: Crouch");
-            //let (_, walk_state) = controller
-            //    .concrete_action::<TnuaBuiltinWalk>()
-            //    .expect("action name mismatch: Walk");
+
+            let Some((_, basis_state)) = controller.concrete_basis::<TnuaBuiltinWalk>() else {
+                return;
+            };
+            let speed = basis_state.running_velocity.length();
 
             // TODO: have transition from/to crouch
             match crouch_state {
-                TnuaBuiltinCrouchState::Maintaining => AnimationState::CrouchWalk(1.0),
+                TnuaBuiltinCrouchState::Maintaining => {
+                    AnimationState::CrouchWalk(cfg.player.movement.speed * speed)
+                }
                 TnuaBuiltinCrouchState::Rising => AnimationState::CrouchIdle,
                 TnuaBuiltinCrouchState::Sinking => AnimationState::CrouchIdle,
             }
@@ -166,6 +171,12 @@ pub fn animating(
         // of the `TnuaAction` trait. Once `type_name` is stabilized as `const` Tnua will use it to
         // generate these names automatically, which may result in a change to the name.
         Some(TnuaBuiltinJump::NAME) => {
+            if let Ok(mut timer) = jump_timer.get_single_mut() {
+                if timer.0.tick(time.delta()).just_finished() {
+                    return;
+                }
+            }
+
             // In case of jump, we want to cast it so that we can get the concrete jump state.
             let (_, jump_state) = controller
                 .concrete_action::<TnuaBuiltinJump>()

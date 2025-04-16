@@ -7,13 +7,19 @@ use bevy_tnua::{
 use bevy_tnua_avian3d::*;
 use leafwing_input_manager::prelude::ActionState;
 
-/// Tnua configuration is not intuitive, this is the best demo I saw:
+#[derive(Component)]
+pub struct StepTimer(pub Timer);
+#[derive(Component)]
+pub struct JumpTimer(pub Timer);
+
+/// Tnua configuration is tricky to grasp from the get go, this is the best demo:
 /// https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_control_systems/platformer_control_systems.rs
 pub fn movement(
     cfg: Res<Config>,
     time: Res<Time<Virtual>>,
     //touch_input: Res<Touches>,
     action: Query<&ActionState<Action>>,
+    mut jump_timer: Query<&mut JumpTimer>,
     mut tnua: Query<
         (
             &mut TnuaController,
@@ -39,7 +45,7 @@ pub fn movement(
     let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
 
     if state.just_pressed(&Action::Crouch) {
-        // TODO: play sink animation
+        // TODO: play crouch sink animation
     }
     if state.pressed(&Action::Crouch) {
         // TODO: replace with actual crouch animation instead of just scaling
@@ -100,13 +106,16 @@ pub fn movement(
     let mut air_counter = air_counter.single_mut();
     air_counter.update(controller.as_mut());
 
-    if state.pressed(&Action::Jump) {
-        controller.action(TnuaBuiltinJump {
-            // The height is the only mandatory field of the jump button.
-            height: 1.0,
-            allow_in_air: true,
-            ..Default::default()
-        });
+    if let Ok(mut timer) = jump_timer.get_single_mut() {
+        // if state.pressed(&Action::Jump) && timer.0.tick(time.delta()).just_finished() {
+        if state.pressed(&Action::Jump) {
+            controller.action(TnuaBuiltinJump {
+                // The height is the only mandatory field of the jump button.
+                height: 1.0,
+                allow_in_air: true,
+                ..Default::default()
+            });
+        }
     }
 
     if state.just_pressed(&Action::Dash) {

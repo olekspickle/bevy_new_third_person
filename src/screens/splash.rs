@@ -11,11 +11,6 @@ const SPLASH_DURATION_SECS: f32 = 1.8;
 const SPLASH_FADE_DURATION_SECS: f32 = 0.3;
 
 pub(super) fn plugin(app: &mut App) {
-    // start asset loading
-    app.load_resource::<Models>();
-    app.load_resource::<Textures>();
-    app.load_resource::<AudioSources>();
-
     app.add_systems(OnEnter(Screen::Splash), spawn_splash_screen);
 
     // Animate splash screen.

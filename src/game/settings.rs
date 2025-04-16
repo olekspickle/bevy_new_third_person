@@ -3,7 +3,6 @@ use crate::{
     screens::gameplay::{MuteLabel, PauseLabel},
 };
 use bevy::{prelude::*, ui::Display as NodeDisplay};
-use bevy_seedling::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 pub fn plugin(app: &mut App) {
@@ -86,11 +85,9 @@ fn toggle_global(
         Query<(&mut BackgroundColor, &mut TextColor), With<PauseLabel>>,
         Query<(&mut BackgroundColor, &mut TextColor), With<MuteLabel>>,
     )>,
-    mut music: Query<
-        (&mut SamplePlayer, &mut PlaybackSettings),
-        (With<Music>, Without<SoundEffect>),
-    >,
-    mut sfx: Query<(&mut SamplePlayer, &mut PlaybackSettings), (With<SoundEffect>, Without<Music>)>,
+
+    mut music: Query<&mut AudioSink, (With<Music>, Without<SoundEffect>)>,
+    mut sfx: Query<&mut AudioSink, (With<SoundEffect>, Without<Music>)>,
     mut perf_ui: Query<&mut Node, With<PerfUiMarker>>,
 ) {
     let state = action.single();
@@ -109,16 +106,18 @@ fn toggle_global(
     if state.just_pressed(&Action::Pause) || state.just_pressed(&Action::Settings) {
         if let Ok((mut bg, mut color)) = label_set.p0().get_single_mut() {
             if time.is_paused() || settings.paused {
-                // TODO: when seedling. actually query sample player and unpause
                 time.unpause();
                 *color = TextColor(LABEL);
                 *bg = BackgroundColor(NODE_BG);
             } else {
-                // TODO: when seedling. actually query sample player and pause
                 time.pause();
                 *color = TextColor(NODE_BG);
                 *bg = BackgroundColor(LABEL);
             }
+        }
+        // TODO: use seedling under feature
+        for s in &mut music.iter_mut().chain(sfx.iter_mut()) {
+            s.toggle();
         }
         settings.paused = !settings.paused;
     }
@@ -126,26 +125,24 @@ fn toggle_global(
     if state.just_pressed(&Action::Mute) {
         if let Ok((mut bg, mut color)) = label_set.p1().get_single_mut() {
             if settings.muted {
-                if let Ok((_, mut pb)) = music.get_single_mut() {
-                    pb.volume = Volume::Linear(settings.sound.general);
+                // TODO: use seedling under feature
+                for s in &mut music {
+                    s.set_volume(settings.sound.general * settings.sound.music);
                 }
-                if let Ok((_, mut pb)) = sfx.get_single_mut() {
-                    pb.volume = Volume::Linear(settings.sound.general);
+                for s in &mut sfx {
+                    s.set_volume(settings.sound.general * settings.sound.sfx);
                 }
                 *color = TextColor(LABEL);
                 *bg = BackgroundColor(TRANSPARENT);
             } else {
-                if let Ok((_, mut pb)) = music.get_single_mut() {
-                    pb.volume = Volume::Linear(0.0);
-                }
-                if let Ok((_, mut pb)) = sfx.get_single_mut() {
-                    pb.volume = Volume::Linear(0.0);
+                // TODO: use seedling under feature
+                for s in &mut music.iter_mut().chain(sfx.iter_mut()) {
+                    s.set_volume(0.0);
                 }
                 *color = TextColor(NODE_BG);
                 *bg = BackgroundColor(LABEL);
             }
         }
-
         settings.muted = !settings.muted;
     }
 }

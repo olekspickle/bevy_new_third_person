@@ -1,9 +1,4 @@
 use bevy::prelude::*;
-use bevy_seedling::prelude::*;
-
-pub fn plugin(app: &mut App) {
-    app.add_plugins(SeedlingPlugin::default());
-}
 
 #[derive(Resource, Default)]
 pub struct Sound {
@@ -14,9 +9,9 @@ pub struct Sound {
 
 impl Sound {
     pub const DEFAULT: Self = Sound {
-        general: 0.3,
-        music: 0.1,
-        sfx: 0.3,
+        general: 0.5,
+        music: 0.5,
+        sfx: 0.5,
     };
 }
 
@@ -30,9 +25,9 @@ impl Sound {
 /// use bevy_seedling::prelude::*;
 /// use crate::prelude::*;
 ///
-/// fn set_music_volume(mut query: Query<&mut PlaybackSettings, With<Music>>) {
-///     for mut playback in &mut query {
-///         playback.set_volume(Volume::Linear(0.5));
+/// fn set_music_volume(mut query: Query<&mut AudioSink, With<Music>>) {
+///     for mut sink in &mut query {
+///         sink.set_volume(0.5);
 ///     }
 /// }
 /// ```
@@ -48,9 +43,9 @@ pub struct Music;
 /// use bevy::prelude::*;
 /// use crate::prelude::*;
 ///
-/// fn set_sfx_volume(mut query: Query<&mut PlaybackSettings, With<SoundEffect>>) {
-///     for mut playback in &mut query {
-///         playback.set_volume(Volume::Linear(0.5));
+/// fn set_sfx_volume(mut query: Query<&mut AudioSink, With<SoundEffect>>) {
+///     for mut sink in &mut query {
+///         sink.set_volume(0.5);
 ///     }
 /// }
 /// ```
