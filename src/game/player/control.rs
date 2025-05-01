@@ -31,16 +31,16 @@ pub fn movement(
     >,
     mut air_counter: Query<&mut TnuaSimpleAirActionsCounter>,
     camera: Query<&Transform, With<SceneCamera>>,
-) {
+) -> Result {
     let Ok((mut controller, mut avian_collider, mut collider, mut debug_capsule)) =
-        tnua.get_single_mut()
+        tnua.single_mut()
     else {
-        return;
+        return Ok(());
     };
     let mut direction = Vec3::ZERO;
     let mut speed = cfg.player.movement.speed * time.delta_secs();
 
-    let (state, camera_transform) = (action.single(), camera.single());
+    let (state, camera_transform) = (action.single()?, camera.single()?);
     let forward = camera_transform.forward().normalize();
     let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
 
@@ -103,10 +103,10 @@ pub fn movement(
 
     // Feed the jump action every frame as long as the player holds the jump button. If the player
     // stops holding the jump button, simply stop feeding the action.
-    let mut air_counter = air_counter.single_mut();
+    let mut air_counter = air_counter.single_mut()?;
     air_counter.update(controller.as_mut());
 
-    if let Ok(mut timer) = jump_timer.get_single_mut() {
+    if let Ok(mut timer) = jump_timer.single_mut() {
         // if state.pressed(&Action::Jump) && timer.0.tick(time.delta()).just_finished() {
         if state.pressed(&Action::Jump) {
             controller.action(TnuaBuiltinJump {
@@ -146,4 +146,5 @@ pub fn movement(
     //        }
     //    }
     //}
+    Ok(())
 }

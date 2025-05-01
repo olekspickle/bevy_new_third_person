@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{audio::Volume, prelude::*};
 
 #[derive(Resource, Default)]
 pub struct Sound {
@@ -15,39 +15,33 @@ impl Sound {
     };
 }
 
-/// An organizational marker component that should be added to a spawned [`AudioPlayer`] if it is in the
-/// general "music" category (ex: global background music, soundtrack, etc).
+/// An organizational marker component that should be added to a spawned [`AudioPlayer`] if it's in the
+/// general "music" category (e.g. global background music, soundtrack).
 ///
-/// This can then be used to query for and operate on sounds in that category. For example:
-///
-/// ```
-/// use bevy::{audio::Volume, prelude::*};
-/// use bevy_seedling::prelude::*;
-/// use crate::prelude::*;
-///
-/// fn set_music_volume(mut query: Query<&mut AudioSink, With<Music>>) {
-///     for mut sink in &mut query {
-///         sink.set_volume(0.5);
-///     }
-/// }
-/// ```
+/// This can then be used to query for and operate on sounds in that category.
 #[derive(Component, Default)]
 pub struct Music;
 
-/// An organizational marker component that should be added to a spawned [`AudioPlayer`] if it is in the
-/// general "sound effect" category (ex: footsteps, the sound of a magic spell, a door opening).
+/// A music audio instance.
+pub fn music(handle: Handle<AudioSource>, volume: f32) -> impl Bundle {
+    (
+        AudioPlayer(handle),
+        PlaybackSettings {
+            volume: Volume::Linear(volume),
+            ..PlaybackSettings::LOOP
+        },
+        Music,
+    )
+}
+
+/// An organizational marker component that should be added to a spawned [`AudioPlayer`] if it's in the
+/// general "sound effect" category (e.g. footsteps, the sound of a magic spell, a door opening).
 ///
-/// This can then be used to query for and operate on sounds in that category. For example:
-///
-/// ```
-/// use bevy::prelude::*;
-/// use crate::prelude::*;
-///
-/// fn set_sfx_volume(mut query: Query<&mut AudioSink, With<SoundEffect>>) {
-///     for mut sink in &mut query {
-///         sink.set_volume(0.5);
-///     }
-/// }
-/// ```
+/// This can then be used to query for and operate on sounds in that category.
 #[derive(Component, Default)]
 pub struct SoundEffect;
+
+/// A sound effect audio instance.
+pub fn sound_effect(handle: Handle<AudioSource>) -> impl Bundle {
+    (AudioPlayer(handle), PlaybackSettings::DESPAWN, SoundEffect)
+}

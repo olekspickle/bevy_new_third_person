@@ -53,11 +53,12 @@ fn spawn(
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut meshes: ResMut<Assets<Mesh>>,
     camera: Query<&Transform, With<SceneCamera>>,
-) {
+) -> Result {
     let Some(gltf) = gltf_assets.get(&models.player) else {
-        return;
+        return Ok(());
     };
-    let camera_transform = camera.single();
+
+    let camera_transform = camera.single()?;
     let mut forward = camera_transform.forward().normalize();
     forward.y = 0.0;
     let player_rot = Quat::from_rotation_y(PI);
@@ -97,11 +98,13 @@ fn spawn(
             collider,
             JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
             StepTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
+            children![(Transform::from_xyz(0.0, -1.0, 0.0), mesh)],
+            #[cfg(feature = "dev_native")]
             debug_collider_mesh,
+            #[cfg(feature = "dev_native")]
             debug_collider_color,
         ))
-        .with_children(|children| {
-            ChildBuild::spawn(children, (Transform::from_xyz(0.0, -1.0, 0.0), mesh))
-                .observe(prepare_animations);
-        });
+        .observe(prepare_animations);
+
+    Ok(())
 }

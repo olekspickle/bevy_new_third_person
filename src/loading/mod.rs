@@ -20,8 +20,6 @@ pub fn plugin(app: &mut App) {
 #[derive(Asset, Clone, Reflect, Resource)]
 pub struct Textures {
     #[dependency]
-    pub bevy: Handle<Image>,
-    #[dependency]
     pub github: Handle<Image>,
 }
 
@@ -29,7 +27,6 @@ impl FromWorld for Textures {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            bevy: assets.load("textures/bevy.png"),
             github: assets.load("textures/github.png"),
         }
     }

@@ -1,3 +1,4 @@
+//! At the time of writing bevy_common_assets did not migrate to 0.16, hence - this module
 use bevy::{
     asset::{Asset, AssetApp, AssetLoader, LoadContext, io::Reader},
     prelude::*,

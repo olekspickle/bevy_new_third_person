@@ -7,26 +7,23 @@ pub(super) fn plugin(app: &mut App) {
 
 fn spawn_screen(mut commands: Commands, score: Res<Score>) {
     commands
-        .ui_root()
-        .insert(StateScoped(Screen::GameOver))
-        .with_children(|children| {
-            children.label(format!("Score: {}", score.0), LayoutOpts::label());
-            children
-                .button("PlayAgain", LayoutOpts::button())
-                .observe(enter_gameplay_screen);
-
-            #[cfg(not(target_family = "wasm"))]
-            children
-                .button("Exit", LayoutOpts::button())
-                .observe(exit_app);
-        });
+        .spawn((
+            ui_root("game over screen"),
+            children![
+                label(format!("Score: {}", score.0)),
+                button("PlayAgain", enter_gameplay_screen),
+                #[cfg(not(target_family = "wasm"))]
+                button("Exit", exit_app)
+            ],
+        ))
+        .insert(StateScoped(Screen::GameOver));
 }
 
 fn enter_gameplay_screen(_trigger: Trigger<OnPress>, mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Title);
+    next_screen.set(Screen::Gameplay);
 }
 
 #[cfg(not(target_family = "wasm"))]
 fn exit_app(_trigger: Trigger<OnPress>, mut app_exit: EventWriter<AppExit>) {
-    app_exit.send(AppExit::Success);
+    app_exit.write(AppExit::Success);
 }

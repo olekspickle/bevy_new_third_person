@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::prelude::{App, Resource};
 
 pub mod audio;
 pub mod camera;
@@ -14,7 +14,7 @@ pub fn plugin(app: &mut App) {
         camera::plugin,
         player::plugin,
         scene::plugin,
-        skybox::plugin,
+        // skybox::plugin,
     ));
 }
 

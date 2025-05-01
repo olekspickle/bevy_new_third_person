@@ -1,7 +1,7 @@
 //! The screen state for the main gameplay.
-//!
+
 use crate::prelude::*;
-use bevy::{audio::Volume, prelude::*, ui::Val::*};
+use bevy::{audio::Volume, prelude::*};
 use leafwing_input_manager::prelude::*;
 use rand::prelude::*;
 
@@ -25,79 +25,59 @@ pub struct MuteLabel;
 
 fn spawn_gameplay_ui(mut commands: Commands) {
     commands
-        .ui_root()
-        .insert(StateScoped(Screen::Gameplay))
-        .with_children(|children| {
-            let opts = LayoutOpts::label().with_node(Node {
-                top: Px(10.0),
-                position_type: PositionType::Absolute,
+        .spawn((
+            Node {
+                flex_direction: FlexDirection::Row,
                 ..Default::default()
-            });
-            children.label("Hello Third Person", opts);
-        });
-
-    // Demo keys
-    commands
-        .container(Node {
-            flex_direction: FlexDirection::Row,
-            ..Default::default()
-        })
-        .with_children(|children| {
-            ChildBuild::spawn(
-                children,
-                Node {
-                    flex_direction: FlexDirection::Column,
-                    align_items: AlignItems::Start,
-                    ..Default::default()
-                },
-            )
-            .with_children(|children| {
-                let layout = LayoutOpts::label().with_node(Node {
-                    justify_items: JustifyItems::Start,
-                    ..Default::default()
-                });
-
-                children
-                    .label("P - pause", layout.clone())
-                    .spawn((PauseLabel, TextLayout::new_with_justify(JustifyText::Left)));
-                children
-                    .label("M - mute", layout.clone())
-                    .spawn((MuteLabel, TextLayout::new_with_justify(JustifyText::Left)));
-                children
-                    .label("F - diagnostics", layout)
-                    .spawn(TextLayout::new_with_justify(JustifyText::Left));
-            });
-        });
+            },
+            // Demo keys
+            children![
+                (
+                    Node {
+                        flex_direction: FlexDirection::Column,
+                        align_items: AlignItems::Start,
+                        ..Default::default()
+                    },
+                    children![
+                        (label("P - pause"), children![PauseLabel]),
+                        (label("M - mute"), children![MuteLabel]),
+                        (label("F - diagnostics"), children![PauseLabel]),
+                        TextLayout::new_with_justify(JustifyText::Left)
+                    ]
+                ),
+                // Demo title
+                label("Hello Third Person"),
+            ],
+        ))
+        .insert(StateScoped(Screen::Gameplay));
 }
 
 fn invoke_settings(
     action: Query<&ActionState<Action>>,
     // mut music: Query<&mut AudioSink, (With<Music>, Without<SoundEffect>)>,
     // mut sfx: Query<&mut AudioSink, (With<SoundEffect>, Without<Music>)>,
-) {
-    let state = action.single();
+) -> Result {
+    let state = action.single()?;
     if state.just_pressed(&Action::Settings) {}
+
+    Ok(())
 }
 
 fn start_or_resume_bg_music(
     mut commands: Commands,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
-    music: Query<&mut AudioSink, With<Music>>,
+    mut music_query: Query<&mut AudioSink, With<Music>>,
 ) {
-    if let Ok(music) = music.get_single() {
-        if music.is_paused() {
+    if let Ok(mut instance) = music_query.single_mut() {
+        if instance.is_paused() {
             // TODO: use seedling under feature
-            music.toggle();
+            instance.toggle_mute();
         } else {
             let handle = *[&sources.bg_music].choose(&mut thread_rng()).unwrap();
-            commands.spawn((
-                Music,
-                AudioPlayer::new(handle.clone()),
-                PlaybackSettings {
-                    volume: Volume::new(settings.sound.general * settings.sound.music),
-                    ..Default::default()
-                },
+            commands.spawn(music(
+                handle.clone(),
+                settings.sound.general * settings.sound.music,
             ));
         }
     }
@@ -109,12 +89,17 @@ fn movement_sound(
     settings: Res<Settings>,
     mut step_timer: Query<&mut StepTimer>,
     sources: ResMut<AudioSources>,
-    action: Query<&ActionState<Action>>,
-    position: Query<&Transform, With<Player>>,
-) {
-    let (player_pos, state) = (position.single(), action.single());
-    let Ok(mut step_timer) = step_timer.get_single_mut() else {
-        return;
+    state: Query<&ActionState<Action>>,
+    player_pos: Query<&Transform, With<Player>>,
+) -> Result {
+    let Ok(player_pos) = player_pos.single() else {
+        return Ok(());
+    };
+    let Ok(state) = state.single() else {
+        return Ok(());
+    };
+    let Ok(mut step_timer) = step_timer.single_mut() else {
+        return Ok(());
     };
 
     if step_timer.0.tick(time.delta()).just_finished() {
@@ -132,10 +117,12 @@ fn movement_sound(
                 SoundEffect,
                 AudioPlayer::new(handle),
                 PlaybackSettings {
-                    volume: Volume::new(settings.sound.general * settings.sound.sfx),
+                    volume: Volume::Linear(settings.sound.general * settings.sound.sfx),
                     ..Default::default()
                 },
             ));
         }
     }
+
+    Ok(())
 }

@@ -46,37 +46,33 @@ pub(super) fn plugin(app: &mut App) {
 
 fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
-        .ui_root()
-        .insert((Name::new("Splash screen"), StateScoped(Screen::Splash)))
-        .with_children(|children| {
-            ChildBuild::spawn(
-                children,
-                (
-                    Name::new("Splash image"),
-                    Node {
-                        width: Percent(20.0),
-                        align_self: AlignSelf::Center,
-                        ..default()
+        .spawn((
+            ui_root("Splash screen"),
+            children![
+                Node {
+                    width: Percent(20.0),
+                    align_self: AlignSelf::Center,
+                    ..default()
+                },
+                ImageNode::new(asset_server.load_with_settings(
+                    // This should be an embedded asset for instant loading, but that is
+                    // currently [broken on Windows Wasm builds](https://github.com/bevyengine/bevy/issues/14246).
+                    "textures/bevy.png",
+                    |settings: &mut ImageLoaderSettings| {
+                        // Make an exception for the splash image in case
+                        // `ImagePlugin::default_nearest()` is used for pixel art.
+                        settings.sampler = ImageSampler::linear();
                     },
-                    ImageNode::new(asset_server.load_with_settings(
-                        // This should be an embedded asset for instant loading, but that is
-                        // currently [broken on Windows Wasm builds](https://github.com/bevyengine/bevy/issues/14246).
-                        "textures/bevy.png",
-                        |settings: &mut ImageLoaderSettings| {
-                            // Make an exception for the splash image in case
-                            // `ImagePlugin::default_nearest()` is used for pixel art.
-                            settings.sampler = ImageSampler::linear();
-                        },
-                    )),
-                    ImageNodeFadeInOut {
-                        total_duration: SPLASH_DURATION_SECS,
-                        fade_duration: SPLASH_FADE_DURATION_SECS,
-                        t: 0.0,
-                    },
-                ),
-            );
-            children.label("Made with BEVY", LayoutOpts::label());
-        });
+                )),
+                ImageNodeFadeInOut {
+                    total_duration: SPLASH_DURATION_SECS,
+                    fade_duration: SPLASH_FADE_DURATION_SECS,
+                    t: 0.0,
+                },
+                label("Made with BEVY")
+            ],
+        ))
+        .insert(StateScoped(Screen::Splash));
 }
 
 #[derive(Component, Reflect)]

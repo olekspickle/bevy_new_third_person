@@ -17,24 +17,17 @@ fn setup_menu(
     //font: Res<Fira>,
     mut commands: Commands,
 ) {
+    let opts = Opts::new("Play").with_bg_color(Color::WHITE);
     commands
-        .ui_root()
-        .insert(StateScoped(Screen::Title))
-        .with_children(|children| {
-            let layout = LayoutOpts::button();
-            //let text = TextOpts::from("Play")
-            //.with_font(TextFont {
-            //    font: font.0.clone(),
-            //    font_size: FONT_SIZE,
-            //    ..default()
-            //});
-            children
-                .button("Play", layout.clone())
-                .observe(enter_gameplay_screen);
-
-            #[cfg(not(target_family = "wasm"))]
-            children.button("Exit", layout).observe(exit_app);
-        });
+        .spawn((
+            ui_root("loading"),
+            children![
+                button(opts.clone(), enter_gameplay_screen),
+                #[cfg(not(target_family = "wasm"))]
+                button(opts.with_text("Exit"), exit_app)
+            ],
+        ))
+        .insert(StateScoped(Screen::Title));
 }
 
 fn enter_gameplay_screen(_trigger: Trigger<OnPress>, mut next_screen: ResMut<NextState<Screen>>) {
@@ -43,7 +36,7 @@ fn enter_gameplay_screen(_trigger: Trigger<OnPress>, mut next_screen: ResMut<Nex
 
 #[cfg(not(target_family = "wasm"))]
 fn exit_app(_trigger: Trigger<OnPress>, mut app_exit: EventWriter<AppExit>) {
-    app_exit.send(AppExit::Success);
+    app_exit.write(AppExit::Success);
 }
 
 fn btn_sounds(
@@ -58,10 +51,6 @@ fn btn_sounds(
             Interaction::Pressed => audio_sources.btn_press.clone(),
             _ => continue,
         };
-        commands.spawn((
-            SoundEffect,
-            AudioPlayer::new(source),
-            PlaybackSettings::ONCE,
-        ));
+        commands.spawn(sound_effect(source));
     }
 }

@@ -2,8 +2,6 @@ use crate::prelude::*;
 use avian3d::prelude::*;
 use bevy::{
     asset::RenderAssetUsages,
-    image::{ImageAddressMode, ImageLoaderSettings, ImageSampler, ImageSamplerDescriptor},
-    math::Affine2,
     pbr::DirectionalLightShadowMap,
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
@@ -17,7 +15,7 @@ pub fn plugin(app: &mut App) {
         .add_systems(OnEnter(Screen::Gameplay), setup);
 }
 
-pub fn setup(
+fn setup(
     config: Res<Config>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
@@ -26,6 +24,8 @@ pub fn setup(
 ) {
     let debug_material = materials.add(StandardMaterial {
         base_color_texture: Some(images.add(uv_debug_texture())),
+        #[cfg(feature = "enhanced")]
+        specular_tint: Color::WHITE,
         ..default()
     });
 
@@ -75,23 +75,16 @@ pub fn setup(
         ));
     }
 
-    // Light
-    commands.spawn((
-        DirectionalLight {
-            color: SUN,
-            //shadows_enabled: true,
-            ..Default::default()
-        },
-        Sun,
-    ));
+    // to see something when suns go away
     commands.insert_resource(AmbientLight {
         color: Color::WHITE,
         brightness: 200.0,
+        ..Default::default()
     });
 }
 
 /// Creates a colorful test pattern
-pub fn uv_debug_texture() -> Image {
+pub(crate) fn uv_debug_texture() -> Image {
     const TEXTURE_SIZE: usize = 8;
 
     let mut palette: [u8; 32] = [

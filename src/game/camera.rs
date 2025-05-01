@@ -18,6 +18,10 @@ pub fn spawn_scene_camera(mut commands: Commands) {
         SceneCamera,
         IsDefaultUiCamera,
         Transform::from_xyz(100., 50., 100.).looking_at(Vec3::ZERO, Vec3::Y),
+        Camera {
+            hdr: true,
+            ..Default::default()
+        },
     ));
 }
 
@@ -25,9 +29,9 @@ fn add_third_person_camera(
     cfg: Res<Config>,
     mut commands: Commands,
     mut camera: Query<Entity, With<SceneCamera>>,
-) {
-    let camera = camera.single_mut();
-    commands.entity(camera).insert(ThirdPersonCamera {
+) -> Result {
+    let camera = camera.single_mut()?;
+    commands.entity(camera).insert((ThirdPersonCamera {
         aim_speed: 3.0,     // default
         aim_zoom: 0.7,      // default
         zoom_enabled: true, // default
@@ -38,5 +42,7 @@ fn add_third_person_camera(
         cursor_lock_key: KeyCode::KeyL,
         gamepad_settings: CustomGamepadSettings::default(),
         ..default()
-    });
+    },));
+
+    Ok(())
 }

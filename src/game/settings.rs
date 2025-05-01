@@ -2,7 +2,7 @@ use crate::{
     prelude::*,
     screens::gameplay::{MuteLabel, PauseLabel},
 };
-use bevy::{prelude::*, ui::Display as NodeDisplay};
+use bevy::{audio::Volume, prelude::*, ui::Display as NodeDisplay};
 use leafwing_input_manager::prelude::*;
 
 pub fn plugin(app: &mut App) {
@@ -52,7 +52,7 @@ fn spawn_player_input_map(mut commands: Commands) {
     input_map.insert(Action::Settings, KeyCode::Escape);
     input_map.insert(Action::ToggleDiagnostics, KeyCode::KeyF);
 
-    commands.spawn(InputManagerBundle::with_map(input_map));
+    commands.spawn(input_map);
 }
 
 #[derive(Resource)]
@@ -89,11 +89,11 @@ fn toggle_global(
     mut music: Query<&mut AudioSink, (With<Music>, Without<SoundEffect>)>,
     mut sfx: Query<&mut AudioSink, (With<SoundEffect>, Without<Music>)>,
     mut perf_ui: Query<&mut Node, With<PerfUiMarker>>,
-) {
-    let state = action.single();
+) -> Result {
+    let state = action.single()?;
 
     if state.just_pressed(&Action::ToggleDiagnostics) {
-        if let Ok(mut perf_ui) = perf_ui.get_single_mut() {
+        if let Ok(mut perf_ui) = perf_ui.single_mut() {
             if perf_ui.display == NodeDisplay::None {
                 perf_ui.display = NodeDisplay::Flex;
             } else {
@@ -104,7 +104,7 @@ fn toggle_global(
     }
 
     if state.just_pressed(&Action::Pause) || state.just_pressed(&Action::Settings) {
-        if let Ok((mut bg, mut color)) = label_set.p0().get_single_mut() {
+        if let Ok((mut bg, mut color)) = label_set.p0().single_mut() {
             if time.is_paused() || settings.paused {
                 time.unpause();
                 *color = TextColor(LABEL);
@@ -116,28 +116,30 @@ fn toggle_global(
             }
         }
         // TODO: use seedling under feature
-        for s in &mut music.iter_mut().chain(sfx.iter_mut()) {
-            s.toggle();
+        for mut s in music.iter_mut().chain(sfx.iter_mut()) {
+            s.toggle_mute();
         }
         settings.paused = !settings.paused;
     }
 
     if state.just_pressed(&Action::Mute) {
-        if let Ok((mut bg, mut color)) = label_set.p1().get_single_mut() {
+        if let Ok((mut bg, mut color)) = label_set.p1().single_mut() {
             if settings.muted {
                 // TODO: use seedling under feature
-                for s in &mut music {
-                    s.set_volume(settings.sound.general * settings.sound.music);
+                for mut s in music {
+                    s.set_volume(Volume::Linear(
+                        settings.sound.general * settings.sound.music,
+                    ));
                 }
-                for s in &mut sfx {
-                    s.set_volume(settings.sound.general * settings.sound.sfx);
+                for mut s in sfx {
+                    s.set_volume(Volume::Linear(settings.sound.general * settings.sound.sfx));
                 }
                 *color = TextColor(LABEL);
                 *bg = BackgroundColor(TRANSPARENT);
             } else {
                 // TODO: use seedling under feature
-                for s in &mut music.iter_mut().chain(sfx.iter_mut()) {
-                    s.set_volume(0.0);
+                for mut s in music.iter_mut().chain(sfx.iter_mut()) {
+                    s.mute();
                 }
                 *color = TextColor(NODE_BG);
                 *bg = BackgroundColor(LABEL);
@@ -145,4 +147,6 @@ fn toggle_global(
         }
         settings.muted = !settings.muted;
     }
+
+    Ok(())
 }

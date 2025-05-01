@@ -14,11 +14,8 @@ pub(super) fn plugin(app: &mut App) {
 
 fn spawn_loading_screen(mut commands: Commands) {
     commands
-        .ui_root()
-        .insert(StateScoped(Screen::Loading))
-        .with_children(|children| {
-            children.label("Loading...", LayoutOpts::label());
-        });
+        .spawn((ui_root("loading"), children![label("Loading...")]))
+        .insert(StateScoped(Screen::Loading));
 }
 
 fn continue_to_menu_screen(mut next_screen: ResMut<NextState<Screen>>) {

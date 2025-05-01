@@ -1,6 +1,6 @@
 [package]
 name = "bevy_new_third_person" # ToDo
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
 edition = "2024"
 license = "MIT OR Apache-2.0"
@@ -20,7 +20,7 @@ dev = [
     # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/dynamic_linking",
     "bevy/bevy_dev_tools",
-    "aalo",
+    # "aalo",
 ]
 dev_native = [
     "dev",
@@ -28,35 +28,39 @@ dev_native = [
     "bevy/file_watcher",
     # Enable embedded asset hot reloading for native dev builds.
     "bevy/embedded_watcher",
+    "enhanced"
 ]
-physics_debug = []
+enhanced = [
+    # new nanite-like rendering system
+    "bevy/meshlet",
+    # PBR specular maps
+    "bevy/pbr_specular_textures"
+]
 
 [dependencies]
-# use after 0.16 migration
+# TODO: use after 0.16 migration
 # bevy_common_assets = {version="0.12.0", features=["ron"]}
-bevy = { version = "0.15", features = [ "jpeg", "wayland", ] }
+bevy = { version = "0.16", features = [ "jpeg", "wayland", ] }
 
 # plugins
 # wireframes
-aalo = { version = "0.0.4", optional = true }
+# TODO: add when 0.16
+# aalo = { version = "0.0.5", optional = true }
 
 # physics
-avian3d = { version = "0.2", features = ["3d", "parallel"] }
+avian3d = { version = "0.2", features = ["3d", "parallel", "collider-from-mesh"] }
 
 # camera
-bevy_third_person_camera = "0.2"
-
-# skybox
-bevy_atmosphere = "0.12"
+bevy_third_person_camera = "0.2.1"
 
 # floating character control
-bevy-tnua = { version = "0.22.0", git = "https://github.com/idanarye/bevy-tnua", branch = "feature/opt-out-of-being-ground" }
-bevy-tnua-avian3d = { version = "0.3.1", git = "https://github.com/idanarye/bevy-tnua", branch = "feature/opt-out-of-being-ground" }
+bevy-tnua = "0.23"
+bevy-tnua-avian3d = "0.5"
 
 # diagnostics overlay
-iyes_perf_ui = "0.4"
+iyes_perf_ui = "0.5.0-rc.1"
 
-# key binding
+# key bindings
 leafwing-input-manager = "0.16"
 
 # misc
@@ -70,6 +74,13 @@ log = { version = "0.4", features = ["max_level_debug", "release_max_level_warn"
 # keep the following in sync with Bevy's dependencies
 winit = { version = "0.30", default-features = false }
 
+# TODO: delete after everyone migrates to 0.16
+[patch.crates-io]
+avian3d = { git = "https://github.com/Jondolf/avian", branch = "main" }
+bevy-tnua = { git = "https://github.com/janhohenheim/bevy-tnua", branch = "bevy-0.16" }
+bevy-tnua-avian3d = { git = "https://github.com/janhohenheim/bevy-tnua", branch = "bevy-0.16" }
+leafwing-input-manager = { git = "https://github.com/Leafwing-Studios/leafwing-input-manager", branch = "main" }
+iyes_perf_ui = { git = "https://github.com/IyesGames/iyes_perf_ui", branch = "main" }
 
 [lints.clippy]
 # Bevy supplies arguments to systems via dependency injection, so it's natural for systems to
@@ -92,6 +103,8 @@ opt-level = 3
 # Do a second optimization pass over the entire program, including dependencies.
 # Slows compile times, marginal improvements.
 lto = "thin"
+# Optimize with size in mind (also try "z", sometimes it is better).
+# Slightly slows compile times, great improvements to file size and runtime performance.
 opt-level = "s"
 # Compile the entire crate as one unit. Slows compile times, marginal improvements.
 codegen-units = 1
@@ -104,6 +117,12 @@ opt-level = 3
 lto = true
 codegen-units = 1
 strip = true
+
+# Optimize for size in the wasm-release profile to reduce load times and bandwidth usage on web.
+[profile.wasm-release]
+inherits = "release"
+# Strip all debugging information from the binary to slightly reduce file size.
+strip = "debuginfo"
 
 [build-dependencies]
 embed-resource = "1"

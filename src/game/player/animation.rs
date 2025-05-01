@@ -74,7 +74,7 @@ pub fn prepare_animations(
         return;
     };
 
-    let Ok(animation_player_entity) = animation_player.get_single() else {
+    let Ok(animation_player_entity) = animation_player.single() else {
         return;
     };
 
@@ -132,10 +132,10 @@ pub fn animating(
 ) {
     // An actual game should match the animation player and the controller. Here we cheat for
     // simplicity and use the only controller and only player.
-    let Ok((controller, mut animating_state)) = player_query.get_single_mut() else {
+    let Ok((controller, mut animating_state)) = player_query.single_mut() else {
         return;
     };
-    let Ok(mut animation_player) = animation_player.get_single_mut() else {
+    let Ok(mut animation_player) = animation_player.single_mut() else {
         return;
     };
     let Some(animation_nodes) = animation_nodes else {
@@ -171,7 +171,7 @@ pub fn animating(
         // of the `TnuaAction` trait. Once `type_name` is stabilized as `const` Tnua will use it to
         // generate these names automatically, which may result in a change to the name.
         Some(TnuaBuiltinJump::NAME) => {
-            if let Ok(mut timer) = jump_timer.get_single_mut() {
+            if let Ok(mut timer) = jump_timer.single_mut() {
                 if timer.0.tick(time.delta()).just_finished() {
                     return;
                 }
@@ -187,7 +187,7 @@ pub fn animating(
                 TnuaBuiltinJumpState::NoJump => return,
                 TnuaBuiltinJumpState::StartingJump { .. } => AnimationState::JumpStart,
                 TnuaBuiltinJumpState::SlowDownTooFastSlopeJump { .. } => AnimationState::JumpStart,
-                TnuaBuiltinJumpState::MaintainingJump => AnimationState::JumpLoop,
+                TnuaBuiltinJumpState::MaintainingJump { .. } => AnimationState::JumpLoop,
                 TnuaBuiltinJumpState::StoppedMaintainingJump => AnimationState::JumpLand,
                 TnuaBuiltinJumpState::FallSection => AnimationState::Fall,
             }
