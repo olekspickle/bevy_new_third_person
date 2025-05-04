@@ -33,11 +33,17 @@ impl Opts {
                 min_width: Px(MIN_WIDTH),
                 ..Default::default()
             },
-            color: BTN,
+            color: WHITEISH,
             bg_color: TRANSPARENT,
-            border_color: BTN,
+            border_color: WHITEISH,
             border_radius: BORDER_RADIUS,
         }
+    }
+
+    pub(crate) fn btn(s: impl Into<Cow<'static, str>>) -> Self {
+        let mut new = Self::new(s);
+        new.node.padding = UiRect::all(Px(10.0));
+        new
     }
 
     pub(crate) fn with_text(mut self, text: impl Into<Cow<'static, str>>) -> Self {
