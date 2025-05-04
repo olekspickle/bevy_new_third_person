@@ -4,7 +4,7 @@ use iyes_perf_ui::{
     entries::{
         PerfUiFixedTimeEntries, PerfUiFramerateEntries, PerfUiSystemEntries, PerfUiWindowEntries,
     },
-    prelude::PerfUiAllEntries,
+    prelude::*,
 };
 
 mod interaction;
@@ -44,24 +44,18 @@ pub struct Fira(pub Handle<Font>);
 
 fn setup_perf_ui(mut commands: Commands) {
     commands.spawn((
-        ui_root("UI Perf"),
         PerfUiMarker,
-        children![
-            Node {
-                flex_direction: FlexDirection::Column,
-                align_items: AlignItems::End,
-                ..Default::default()
-            },
-            children![
-                // Contains everything related to FPS and frame time
-                PerfUiFramerateEntries::default(),
-                // Contains everything related to the window and cursor
-                PerfUiWindowEntries::default(),
-                // Contains everything related to system diagnostics (CPU, RAM)
-                PerfUiSystemEntries::default(),
-                // Contains everything related to fixed timestep
-                PerfUiFixedTimeEntries::default(),
-            ]
-        ],
+        PerfUiRoot {
+            position: PerfUiPosition::TopRight,
+            ..default()
+        },
+        // Contains everything related to FPS and frame time
+        PerfUiFramerateEntries::default(),
+        // Contains everything related to the window and cursor
+        PerfUiWindowEntries::default(),
+        // Contains everything related to system diagnostics (CPU, RAM)
+        PerfUiSystemEntries::default(),
+        // Contains everything related to fixed timestep
+        PerfUiFixedTimeEntries::default(),
     ));
 }

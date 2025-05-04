@@ -5,14 +5,13 @@
 Current status:
 - [x] simple asset loading from [BevyFlock] example with loading from path addition
 - [x] import and usage of game mechanics and parameters from .ron config
-- [x] simple skybox sun cycle using [bevy_atmosphere]
 - [x] third person camera with [bevy_third_person_camera]
 - [x] simple key mapping to game actions using [leafwing-input-manager]
-- [x] simple player movement using [bevy_tnua]
 - [x] simple scene with colliders and rigid bodies using [avian3d]
-- [x] ui widget traits for simpler ui building (RynKitty came up with it during a jam, I expanded it a bit)
-- [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio)
-- [x] rig and animations using [Universal Animation Library] from quaternius
+- [x] simple player movement using [bevy_tnua]
+- [ ] simple skybox sun cycle using [bevy atmosphere example]
+- [ ] rig and animations using [Universal Animation Library] from quaternius
+- [ ] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio)
 - [ ] vault mechanics
 - [ ] small door/portal demo
 
@@ -108,7 +107,7 @@ This project is licensed under [CC0 1.0 Universal](LICENSE) except some content 
 [android-instructions]: https://github.com/bevyengine/bevy/blob/latest/examples/README.md#setup
 [avian3d]: https://github.com/Jondolf/avian/tree/main/crates/avian3d
 [bevy]: https://bevyengine.org/
-[bevy_atmosphere]: https://github.com/JonahPlusPlus/bevy_atmosphere
+[bevy atmosphere example]: https://bevyengine.org/examples/3d-rendering/atmosphere/
 [bevy-discord]: https://discord.gg/bevy
 [bevy-learn]: https://bevyengine.org/learn/
 [bevy_third_person_camera]: https://github.com/The-DevBlog/bevy_third_person_camera

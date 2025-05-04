@@ -39,9 +39,9 @@ fn spawn_gameplay_ui(mut commands: Commands) {
                         ..Default::default()
                     },
                     children![
-                        (label("P - pause"), children![PauseLabel]),
-                        (label("M - mute"), children![MuteLabel]),
-                        (label("F - diagnostics"), children![PauseLabel]),
+                        (label("P - pause"), PauseLabel),
+                        (label("M - mute"), MuteLabel),
+                        label("F - diagnostics"),
                         TextLayout::new_with_justify(JustifyText::Left)
                     ]
                 ),

@@ -1,5 +1,5 @@
-[build]
-public_url = "./"
-
-[serve]
-port = 8080
+# [build]
+# public_url = "./"
+#
+# [serve]
+# port = 8080

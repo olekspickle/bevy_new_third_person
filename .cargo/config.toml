@@ -145,3 +145,7 @@ rustflags = [
 # In most cases the gains are negligible, but if you are on macos and have slow compile times you should see significant gains.
 # [profile.dev]
 # debug = 1
+
+# help trunk
+[target.wasm32-unknown-unknown]
+runner = "wasm-server-runner"

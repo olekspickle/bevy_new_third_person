@@ -1,13 +1,13 @@
 (
-    scale: 5.0,
     geometry: (
         main_plane: 200,
         quantity: 20,
     ),
     player:(
+        fov: 60,
         zoom: (1.5, 30.0),
         movement: (
-            speed: 500,
+            speed: 1000,
             actions_in_air: 2,
             dash_distance: 10,
         ),
@@ -15,5 +15,10 @@
             radius: 0.5,
             height: 1.5
         ),
+    ),
+    sound: (
+        general: 1.0,
+        music: 0.5,
+        sfx: 0.5,
     )
 )

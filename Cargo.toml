@@ -13,34 +13,66 @@ members = ["mobile"]
 
 [features]
 default = [
-    # Default to a native dev build.
-    "dev_native",
-]
-dev = [
-    # Improve compile times for dev builds by linking Bevy as a dynamic library.
-    "bevy/dynamic_linking",
-    "bevy/bevy_dev_tools",
-    # "aalo",
+    "dev_native",                   # Default to a native dev build.
 ]
 dev_native = [
-    "dev",
-    # Enable asset hot reloading for native dev builds.
-    "bevy/file_watcher",
-    # Enable embedded asset hot reloading for native dev builds.
-    "bevy/embedded_watcher",
+    "bevy/bevy_dev_tools",
+    "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
+    # "bevy/file_watcher",            # Enable asset hot reloading for native dev builds.
+    # "bevy/embedded_watcher",        # Enable embedded asset hot reloading for native dev builds.
     "enhanced"
 ]
+
+# For all dev builds (shared logic, wasm-safe)
+dev = ["bevy/bevy_dev_tools", "enhanced"]
 enhanced = [
-    # new nanite-like rendering system
-    "bevy/meshlet",
-    # PBR specular maps
-    "bevy/pbr_specular_textures"
+    "bevy/meshlet",                 # new nanite-like rendering system
+    "bevy/pbr_specular_textures"    # PBR specular maps
 ]
 
 [dependencies]
 # TODO: use after 0.16 migration
-# bevy_common_assets = {version="0.12.0", features=["ron"]}
-bevy = { version = "0.16", features = [ "jpeg", "wayland", ] }
+# bevy_seedling = "0.3"
+# everything except bevy_audio
+bevy = { version = "^0.16", default-features = false, features = [
+    "std",
+    "vorbis",
+    "bevy_audio",
+    "animation",
+    "bevy_asset",
+    "bevy_color",
+    "bevy_core_pipeline",
+    "bevy_gilrs",
+    "bevy_gizmos",
+    "bevy_gltf",
+    "bevy_input_focus",
+    "bevy_log",
+    "bevy_mesh_picking_backend",
+    "bevy_pbr",
+    "bevy_picking",
+    "bevy_render",
+    "bevy_scene",
+    "bevy_sprite",
+    "bevy_sprite_picking_backend",
+    "bevy_state",
+    "bevy_text",
+    "bevy_ui",
+    "bevy_ui_picking_backend",
+    "bevy_window",
+    "bevy_winit",
+    "custom_cursor",
+    "default_font",
+    "hdr",
+    "multi_threaded",
+    "png",
+    "jpeg",
+    "smaa_luts",
+    "sysinfo_plugin",
+    "tonemapping_luts",
+    "x11",
+    "webgl2",
+    "wayland"
+] }
 
 # plugins
 # wireframes

@@ -10,13 +10,11 @@ crate-type = ["staticlib", "cdylib"]
 
 [dependencies]
 bevy_new_third_person = { path = ".." }
-bevy = { version = "0.15", default-features = false, features = ["android-native-activity"] }
+bevy = { version = "0.16", default-features = false, features = ["android-native-activity"] }
 
 # See https://github.com/bevyengine/bevy/pull/12052
 [target.aarch64-apple-ios-sim.dependencies]
-bevy = { version = "0.15", default-features = false, features = [
-    "ios_simulator",
-] }
+bevy = { version = "0.16", default-features = false }
 
 [package.metadata.android]
 package = "me.olekspickle.bevygame"
