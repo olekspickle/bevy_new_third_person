@@ -1,86 +1,160 @@
 //! The screen state for the main gameplay.
 
-use crate::prelude::*;
-use bevy::{audio::Volume, prelude::*};
+use super::*;
+use bevy::audio::Volume;
+use bevy_third_person_camera::ThirdPersonCamera;
 use leafwing_input_manager::prelude::*;
 use rand::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(
-        OnEnter(Screen::Gameplay),
-        (start_or_resume_bg_music, spawn_gameplay_ui),
-    )
-    .add_systems(
-        Update,
-        movement_sound
-            .run_if(resource_exists::<AudioSources>)
-            .run_if(in_state(Screen::Gameplay)),
-    );
+    app.add_event::<OnMenuToggle>()
+        .add_systems(
+            OnEnter(Screen::Gameplay),
+            (
+                start_or_resume_soundtrack.after(scene::setup),
+                spawn_gameplay_ui,
+            ),
+        )
+        .add_systems(
+            Update,
+            (toot, movement_sound, invoke_menu)
+                .run_if(resource_exists::<AudioSources>)
+                .run_if(in_state(Screen::Gameplay)),
+        )
+        .add_observer(toggle_menu);
 }
 
 #[derive(Component)]
 pub struct PauseLabel;
 #[derive(Component)]
 pub struct MuteLabel;
+// TODO: The idea is to create a boombox with spatial audio
+// <https://github.com/bevyengine/bevy/blob/main/examples/audio/spatial_audio_3d.rs>
+// #[derive(Component)]
+// pub struct Boombox;
 
 fn spawn_gameplay_ui(mut commands: Commands) {
-    commands
-        .spawn((
-            Node {
-                flex_direction: FlexDirection::Row,
-                ..Default::default()
-            },
+    commands.spawn((
+        StateScoped(Screen::Gameplay),
+        Node {
+            flex_direction: FlexDirection::Row,
+            ..Default::default()
+        },
+        children![
             // Demo keys
-            children![
-                (
-                    Node {
-                        flex_direction: FlexDirection::Column,
-                        align_items: AlignItems::Start,
-                        ..Default::default()
-                    },
-                    children![
-                        (label("P - pause"), PauseLabel),
-                        (label("M - mute"), MuteLabel),
-                        label("F - diagnostics"),
-                        TextLayout::new_with_justify(JustifyText::Left)
-                    ]
-                ),
-                // Demo title
-                label("Hello Third Person"),
-            ],
-        ))
-        .insert(StateScoped(Screen::Gameplay));
+            (
+                Node {
+                    flex_direction: FlexDirection::Column,
+                    align_items: AlignItems::Start,
+                    ..Default::default()
+                },
+                children![
+                    (label("P - pause"), PauseLabel),
+                    (label("M - mute"), MuteLabel),
+                    label("F - diagnostics"),
+                    label("V - incr fov"),
+                    TextLayout::new_with_justify(JustifyText::Left)
+                ]
+            ),
+            // Demo title
+            (
+                Node {
+                    justify_content: JustifyContent::Center,
+                    ..Default::default()
+                },
+                children![label("Hello Third Person"),]
+            )
+        ],
+    ));
 }
 
-fn invoke_settings(
+fn toot(
+    mut commands: Commands,
+    settings: Res<Settings>,
+    sources: ResMut<AudioSources>,
     action: Query<&ActionState<Action>>,
-    // mut music: Query<&mut AudioSink, (With<Music>, Without<SoundEffect>)>,
-    // mut sfx: Query<&mut AudioSink, (With<SoundEffect>, Without<Music>)>,
 ) -> Result {
     let state = action.single()?;
-    if state.just_pressed(&Action::Settings) {}
+    if state.just_pressed(&Action::Toot) {
+        let vol = settings.sound.general * settings.sound.sfx;
+        commands.spawn(sfx(sources.btn_hover.clone(), vol));
+    }
 
     Ok(())
 }
 
-fn start_or_resume_bg_music(
+#[derive(Event)]
+pub struct OnMenuToggle;
+#[derive(Component)]
+pub struct Menu;
+
+fn invoke_menu(mut commands: Commands, action: Query<&ActionState<Action>>) -> Result {
+    let state = action.single()?;
+    if state.just_pressed(&Action::Menu) {
+        commands.trigger(OnMenuToggle);
+    }
+
+    Ok(())
+}
+
+fn trigger_toggle_menu(_: Trigger<OnPress>, mut commands: Commands) {
+    commands.trigger(OnMenuToggle);
+}
+
+fn toggle_menu(
+    _: Trigger<OnMenuToggle>,
+    mut commands: Commands,
+    mut settings: ResMut<Settings>,
+    menu: Query<Entity, With<Menu>>,
+    mut cam: Query<&mut ThirdPersonCamera>,
+) {
+    let Ok(mut cam) = cam.single_mut() else {
+        return;
+    };
+    cam.cursor_lock_active = !cam.cursor_lock_active;
+    settings.menu_open = !settings.menu_open;
+
+    if settings.menu_open {
+        commands.spawn((
+            Menu,
+            ui_root("In game menu"),
+            children![
+                button_small("x", trigger_toggle_menu),
+                button("Settings", to_settings),
+                button("Main Menu", to_title)
+            ],
+        ));
+    } else if let Ok(menu) = menu.single() {
+        commands.entity(menu).despawn();
+    }
+}
+
+// TODO: implement different music states
+// good structure in this example: <https://github.com/bevyengine/bevy/blob/main/examples/audio/soundtrack.rs#L29>
+fn start_or_resume_soundtrack(
     mut commands: Commands,
     settings: Res<Settings>,
     sources: ResMut<AudioSources>,
+    // boombox: Query<Entity, With<Boombox>>,
     mut music_query: Query<&mut AudioSink, With<Music>>,
-) {
-    if let Ok(mut instance) = music_query.single_mut() {
+) -> Result {
+    if let Ok(instance) = music_query.single_mut() {
         if instance.is_paused() {
             // TODO: use seedling under feature
-            instance.toggle_mute();
-        } else {
-            let handle = *[&sources.bg_music].choose(&mut thread_rng()).unwrap();
-            commands.spawn(music(
-                handle.clone(),
-                settings.sound.general * settings.sound.music,
-            ));
+            instance.play();
         }
+    } else {
+        let handle = *[&sources.bg_music].choose(&mut thread_rng()).unwrap();
+        let vol = settings.sound.general * settings.sound.music;
+        // // Play music from boombox entity
+        // commands
+        //     .entity(boombox.single()?)
+        //     .insert(music(handle.clone(), vol));
+        // Or just play music
+        commands.spawn(music(handle.clone(), vol));
     }
+
+    Ok(())
 }
 
 fn movement_sound(

@@ -1,5 +1,4 @@
-use crate::prelude::*;
-use bevy::prelude::*;
+use super::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::GameOver), spawn_screen);
@@ -9,10 +8,15 @@ fn spawn_screen(mut commands: Commands, score: Res<Score>) {
     commands
         .spawn((
             ui_root("game over screen"),
+            #[cfg(target_family = "wasm")]
             children![
                 label(format!("Score: {}", score.0)),
                 button("PlayAgain", enter_gameplay_screen),
-                #[cfg(not(target_family = "wasm"))]
+            ],
+            #[cfg(not(target_family = "wasm"))]
+            children![
+                label(format!("Score: {}", score.0)),
+                button("PlayAgain", enter_gameplay_screen),
                 button("Exit", exit_app)
             ],
         ))

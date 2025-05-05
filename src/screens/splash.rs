@@ -7,8 +7,8 @@ use bevy::{
     ui::Val::*,
 };
 
-const SPLASH_DURATION_SECS: f32 = 1.8;
-const SPLASH_FADE_DURATION_SECS: f32 = 0.3;
+const SPLASH_DURATION_SECS: f32 = 3.0;
+const SPLASH_FADE_DURATION_SECS: f32 = 1.0;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Splash), spawn_splash_screen);
@@ -45,13 +45,13 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands
-        .spawn((
-            ui_root("Splash screen"),
-            children![
+    commands.spawn((
+        ui_root("Splash screen"),
+        children![
+            (
                 Node {
-                    width: Percent(20.0),
                     align_self: AlignSelf::Center,
+                    width: Percent(30.0),
                     ..default()
                 },
                 ImageNode::new(asset_server.load_with_settings(
@@ -68,11 +68,12 @@ fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
                     total_duration: SPLASH_DURATION_SECS,
                     fade_duration: SPLASH_FADE_DURATION_SECS,
                     t: 0.0,
-                },
-                label("Made with BEVY")
-            ],
-        ))
-        .insert(StateScoped(Screen::Splash));
+                }
+            ),
+            label("Made with BEVY and love")
+        ],
+        StateScoped(Screen::Splash),
+    ));
 }
 
 #[derive(Component, Reflect)]
@@ -85,17 +86,35 @@ struct ImageNodeFadeInOut {
     /// Current progress in seconds, between 0 and [`Self::total_duration`].
     t: f32,
 }
-
 impl ImageNodeFadeInOut {
     fn alpha(&self) -> f32 {
-        // Normalize by duration.
-        let t = (self.t / self.total_duration).clamp(0.0, 1.0);
-        let fade = self.fade_duration / self.total_duration;
+        let t = self.t;
+        let fade = self.fade_duration;
+        let total = self.total_duration;
 
-        // Regular trapezoid-shaped graph, flat at the top with alpha = 1.0.
-        ((1.0 - (2.0 * t - 1.0).abs()) / fade).min(1.0)
+        if t < fade {
+            // Fade in
+            t / fade
+        } else if t > total - fade {
+            // Fade out
+            (total - t) / fade
+        } else {
+            // Fully visible
+            1.0
+        }
+        .clamp(0.0, 1.0)
     }
 }
+// impl ImageNodeFadeInOut {
+//     fn alpha(&self) -> f32 {
+//         // Normalize by duration.
+//         let t = (self.t / self.total_duration).clamp(0.0, 1.0);
+//         let fade = self.fade_duration / self.total_duration;
+//
+//         // Regular trapezoid-shaped graph, flat at the top with alpha = 1.0.
+//         ((1.0 - (2.0 * t - 1.0).abs()) / fade).min(1.0)
+//     }
+// }
 
 fn tick_fade_in_out(time: Res<Time>, mut animation_query: Query<&mut ImageNodeFadeInOut>) {
     for mut anim in &mut animation_query {

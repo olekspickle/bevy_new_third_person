@@ -1,8 +1,7 @@
 //! A loading screen during which game assets are loaded.
 //! This reduces stuttering, especially for audio on WASM.
 
-use crate::prelude::*;
-use bevy::prelude::*;
+use super::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Loading), spawn_loading_screen)
@@ -13,9 +12,11 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 fn spawn_loading_screen(mut commands: Commands) {
-    commands
-        .spawn((ui_root("loading"), children![label("Loading...")]))
-        .insert(StateScoped(Screen::Loading));
+    commands.spawn((
+        ui_root("loading screen"),
+        children![label("Loading...")],
+        StateScoped(Screen::Loading),
+    ));
 }
 
 fn continue_to_menu_screen(mut next_screen: ResMut<NextState<Screen>>) {
