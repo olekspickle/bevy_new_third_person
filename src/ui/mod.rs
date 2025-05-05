@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, ui::Val::*};
 use iyes_perf_ui::{
     PerfUiPlugin,
     entries::{PerfUiFramerateEntries, PerfUiWindowEntries},
@@ -14,10 +14,6 @@ pub use interaction::{InteractionPalette, OnPress};
 pub use opts::*;
 pub use palette::*;
 pub use widget::*;
-
-pub const BORDER_RADIUS: f32 = 15.0;
-pub const FONT_SIZE: f32 = 24.0;
-pub const MIN_WIDTH: f32 = 200.0;
 
 pub fn plugin(app: &mut App) {
     //app.load_resource_from_path::<Fira>("fonts/FiraCode-Regular.ttf");

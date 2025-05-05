@@ -1,12 +1,12 @@
 //! Helper functions for creating common widgets.
 
 use super::*;
+use bevy::ecs::{spawn::SpawnWith, system::IntoObserverSystem};
 use std::borrow::Cow;
 
-use bevy::{
-    ecs::{spawn::SpawnWith, system::IntoObserverSystem},
-    ui::Val::*,
-};
+pub const BORDER_RADIUS: f32 = 15.0;
+pub const FONT_SIZE: f32 = 24.0;
+pub const MIN_WIDTH: f32 = 200.0;
 
 /// A root UI node that fills the window and centers its content.
 pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
@@ -39,20 +39,14 @@ pub fn text(opts: impl Into<Opts>) -> impl Bundle {
 pub fn label(opts: impl Into<Opts>) -> impl Bundle {
     let opts = opts.into();
     let s = opts.text.clone();
-
-    // dynamic width calculated from font size so that label node does not cut it out
     let short = if s.len() > 10 { &s[..8] } else { &s };
-    let node = Node {
-        width: Px(s.len() as f32 * opts.font.font_size),
-        ..opts.node.clone()
-    };
 
     (
         Name::new(format!("Label {short}")),
         BorderRadius::all(Px(opts.border_radius)),
         opts.font.clone(),
+        opts.node.clone(),
         Label,
-        node,
         text(opts),
     )
 }
@@ -96,6 +90,7 @@ where
     let action = IntoObserverSystem::into_system(action);
     let mut opts = opts.into();
     opts.node.padding = UiRect::all(Px(10.0));
+    opts.node.min_width = Px(MIN_WIDTH);
 
     (
         Name::new(format!("Button {}", opts.text)),

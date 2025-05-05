@@ -1,5 +1,4 @@
 use super::*;
-use bevy::ui::Val::*;
 use std::borrow::Cow;
 
 #[derive(Debug, Clone)]
@@ -18,11 +17,15 @@ pub struct Opts {
 
 impl Opts {
     pub(crate) fn new(s: impl Into<Cow<'static, str>>) -> Self {
+        let text = s.into();
+        // a bit of a hack IMO - it's weird that text node is not the width of the text by default
+        let min_width = Px(text.len() as f32 * FONT_SIZE / 1.2);
         Self {
-            text: s.into(),
+            text,
             text_layout: TextLayout::new_with_justify(JustifyText::Center),
             font: TextFont::from_font_size(FONT_SIZE),
             node: Node {
+                min_width,
                 width: Percent(30.0),
                 align_items: AlignItems::Center,
                 align_content: AlignContent::Center,
@@ -30,7 +33,6 @@ impl Opts {
                 justify_content: JustifyContent::Center,
                 border: UiRect::all(Px(2.0)),
                 padding: UiRect::horizontal(Px(10.0)),
-                min_width: Px(MIN_WIDTH),
                 ..Default::default()
             },
             color: WHITEISH,
