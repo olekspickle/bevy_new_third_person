@@ -9,7 +9,45 @@ pub fn plugin(app: &mut App) {
     app.init_resource::<Settings>();
     app.add_plugins(InputManagerPlugin::<Action>::default())
         .add_systems(Startup, spawn_player_input_map)
+        .add_systems(
+            OnEnter(Screen::Gameplay),
+            inject_settings_from_cfg.run_if(resource_exists::<Config>),
+        )
         .add_systems(Update, toggle_global);
+}
+
+#[derive(Resource)]
+pub struct Settings {
+    pub fov: f32,
+    pub sound: Sound,
+
+    // game state things
+    pub diagnostics: bool,
+    pub menu_open: bool,
+    pub muted: bool,
+    pub paused: bool,
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Self {
+            sound: Sound::default(),
+            diagnostics: true,
+            menu_open: false,
+            paused: false,
+            muted: false,
+            fov: 45.0, // bevy default
+        }
+    }
+}
+
+fn inject_settings_from_cfg(mut commands: Commands, cfg: Res<Config>) {
+    commands.insert_resource(Settings {
+        sound: cfg.sound.clone(),
+        fov: cfg.player.fov,
+        diagnostics: true,
+        ..Default::default()
+    });
 }
 
 #[derive(Actionlike, PartialEq, Eq, Clone, Copy, Hash, Debug, Reflect)]
@@ -24,10 +62,12 @@ pub enum Action {
     Crouch,
 
     // Miscellaneous
+    Menu,
     Mute,
     Pause,
-    Settings,
     ToggleDiagnostics,
+    Toot,
+    FovIncr,
 }
 
 fn spawn_player_input_map(mut commands: Commands) {
@@ -49,31 +89,13 @@ fn spawn_player_input_map(mut commands: Commands) {
 
     input_map.insert(Action::Pause, KeyCode::KeyP);
     input_map.insert(Action::Mute, KeyCode::KeyM);
-    input_map.insert(Action::Settings, KeyCode::Escape);
+    input_map.insert(Action::Menu, KeyCode::Escape);
     input_map.insert(Action::ToggleDiagnostics, KeyCode::KeyF);
 
+    input_map.insert(Action::Toot, KeyCode::KeyC);
+    input_map.insert(Action::FovIncr, KeyCode::KeyV);
+
     commands.spawn(input_map);
-}
-
-#[derive(Resource)]
-pub struct Settings {
-    pub fov: f32,
-    pub muted: bool,
-    pub paused: bool,
-    pub diagnostics: bool,
-    pub sound: Sound,
-}
-
-impl Default for Settings {
-    fn default() -> Self {
-        Self {
-            sound: Sound::DEFAULT,
-            diagnostics: false,
-            paused: false,
-            muted: false,
-            fov: 90.0,
-        }
-    }
 }
 
 #[allow(clippy::type_complexity)]
@@ -103,21 +125,21 @@ fn toggle_global(
         }
     }
 
-    if state.just_pressed(&Action::Pause) || state.just_pressed(&Action::Settings) {
+    if state.just_pressed(&Action::Pause) || state.just_pressed(&Action::Menu) {
         if let Ok((mut bg, mut color)) = label_set.p0().single_mut() {
             if time.is_paused() || settings.paused {
                 time.unpause();
-                *color = TextColor(LABEL);
-                *bg = BackgroundColor(NODE_BG);
+                *color = TextColor(WHITEISH);
+                *bg = BackgroundColor(TRANSPARENT);
             } else {
                 time.pause();
-                *color = TextColor(NODE_BG);
-                *bg = BackgroundColor(LABEL);
+                *color = TextColor(GRAY);
+                *bg = BackgroundColor(WHITEISH);
             }
         }
-        // TODO: use seedling under feature
-        for mut s in music.iter_mut().chain(sfx.iter_mut()) {
-            s.toggle_mute();
+        // TODO: use seedling when it's migrated to 0.16
+        for s in music.iter_mut().chain(sfx.iter_mut()) {
+            s.pause();
         }
         settings.paused = !settings.paused;
     }
@@ -125,7 +147,7 @@ fn toggle_global(
     if state.just_pressed(&Action::Mute) {
         if let Ok((mut bg, mut color)) = label_set.p1().single_mut() {
             if settings.muted {
-                // TODO: use seedling under feature
+                // TODO: use seedling when it's migrated to 0.16
                 for mut s in music {
                     s.set_volume(Volume::Linear(
                         settings.sound.general * settings.sound.music,
@@ -134,15 +156,15 @@ fn toggle_global(
                 for mut s in sfx {
                     s.set_volume(Volume::Linear(settings.sound.general * settings.sound.sfx));
                 }
-                *color = TextColor(LABEL);
+                *color = TextColor(WHITEISH);
                 *bg = BackgroundColor(TRANSPARENT);
             } else {
-                // TODO: use seedling under feature
+                // TODO: use seedling when it's migrated to 0.16
                 for mut s in music.iter_mut().chain(sfx.iter_mut()) {
                     s.mute();
                 }
-                *color = TextColor(NODE_BG);
-                *bg = BackgroundColor(LABEL);
+                *color = TextColor(GRAY);
+                *bg = BackgroundColor(WHITEISH);
             }
         }
         settings.muted = !settings.muted;

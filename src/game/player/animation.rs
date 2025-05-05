@@ -37,31 +37,6 @@ pub struct AnimationNodes {
     knockback: AnimationNodeIndex,
 }
 
-//fn play_gltf_mesh_animations(
-//    mut commands: Commands,
-//    children: Query<&Children>,
-//    animations: Query<&GltfPendingAnimation>,
-//    mut players: Query<&mut AnimationPlayer>,
-//) {
-//    commands
-//        .entity(trigger.target())
-//        .remove::<GltfPendingAnimation>();
-//
-//    if let Ok(animation) = animations.get(trigger.target()) {
-//        for child in children.iter_descendants(trigger.target()) {
-//            if let Ok(mut player) = players.get_mut(child) {
-//                player
-//                    .play(animation.graph_node_index)
-//                    .set_speed(animation.speed)
-//                    .repeat();
-//
-//                commands
-//                    .entity(child)
-//                    .insert(AnimationGraphHandle(animation.graph_handle.clone()));
-//            }
-//        }
-//    }
-//}
 pub fn prepare_animations(
     _trigger: Trigger<SceneInstanceReady>,
     models: Res<Models>,
@@ -112,21 +87,10 @@ pub fn prepare_animations(
 }
 
 pub fn animating(
-    cfg: Res<Config>,
-    mut player_query: Query<(
-        // The controller can be used to determine the state of the character - information crucial
-        // for deciding which animation to play.
-        &TnuaController,
-        // `TnuaAnimatingState` is a helper for controlling the animations. The user system is
-        // expected to provide it with an enum on every frame that describes the state of the
-        // character. The helper then tells the user system if the enum variant changed - which
-        // usually means the system should start a new animation - or remained the same, which
-        // means that the system should not change the animation (but maybe change its speed based
-        // on the enum's payload)
-        &mut TnuaAnimatingState<AnimationState>,
-    )>,
-    mut animation_player: Query<&mut AnimationPlayer>,
     time: Res<Time>,
+    cfg: Res<Config>,
+    mut player_query: Query<(&TnuaController, &mut TnuaAnimatingState<AnimationState>)>,
+    mut animation_player: Query<&mut AnimationPlayer>,
     mut jump_timer: Query<&mut JumpTimer>,
     animation_nodes: Option<Res<AnimationNodes>>,
 ) {

@@ -14,7 +14,7 @@ pub fn plugin(app: &mut App) {
         camera::plugin,
         player::plugin,
         scene::plugin,
-        // skybox::plugin,
+        skybox::plugin,
     ));
 }
 
