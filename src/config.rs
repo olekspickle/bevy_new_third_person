@@ -1,9 +1,10 @@
+use crate::prelude::*;
 use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
 pub struct Config {
-    pub scale: f32,
+    pub sound: Sound,
     pub geometry: Geometry,
     pub player: PlayerConfig,
 }
@@ -18,6 +19,7 @@ pub struct PlayerConfig {
     pub movement: Movement,
     pub hitbox: Hitbox,
     pub zoom: (f32, f32),
+    pub fov: f32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]

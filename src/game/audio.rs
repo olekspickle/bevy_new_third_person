@@ -1,18 +1,21 @@
 use bevy::{audio::Volume, prelude::*};
+use serde::{Deserialize, Serialize};
 
-#[derive(Resource, Default)]
+#[derive(Resource, Debug, Clone, Serialize, Deserialize, Reflect)]
 pub struct Sound {
     pub general: f32,
     pub music: f32,
     pub sfx: f32,
 }
 
-impl Sound {
-    pub const DEFAULT: Self = Sound {
-        general: 0.5,
-        music: 0.5,
-        sfx: 0.5,
-    };
+impl Default for Sound {
+    fn default() -> Self {
+        Self {
+            general: 1.0,
+            music: 0.5,
+            sfx: 0.5,
+        }
+    }
 }
 
 /// An organizational marker component that should be added to a spawned [`AudioPlayer`] if it's in the
@@ -25,12 +28,12 @@ pub struct Music;
 /// A music audio instance.
 pub fn music(handle: Handle<AudioSource>, volume: f32) -> impl Bundle {
     (
+        Music,
         AudioPlayer(handle),
         PlaybackSettings {
             volume: Volume::Linear(volume),
             ..PlaybackSettings::LOOP
         },
-        Music,
     )
 }
 
@@ -42,6 +45,13 @@ pub fn music(handle: Handle<AudioSource>, volume: f32) -> impl Bundle {
 pub struct SoundEffect;
 
 /// A sound effect audio instance.
-pub fn sound_effect(handle: Handle<AudioSource>) -> impl Bundle {
-    (AudioPlayer(handle), PlaybackSettings::DESPAWN, SoundEffect)
+pub fn sfx(handle: Handle<AudioSource>, volume: f32) -> impl Bundle {
+    (
+        SoundEffect,
+        AudioPlayer(handle),
+        PlaybackSettings {
+            volume: Volume::Linear(volume),
+            ..PlaybackSettings::DESPAWN
+        },
+    )
 }

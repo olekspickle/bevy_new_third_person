@@ -15,25 +15,18 @@ pub fn plugin(app: &mut App) {
         .add_systems(OnEnter(Screen::Gameplay), setup);
 }
 
-fn setup(
+pub(crate) fn setup(
     config: Res<Config>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut images: ResMut<Assets<Image>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let debug_material = materials.add(StandardMaterial {
-        base_color_texture: Some(images.add(uv_debug_texture())),
-        #[cfg(feature = "enhanced")]
-        specular_tint: Color::WHITE,
-        ..default()
-    });
-
     let main_plane = config.geometry.main_plane;
 
     // Plane
     let mesh = Mesh3d(meshes.add(Cuboid::new(main_plane, 0., main_plane)));
-    let mat = MeshMaterial3d(materials.add(GREY));
+    let mat = MeshMaterial3d(materials.add(SAND_YELLOW));
     commands.spawn((
         mat,
         mesh,
@@ -56,15 +49,21 @@ fn setup(
             y_size / 2.0 + i * step,
             -size / 4.0,
         );
-        let mesh = if i % 2.0 == 0.0 {
-            Mesh::from(Cuboid::new(x_size, y_size, x_size))
+        let (mesh, color) = if i % 2.0 == 0.0 {
+            (Mesh::from(Cuboid::new(x_size, y_size, x_size)), GREEN)
         } else {
             z += size / 2.0;
-            Mesh::from(Sphere::new(y_size))
+            (Mesh::from(Sphere::new(y_size)), LIGHT_BLUE)
         };
-        let mesh3d = Mesh3d(meshes.add(mesh.clone()));
-        let mat = MeshMaterial3d(debug_material.clone());
+        let material = materials.add(StandardMaterial {
+            base_color: color,
+            #[cfg(feature = "enhanced")]
+            specular_tint: Color::WHITE,
+            ..default()
+        });
 
+        let mesh3d = Mesh3d(meshes.add(mesh.clone()));
+        let mat = MeshMaterial3d(material.clone());
         let pos = Transform::from_xyz(x, y, z);
         commands.spawn((
             mat,
@@ -74,6 +73,15 @@ fn setup(
             Collider::trimesh_from_mesh(&mesh).expect("failed to create collider for mesh"),
         ));
     }
+
+    // TODO: add spatial boombox object
+    // // soundtrack boombox
+    // commands.spawn((
+    //     Boombox,
+    //     Mesh3d(meshes.add(Sphere::new(0.2).mesh().uv(32, 18))),
+    //     MeshMaterial3d(materials.add(LIGHT_BLUE)),
+    //     Transform::from_xyz(0.0, 0.0, 0.0),
+    // ));
 
     // to see something when suns go away
     commands.insert_resource(AmbientLight {
