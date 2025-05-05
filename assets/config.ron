@@ -20,5 +20,10 @@
         general: 1.0,
         music: 0.5,
         sfx: 0.5,
+    ),
+    physics: (
+        fog: false,
+        fog_directional_light_exponent: 5.0,
+        fog_visibility: 200.0,
     )
 )

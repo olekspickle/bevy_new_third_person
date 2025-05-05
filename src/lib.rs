@@ -1,5 +1,5 @@
 //#![allow(clippy::type_complexity)]
-use bevy::{app::App, asset::AssetMetaCheck, log, prelude::*};
+use bevy::{app::App, asset::AssetMetaCheck, log, prelude::*, window::WindowResolution};
 
 mod config;
 mod game;
@@ -14,17 +14,14 @@ pub(crate) mod prelude {
     pub use config::Config;
     pub use game::{
         Score,
-        audio::{Music, Sound, SoundEffect, music, sound_effect},
+        audio::{Music, Sound, SoundEffect, music, sfx},
         camera::SceneCamera,
         player::{JumpTimer, Player, StepTimer},
-        // scene::uv_debug_texture,
+        scene,
         settings::{Action, Settings},
         skybox::Sun,
     };
-    pub use loading::{
-        AudioSources, LoadResource, Models, ResourceHandles, RonAssetLoader, RonAssetPlugin,
-        Textures,
-    };
+    pub use loading::{AudioSources, LoadResource, Models, ResourceHandles, Textures};
     pub use screens::Screen;
     pub use ui::*;
     pub use utils::despawn;
@@ -35,6 +32,8 @@ pub fn game(app: &mut App) {
         Update,
         (AppSet::TickTimers, AppSet::RecordInput, AppSet::Update).chain(),
     );
+    let mut resolution = WindowResolution::default();
+    resolution.set_physical_resolution(1600, 1000);
     let window = WindowPlugin {
         primary_window: Some(Window {
             title: "Bevy Third Person".to_string(), // ToDo
@@ -43,6 +42,7 @@ pub fn game(app: &mut App) {
             fit_canvas_to_parent: true,
             // Tells wasm not to override default event handling, like F5 and Ctrl+R
             prevent_default_event_handling: false,
+            resolution,
             ..default()
         }),
         ..default()
@@ -64,7 +64,7 @@ pub fn game(app: &mut App) {
 
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them
-    app.add_plugins((game::plugin, ui::plugin, screens::plugin, loading::plugin));
+    app.add_plugins((loading::plugin, game::plugin, ui::plugin, screens::plugin));
 }
 
 /// High-level groupings of systems for the app in the `Update` schedule.

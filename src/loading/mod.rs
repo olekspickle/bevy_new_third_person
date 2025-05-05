@@ -17,6 +17,7 @@ pub fn plugin(app: &mut App) {
         .load_resource::<Models>();
 }
 
+// #[reflect(Resource)]
 #[derive(Asset, Clone, Reflect, Resource)]
 pub struct Textures {
     #[dependency]
@@ -32,6 +33,7 @@ impl FromWorld for Textures {
     }
 }
 
+// #[reflect(Resource)]
 #[derive(Asset, Clone, Reflect, Resource)]
 pub struct Models {
     #[dependency]
@@ -47,7 +49,8 @@ impl FromWorld for Models {
     }
 }
 
-#[derive(Resource, Asset, Reflect, Clone)]
+// #[reflect(Resource)]
+#[derive(Asset, Clone, Reflect, Resource)]
 pub struct AudioSources {
     // SFX
     #[dependency]

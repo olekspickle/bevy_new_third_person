@@ -3,11 +3,21 @@ use bevy::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
+#[reflect(Resource)]
 pub struct Config {
     pub sound: Sound,
+    pub physics: Physics,
     pub geometry: Geometry,
     pub player: PlayerConfig,
 }
+
+#[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
+pub struct Physics {
+    pub fog: bool,
+    pub fog_directional_light_exponent: f32,
+    pub fog_visibility: f32,
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
 pub struct Geometry {
     pub main_plane: f32,

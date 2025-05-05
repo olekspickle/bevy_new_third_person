@@ -1,8 +1,7 @@
 //! A high-level way to load collections of asset handles as resources.
 
+use super::*;
 use std::{collections::VecDeque, path::Path};
-
-use bevy::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.init_resource::<ResourceHandles>();
