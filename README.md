@@ -42,9 +42,11 @@ WARNING: if you work in a private repository, please be aware that macOS and Win
         * requires [trunk]: `cargo install --locked trunk`
         * requires `wasm32-unknown-unknown` target: `rustup target add wasm32-unknown-unknown`
         * this will serve your app on `8080` and automatically rebuild + reload it after code changes
-    * Start the android app: `cargo apk run -p mobile`
+    * Start the android app (currently not tested):
+    `cargo apk run -p mobile`
         * requires following the instructions in the [bevy example readme for android setup][android-instructions]
-    * Start the iOS app (see the [bevy example readme for ios setup instructions][ios-instructions])
+    * Start the iOS app     (currently not tested)
+    (see the [bevy example readme for ios setup instructions][ios-instructions])
         * Install Xcode through the app store
         * Launch Xcode and install the iOS simulator (check the box upon first start, or install it through `Preferences > Platforms` later)
         * Install the iOS and iOS simulator Rust targets with `rustup target add aarch64-apple-ios x86_64-apple-ios aarch64-apple-ios-sim`
