@@ -2,7 +2,9 @@ use crate::prelude::*;
 use avian3d::{math::PI, prelude::*};
 use bevy::prelude::*;
 use bevy_tnua::{
-    builtins::TnuaBuiltinDash, control_helpers::TnuaSimpleAirActionsCounter, prelude::*,
+    builtins::{TnuaBuiltinCrouch, TnuaBuiltinDash},
+    control_helpers::TnuaSimpleAirActionsCounter,
+    prelude::*,
 };
 use bevy_tnua_avian3d::*;
 use leafwing_input_manager::prelude::ActionState;
@@ -49,9 +51,14 @@ pub fn movement(
     }
     if state.pressed(&Action::Crouch) {
         // TODO: replace with actual crouch animation instead of just scaling
-        debug_capsule.scale.y = 0.5;
-        collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
-        avian_collider.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
+
+        controller.action(TnuaBuiltinCrouch {
+            float_offset: -0.1,
+            ..Default::default()
+        });
+        // debug_capsule.scale.y = 0.5;
+        // avian_collider.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
+        // collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
         speed /= 2.0;
     }
     if state.just_released(&Action::Crouch) {
@@ -84,7 +91,7 @@ pub fn movement(
     }
 
     // NOTE: subject to change. UAL model is imported rotated 180 so we rotate it back
-    let player_rot = Quat::from_rotation_y(PI) * direction;
+    // let player_rot = Quat::from_rotation_y(PI) * direction;
 
     // Feed the basis every frame. Even if the player doesn't move - just use `desired_velocity:
     // Vec3::ZERO`. `TnuaController` starts without a basis, which will make the character collider
@@ -92,12 +99,10 @@ pub fn movement(
     controller.basis(TnuaBuiltinWalk {
         // The `desired_velocity` determines how the character will move.
         desired_velocity: direction.normalize_or_zero() * speed,
-        desired_forward: Dir3::new(player_rot).ok(),
+        desired_forward: Dir3::new(direction).ok(),
         // The `float_height` must be greater (even if by little) from the distance between the
         // character's center and the lowest point of its collider.
         float_height: 0.01,
-        // `TnuaBuiltinWalk` has many other fields for customizing the movement - but they have
-        // sensible defaults. Refer to the `TnuaBuiltinWalk`'s documentation to learn what they do.
         ..Default::default()
     });
 
@@ -120,6 +125,7 @@ pub fn movement(
 
     if state.just_pressed(&Action::Dash) {
         controller.action(TnuaBuiltinDash {
+            speed: 50.,
             // Dashing is also an action, but because it has directions we need to provide said
             // directions. `displacement` is a vector that determines where the jump will bring
             // us. Note that even after reaching the displacement, the character may still have
@@ -131,7 +137,7 @@ pub fn movement(
             // When set, the `desired_forward` of the dash action "overrides" the
             // `desired_forward` of the walk basis. Like the displacement, it gets "frozen" -
             // allowing to easily maintain a forward direction during the dash.
-            desired_forward: Dir3::new(player_rot).ok(),
+            desired_forward: Dir3::new(direction).ok(),
             allow_in_air: air_counter.air_count_for(TnuaBuiltinDash::NAME)
                 <= cfg.player.movement.actions_in_air.into(),
             ..Default::default()

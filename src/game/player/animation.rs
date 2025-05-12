@@ -6,6 +6,8 @@ use bevy_tnua::{
     prelude::*,
 };
 
+const BASE_SPEED_SCALE: f32 = 0.2;
+
 #[derive(Default)]
 pub enum AnimationState {
     #[default]
@@ -89,6 +91,7 @@ pub fn prepare_animations(
 pub fn animating(
     time: Res<Time>,
     cfg: Res<Config>,
+    player: Single<&Player>,
     mut player_query: Query<(&TnuaController, &mut TnuaAnimatingState<AnimationState>)>,
     mut animation_player: Query<&mut AnimationPlayer>,
     mut jump_timer: Query<&mut JumpTimer>,
@@ -125,7 +128,7 @@ pub fn animating(
             // TODO: have transition from/to crouch
             match crouch_state {
                 TnuaBuiltinCrouchState::Maintaining => {
-                    AnimationState::CrouchWalk(cfg.player.movement.speed * speed)
+                    AnimationState::CrouchWalk(BASE_SPEED_SCALE * speed)
                 }
                 TnuaBuiltinCrouchState::Rising => AnimationState::CrouchIdle,
                 TnuaBuiltinCrouchState::Sinking => AnimationState::CrouchIdle,
@@ -135,6 +138,7 @@ pub fn animating(
         // of the `TnuaAction` trait. Once `type_name` is stabilized as `const` Tnua will use it to
         // generate these names automatically, which may result in a change to the name.
         Some(TnuaBuiltinJump::NAME) => {
+            // does not work
             if let Ok(mut timer) = jump_timer.single_mut() {
                 if timer.0.tick(time.delta()).just_finished() {
                     return;
@@ -184,9 +188,9 @@ pub fn animating(
                 // character has walked off a cliff and needs to fall.
                 AnimationState::Fall
             } else {
-                let speed = basis_state.running_velocity.length();
-                if 0.01 < speed {
-                    AnimationState::Run(0.1 * speed)
+                let basis_speed = basis_state.running_velocity.length();
+                if basis_speed > 0.01 {
+                    AnimationState::Run(BASE_SPEED_SCALE * basis_speed)
                 } else {
                     AnimationState::StandIdle
                 }
@@ -244,17 +248,17 @@ pub fn animating(
                 AnimationState::JumpStart => {
                     animation_player
                         .start(animation_nodes.jump_start)
-                        .set_speed(1.0);
+                        .set_speed(0.01);
                 }
                 AnimationState::JumpLand => {
                     animation_player
                         .start(animation_nodes.jump_land)
-                        .set_speed(1.0);
+                        .set_speed(0.01);
                 }
                 AnimationState::JumpLoop => {
                     animation_player
                         .start(animation_nodes.jump_loop)
-                        .set_speed(1.0);
+                        .set_speed(0.5);
                 }
                 AnimationState::Fall => {
                     animation_player
@@ -274,7 +278,7 @@ pub fn animating(
                 AnimationState::Dash => {
                     animation_player
                         .start(animation_nodes.dashing)
-                        .set_speed(1.0);
+                        .set_speed(3.0);
                 }
                 AnimationState::KnockBack => {
                     animation_player

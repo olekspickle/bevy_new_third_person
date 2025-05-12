@@ -1,6 +1,6 @@
 use crate::prelude::*;
 use avian3d::{math::PI, prelude::*};
-use bevy::prelude::*;
+use bevy::{ecs::spawn::SpawnWith, prelude::*};
 use bevy_third_person_camera::*;
 use bevy_tnua::{TnuaAnimatingState, control_helpers::TnuaSimpleAirActionsCounter, prelude::*};
 use bevy_tnua_avian3d::*;
@@ -77,7 +77,7 @@ fn spawn(
     ));
     let debug_collider_mesh = Mesh3d(meshes.add(collider_mesh.clone()));
     let debug_collider_color: MeshMaterial3d<StandardMaterial> =
-        MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 0.2)));
+        MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 0.1)));
 
     commands
         .spawn((
@@ -98,13 +98,16 @@ fn spawn(
             collider,
             JumpTimer(Timer::from_seconds(0.5, TimerMode::Repeating)),
             StepTimer(Timer::from_seconds(0.3, TimerMode::Repeating)),
-            children![(Transform::from_xyz(0.0, -1.0, 0.0), mesh)],
             #[cfg(feature = "dev_native")]
             debug_collider_mesh,
             #[cfg(feature = "dev_native")]
             debug_collider_color,
         ))
-        .observe(prepare_animations);
+        .with_children(|spawner| {
+            spawner
+                .spawn((Transform::from_xyz(0.0, -1.0, 0.0), mesh))
+                .observe(prepare_animations);
+        });
 
     Ok(())
 }
