@@ -19,14 +19,14 @@ impl Opts {
     pub(crate) fn new(s: impl Into<Cow<'static, str>>) -> Self {
         let text = s.into();
         // a bit of a hack IMO - it's weird that text node is not the width of the text by default
-        let min_width = Px(text.len() as f32 * FONT_SIZE / 1.2);
+        // let min_width = Px(text.len() as f32 * FONT_SIZE / 1.2);
         Self {
             text,
             text_layout: TextLayout::new_with_justify(JustifyText::Center),
             font: TextFont::from_font_size(FONT_SIZE),
             node: Node {
-                min_width,
-                width: Percent(30.0),
+                // min_width,
+                // width: Percent(30.0),
                 align_items: AlignItems::Center,
                 align_content: AlignContent::Center,
                 justify_items: JustifyItems::Center,
@@ -104,6 +104,14 @@ impl Opts {
             min_width: Px(MIN_WIDTH),
             ..new
         };
+        self
+    }
+    pub(crate) fn with_width(mut self, w: f32) -> Self {
+        self.node.width = Px(w);
+        self
+    }
+    pub(crate) fn with_height(mut self, h: f32) -> Self {
+        self.node.height = Px(h);
         self
     }
     pub(crate) fn with_margin(mut self, m: UiRect) -> Self {

@@ -30,8 +30,8 @@ pub fn text(opts: impl Into<Opts>) -> impl Bundle {
     (
         Text(opts.text.to_string()),
         TextColor(opts.color),
-        BackgroundColor(DEBUG_BLUE),
-        // BackgroundColor(opts.bg_color),
+        // BackgroundColor(DEBUG_BLUE),
+        BackgroundColor(opts.bg_color),
         opts.text_layout,
     )
 }
@@ -62,8 +62,28 @@ pub fn header(opts: impl Into<Opts>) -> impl Bundle {
     )
 }
 
+// A regular wide button with text and an action defined as an [`Observer`].
+pub fn btn<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
+where
+    E: Event,
+    B: Bundle,
+    I: IntoObserverSystem<E, B, M>,
+{
+    let opts = opts.into().with_node(Node {
+        width: Px(30.0),
+        height: Px(30.0),
+        min_width: Px(MIN_WIDTH),
+        padding: UiRect::all(Px(10.0)),
+        align_items: AlignItems::Center,
+        justify_content: JustifyContent::Center,
+        ..default()
+    });
+
+    btn_base(opts, action)
+}
+
 // A small square button with text and an action defined as an [`Observer`].
-pub fn button_small<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
+pub fn btn_small<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
 where
     E: Event,
     B: Bundle,
@@ -77,20 +97,18 @@ where
         ..default()
     });
 
-    button(opts, action)
+    btn_base(opts, action)
 }
 
 /// A simple button with text and an action defined as an [`Observer`]. The button's layout is provided by `button_bundle`.
-pub fn button<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
+pub fn btn_base<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
 where
     E: Event,
     B: Bundle,
     I: IntoObserverSystem<E, B, M>,
 {
+    let opts = opts.into();
     let action = IntoObserverSystem::into_system(action);
-    let mut opts = opts.into();
-    opts.node.padding = UiRect::all(Px(10.0));
-    opts.node.min_width = Px(MIN_WIDTH);
 
     (
         Name::new(format!("Button {}", opts.text)),

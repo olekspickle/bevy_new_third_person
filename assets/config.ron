@@ -13,7 +13,7 @@
         ),
         hitbox:(
             radius: 0.5,
-            height: 1.5
+            height: 1
         ),
     ),
     sound: (
@@ -22,7 +22,7 @@
         sfx: 0.5,
     ),
     physics: (
-        fog: false,
+        fog: true,
         fog_directional_light_exponent: 5.0,
         fog_visibility: 200.0,
     )

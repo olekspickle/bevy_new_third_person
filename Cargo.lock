@@ -48,9 +48,9 @@ dependencies = [
  "accesskit",
  "accesskit_consumer",
  "hashbrown",
- "objc2 0.5.2",
+ "objc2",
  "objc2-app-kit",
- "objc2-foundation 0.2.2",
+ "objc2-foundation",
 ]
 
 [[package]]
@@ -371,8 +371,9 @@ dependencies = [
 
 [[package]]
 name = "avian3d"
-version = "0.2.0"
-source = "git+https://github.com/Jondolf/avian?branch=main#8a6953298178addc24adc17fcafae3108b5ea4f9"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8ba10c23fee3d432f3c6cf8d036e269d952b8840c1ca4fa6a021ab926786dc4"
 dependencies = [
  "avian_derive",
  "bevy",
@@ -391,7 +392,8 @@ dependencies = [
 [[package]]
 name = "avian_derive"
 version = "0.2.2"
-source = "git+https://github.com/Jondolf/avian?branch=main#8a6953298178addc24adc17fcafae3108b5ea4f9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12b257f601a1535e0d4a7a7796f535e3a13de62fd422b16dff7c14d27f0d4048"
 dependencies = [
  "proc-macro-error2",
  "proc-macro2",
@@ -432,8 +434,9 @@ dependencies = [
 
 [[package]]
 name = "bevy-tnua"
-version = "0.23.0"
-source = "git+https://github.com/janhohenheim/bevy-tnua?branch=bevy-0.16#db13dfd350f86afe70c1f288e1f3cf075a943ffe"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fed533302dfcef51b63d60c2731e0c64bf835ca3e287da686b411869afddee0e"
 dependencies = [
  "bevy",
  "bevy-tnua-physics-integration-layer",
@@ -443,7 +446,8 @@ dependencies = [
 [[package]]
 name = "bevy-tnua-avian3d"
 version = "0.5.0"
-source = "git+https://github.com/janhohenheim/bevy-tnua?branch=bevy-0.16#db13dfd350f86afe70c1f288e1f3cf075a943ffe"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8767dfb15ed696e07750470145240ca007e5276c367f68b9a3895955e92cbb66"
 dependencies = [
  "avian3d",
  "bevy",
@@ -453,7 +457,8 @@ dependencies = [
 [[package]]
 name = "bevy-tnua-physics-integration-layer"
 version = "0.8.0"
-source = "git+https://github.com/janhohenheim/bevy-tnua?branch=bevy-0.16#db13dfd350f86afe70c1f288e1f3cf075a943ffe"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "914d26cf060dd50852d66fe31edf385fd5b9ea7f57a9ca5ddd9ba628b4157747"
 dependencies = [
  "bevy",
 ]
@@ -758,6 +763,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "bevy_fix_gltf_coordinate_system"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3d322f8addff6f04423ea6bbd4ab37a5fb08c9c14aec426bf1aae01bee128e1"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "bevy_gilrs"
 version = "0.16.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -848,8 +862,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_heavy"
-version = "0.1.0"
-source = "git+https://github.com/Jondolf/bevy_heavy#3905efe581700296de8f48d33388c5471dfca785"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "34ccc861fea2ff58c67f4df119512e204050bd7631a3a9c65e1a5e9d162cce28"
 dependencies = [
  "bevy_math",
  "bevy_reflect",
@@ -1048,12 +1063,13 @@ dependencies = [
 
 [[package]]
 name = "bevy_new_third_person"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "avian3d",
  "bevy",
  "bevy-tnua",
  "bevy-tnua-avian3d",
+ "bevy_fix_gltf_coordinate_system",
  "bevy_third_person_camera",
  "embed-resource",
  "image",
@@ -1433,8 +1449,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_transform_interpolation"
-version = "0.1.0"
-source = "git+https://github.com/Jondolf/bevy_transform_interpolation#9fd7fe92c32e2d30e38b80566dfa7b740119b593"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72c7c6c4e6a3d5415b3a29a17bd20c17cd0e2f068b96b24e263316d58d5346ea"
 dependencies = [
  "bevy",
 ]
@@ -1643,16 +1660,7 @@ version = "0.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c132eebf10f5cad5289222520a4a058514204aed6d791f1cf4fe8088b82d15f"
 dependencies = [
- "objc2 0.5.2",
-]
-
-[[package]]
-name = "block2"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "340d2f0bdb2a43c1d3cd40513185b2bd7def0aa1052f956455114bc98f82dcf2"
-dependencies = [
- "objc2 0.6.1",
+ "objc2",
 ]
 
 [[package]]
@@ -3324,15 +3332,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mobile"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "bevy_new_third_person",
- "objc2-avf-audio",
-]
-
-[[package]]
 name = "naga"
 version = "24.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3660,54 +3659,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "objc2"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88c6597e14493ab2e44ce58f2fdecf095a51f12ca57bec060a11c57332520551"
-dependencies = [
- "objc2-encode",
-]
-
-[[package]]
 name = "objc2-app-kit"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e4e89ad9e3d7d297152b17d39ed92cd50ca8063a89a9fa569046d41568891eff"
 dependencies = [
  "bitflags 2.9.0",
- "block2 0.5.1",
+ "block2",
  "libc",
- "objc2 0.5.2",
+ "objc2",
  "objc2-core-data",
  "objc2-core-image",
- "objc2-foundation 0.2.2",
+ "objc2-foundation",
  "objc2-quartz-core",
-]
-
-[[package]]
-name = "objc2-audio-toolbox"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10cbe18d879e20a4aea544f8befe38bcf52255eb63d3f23eca2842f3319e4c07"
-dependencies = [
- "bitflags 2.9.0",
- "block2 0.6.1",
- "objc2 0.6.1",
- "objc2-foundation 0.3.1",
-]
-
-[[package]]
-name = "objc2-avf-audio"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfc1d11521c211a7ebe17739fc806719da41f56c6b3f949d9861b459188ce910"
-dependencies = [
- "bitflags 2.9.0",
- "block2 0.6.1",
- "objc2 0.6.1",
- "objc2-audio-toolbox",
- "objc2-core-audio-types",
- "objc2-foundation 0.3.1",
 ]
 
 [[package]]
@@ -3717,10 +3681,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74dd3b56391c7a0596a295029734d3c1c5e7e510a4cb30245f8221ccea96b009"
 dependencies = [
  "bitflags 2.9.0",
- "block2 0.5.1",
- "objc2 0.5.2",
+ "block2",
+ "objc2",
  "objc2-core-location",
- "objc2-foundation 0.2.2",
+ "objc2-foundation",
 ]
 
 [[package]]
@@ -3729,19 +3693,9 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a5ff520e9c33812fd374d8deecef01d4a840e7b41862d849513de77e44aa4889"
 dependencies = [
- "block2 0.5.1",
- "objc2 0.5.2",
- "objc2-foundation 0.2.2",
-]
-
-[[package]]
-name = "objc2-core-audio-types"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c0f1cc99bb07ad2ddb6527ddf83db6a15271bb036b3eb94b801cd44fdc666ee1"
-dependencies = [
- "bitflags 2.9.0",
- "objc2 0.6.1",
+ "block2",
+ "objc2",
+ "objc2-foundation",
 ]
 
 [[package]]
@@ -3751,9 +3705,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "617fbf49e071c178c0b24c080767db52958f716d9eabdf0890523aeae54773ef"
 dependencies = [
  "bitflags 2.9.0",
- "block2 0.5.1",
- "objc2 0.5.2",
- "objc2-foundation 0.2.2",
+ "block2",
+ "objc2",
+ "objc2-foundation",
 ]
 
 [[package]]
@@ -3771,9 +3725,9 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "55260963a527c99f1819c4f8e3b47fe04f9650694ef348ffd2227e8196d34c80"
 dependencies = [
- "block2 0.5.1",
- "objc2 0.5.2",
- "objc2-foundation 0.2.2",
+ "block2",
+ "objc2",
+ "objc2-foundation",
  "objc2-metal",
 ]
 
@@ -3783,10 +3737,10 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "000cfee34e683244f284252ee206a27953279d370e309649dc3ee317b37e5781"
 dependencies = [
- "block2 0.5.1",
- "objc2 0.5.2",
+ "block2",
+ "objc2",
  "objc2-contacts",
- "objc2-foundation 0.2.2",
+ "objc2-foundation",
 ]
 
 [[package]]
@@ -3802,20 +3756,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0ee638a5da3799329310ad4cfa62fbf045d5f56e3ef5ba4149e7452dcf89d5a8"
 dependencies = [
  "bitflags 2.9.0",
- "block2 0.5.1",
+ "block2",
  "dispatch",
  "libc",
- "objc2 0.5.2",
-]
-
-[[package]]
-name = "objc2-foundation"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "900831247d2fe1a09a683278e5384cfb8c80c79fe6b166f9d14bfdde0ea1b03c"
-dependencies = [
- "bitflags 2.9.0",
- "objc2 0.6.1",
+ "objc2",
 ]
 
 [[package]]
@@ -3824,10 +3768,10 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a1a1ae721c5e35be65f01a03b6d2ac13a54cb4fa70d8a5da293d7b0020261398"
 dependencies = [
- "block2 0.5.1",
- "objc2 0.5.2",
+ "block2",
+ "objc2",
  "objc2-app-kit",
- "objc2-foundation 0.2.2",
+ "objc2-foundation",
 ]
 
 [[package]]
@@ -3837,9 +3781,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dd0cba1276f6023976a406a14ffa85e1fdd19df6b0f737b063b95f6c8c7aadd6"
 dependencies = [
  "bitflags 2.9.0",
- "block2 0.5.1",
- "objc2 0.5.2",
- "objc2-foundation 0.2.2",
+ "block2",
+ "objc2",
+ "objc2-foundation",
 ]
 
 [[package]]
@@ -3849,9 +3793,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e42bee7bff906b14b167da2bac5efe6b6a07e6f7c0a21a7308d40c960242dc7a"
 dependencies = [
  "bitflags 2.9.0",
- "block2 0.5.1",
- "objc2 0.5.2",
- "objc2-foundation 0.2.2",
+ "block2",
+ "objc2",
+ "objc2-foundation",
  "objc2-metal",
 ]
 
@@ -3861,8 +3805,8 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0a684efe3dec1b305badae1a28f6555f6ddd3bb2c2267896782858d5a78404dc"
 dependencies = [
- "objc2 0.5.2",
- "objc2-foundation 0.2.2",
+ "objc2",
+ "objc2-foundation",
 ]
 
 [[package]]
@@ -3872,13 +3816,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b8bb46798b20cd6b91cbd113524c490f1686f4c4e8f49502431415f3512e2b6f"
 dependencies = [
  "bitflags 2.9.0",
- "block2 0.5.1",
- "objc2 0.5.2",
+ "block2",
+ "objc2",
  "objc2-cloud-kit",
  "objc2-core-data",
  "objc2-core-image",
  "objc2-core-location",
- "objc2-foundation 0.2.2",
+ "objc2-foundation",
  "objc2-link-presentation",
  "objc2-quartz-core",
  "objc2-symbols",
@@ -3892,9 +3836,9 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "44fa5f9748dbfe1ca6c0b79ad20725a11eca7c2218bceb4b005cb1be26273bfe"
 dependencies = [
- "block2 0.5.1",
- "objc2 0.5.2",
- "objc2-foundation 0.2.2",
+ "block2",
+ "objc2",
+ "objc2-foundation",
 ]
 
 [[package]]
@@ -3904,10 +3848,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "76cfcbf642358e8689af64cee815d139339f3ed8ad05103ed5eaf73db8d84cb3"
 dependencies = [
  "bitflags 2.9.0",
- "block2 0.5.1",
- "objc2 0.5.2",
+ "block2",
+ "objc2",
  "objc2-core-location",
- "objc2-foundation 0.2.2",
+ "objc2-foundation",
 ]
 
 [[package]]
@@ -6317,7 +6261,7 @@ dependencies = [
  "android-activity",
  "atomic-waker",
  "bitflags 2.9.0",
- "block2 0.5.1",
+ "block2",
  "bytemuck",
  "calloop",
  "cfg_aliases",
@@ -6330,9 +6274,9 @@ dependencies = [
  "libc",
  "memmap2",
  "ndk 0.9.0",
- "objc2 0.5.2",
+ "objc2",
  "objc2-app-kit",
- "objc2-foundation 0.2.2",
+ "objc2-foundation",
  "objc2-ui-kit",
  "orbclient",
  "percent-encoding",
