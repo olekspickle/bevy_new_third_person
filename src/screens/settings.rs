@@ -41,7 +41,7 @@ fn spawn_settings_screen(mut commands: Commands) {
                 ],
             ),
             keybindings(),
-            button("Back", to_title),
+            btn("Back", to_title),
         ],
     ));
 }
@@ -58,7 +58,7 @@ fn volume_widget() -> impl Bundle {
             ..Default::default()
         },
         children![
-            button_small("-", lower_general),
+            btn_small("-", lower_general),
             (
                 Node {
                     padding: UiRect::horizontal(Px(10.0)),
@@ -67,7 +67,7 @@ fn volume_widget() -> impl Bundle {
                 },
                 children![(label(""), GeneralVolumeLabel)],
             ),
-            button_small("+", raise_general),
+            btn_small("+", raise_general),
         ],
     )
 }

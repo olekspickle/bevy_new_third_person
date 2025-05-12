@@ -1,7 +1,9 @@
 //#![allow(clippy::type_complexity)]
 use bevy::{app::App, asset::AssetMetaCheck, log, prelude::*, window::WindowResolution};
 
+mod audio;
 mod config;
+mod dev_tools;
 mod game;
 mod loading;
 mod screens;
@@ -11,15 +13,15 @@ mod utils;
 pub(crate) mod prelude {
     use super::*;
 
+    pub use audio::{Music, Sound, SoundEffect, music, sfx};
     pub use config::Config;
     pub use game::{
         Score,
-        audio::{Music, Sound, SoundEffect, music, sfx},
         camera::SceneCamera,
         player::{JumpTimer, Player, StepTimer},
         scene,
         settings::{Action, Settings},
-        skybox::Sun,
+        skybox::SunCycle,
     };
     pub use loading::{AudioSources, LoadResource, Models, ResourceHandles, Textures};
     pub use screens::Screen;
@@ -36,7 +38,7 @@ pub fn game(app: &mut App) {
     resolution.set_physical_resolution(1600, 1000);
     let window = WindowPlugin {
         primary_window: Some(Window {
-            title: "Bevy Third Person".to_string(), // ToDo
+            title: "Bevy Game".to_string(),
             // Bind to canvas included in `index.html`
             canvas: Some("#bevy".to_owned()),
             fit_canvas_to_parent: true,
@@ -65,6 +67,9 @@ pub fn game(app: &mut App) {
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them
     app.add_plugins((loading::plugin, game::plugin, ui::plugin, screens::plugin));
+
+    #[cfg(feature = "dev_native")]
+    app.add_plugins(dev_tools::plugin);
 }
 
 /// High-level groupings of systems for the app in the `Update` schedule.

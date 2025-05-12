@@ -8,11 +8,17 @@ use bevy::{
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Gameplay), add_skybox_to_camera)
-        .add_systems(Update, daylight_cycle.run_if(in_state(Screen::Gameplay)));
+        .add_systems(Update, sun_cycle.run_if(in_state(Screen::Gameplay)));
 }
 
 #[derive(Component)]
 pub struct Sun;
+
+#[derive(Debug)]
+pub enum SunCycle {
+    DayNight,
+    Nimb,
+}
 
 /// Mainly this example:
 /// <https://bevyengine.org/examples/3d-rendering/atmosphere/>
@@ -57,10 +63,19 @@ fn add_skybox_to_camera(
     Ok(())
 }
 
-fn daylight_cycle(mut suns: Query<&mut Transform, With<DirectionalLight>>, time: Res<Time>) {
-    // TODO: add ability to toggle between daylight_cycle and circling orb
-    suns.iter_mut()
-        .for_each(|mut tf| tf.rotate_x(-time.delta_secs() * std::f32::consts::PI / 50.0));
+fn sun_cycle(
+    settings: Res<Settings>,
+    mut suns: Query<&mut Transform, With<DirectionalLight>>,
+    time: Res<Time>,
+) {
+    match settings.sun_cycle {
+        SunCycle::DayNight => suns
+            .iter_mut()
+            .for_each(|mut tf| tf.rotate_x(-time.delta_secs() * std::f32::consts::PI / 50.0)),
+        SunCycle::Nimb => suns
+            .iter_mut()
+            .for_each(|mut tf| tf.rotate_y(-time.delta_secs() * std::f32::consts::PI / 50.0)),
+    }
 }
 
 pub fn fog(cfg: Res<Config>) -> impl Bundle {

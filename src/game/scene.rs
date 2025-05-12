@@ -6,11 +6,13 @@ use bevy::{
     prelude::*,
     render::render_resource::{Extent3d, TextureDimension, TextureFormat},
 };
+use bevy_fix_gltf_coordinate_system::prelude::*;
 
 /// This plugin handles loading and saving scenes
 /// Scene logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
     app.add_plugins(PhysicsPlugins::default())
+        .add_plugins(FixGltfCoordinateSystemPlugin)
         .insert_resource(DirectionalLightShadowMap { size: 4096 })
         .add_systems(OnEnter(Screen::Gameplay), setup);
 }

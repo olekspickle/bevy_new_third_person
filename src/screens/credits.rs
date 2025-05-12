@@ -21,7 +21,7 @@ fn spawn_credits_screen(mut commands: Commands) {
             created_by(),
             header("Assets"),
             assets(),
-            button("Back", enter_title_screen),
+            btn("Back", enter_title_screen),
         ],
     ));
 }

@@ -12,8 +12,7 @@ pub fn plugin(app: &mut App) {
         .add_systems(
             OnEnter(Screen::Gameplay),
             inject_settings_from_cfg.run_if(resource_exists::<Config>),
-        )
-        .add_systems(Update, toggle_global);
+        );
 }
 
 #[derive(Resource)]
@@ -26,11 +25,13 @@ pub struct Settings {
     pub menu_open: bool,
     pub muted: bool,
     pub paused: bool,
+    pub sun_cycle: SunCycle,
 }
 
 impl Default for Settings {
     fn default() -> Self {
         Self {
+            sun_cycle: SunCycle::DayNight,
             sound: Sound::default(),
             diagnostics: true,
             menu_open: false,
@@ -62,6 +63,7 @@ pub enum Action {
     Crouch,
 
     // Miscellaneous
+    DevTools,
     Menu,
     Mute,
     Pause,
@@ -92,83 +94,9 @@ fn spawn_player_input_map(mut commands: Commands) {
     input_map.insert(Action::Menu, KeyCode::Escape);
     input_map.insert(Action::ToggleDiagnostics, KeyCode::KeyF);
 
+    input_map.insert(Action::DevTools, KeyCode::Backquote);
     input_map.insert(Action::Toot, KeyCode::KeyC);
     input_map.insert(Action::FovIncr, KeyCode::KeyV);
 
     commands.spawn(input_map);
-}
-
-#[allow(clippy::type_complexity)]
-fn toggle_global(
-    mut settings: ResMut<Settings>,
-    mut time: ResMut<Time<Virtual>>,
-    action: Query<&ActionState<Action>>,
-    mut label_set: ParamSet<(
-        Query<(&mut BackgroundColor, &mut TextColor), With<PauseLabel>>,
-        Query<(&mut BackgroundColor, &mut TextColor), With<MuteLabel>>,
-    )>,
-
-    mut music: Query<&mut AudioSink, (With<Music>, Without<SoundEffect>)>,
-    mut sfx: Query<&mut AudioSink, (With<SoundEffect>, Without<Music>)>,
-    mut perf_ui: Query<&mut Node, With<PerfUiMarker>>,
-) -> Result {
-    let state = action.single()?;
-
-    if state.just_pressed(&Action::ToggleDiagnostics) {
-        if let Ok(mut perf_ui) = perf_ui.single_mut() {
-            if perf_ui.display == NodeDisplay::None {
-                perf_ui.display = NodeDisplay::Flex;
-            } else {
-                perf_ui.display = NodeDisplay::None;
-            }
-            settings.diagnostics = !settings.diagnostics;
-        }
-    }
-
-    if state.just_pressed(&Action::Pause) || state.just_pressed(&Action::Menu) {
-        if let Ok((mut bg, mut color)) = label_set.p0().single_mut() {
-            if time.is_paused() || settings.paused {
-                time.unpause();
-                *color = TextColor(WHITEISH);
-                *bg = BackgroundColor(TRANSPARENT);
-            } else {
-                time.pause();
-                *color = TextColor(GRAY);
-                *bg = BackgroundColor(WHITEISH);
-            }
-        }
-        // TODO: use seedling when it's migrated to 0.16
-        for s in music.iter_mut().chain(sfx.iter_mut()) {
-            s.pause();
-        }
-        settings.paused = !settings.paused;
-    }
-
-    if state.just_pressed(&Action::Mute) {
-        if let Ok((mut bg, mut color)) = label_set.p1().single_mut() {
-            if settings.muted {
-                // TODO: use seedling when it's migrated to 0.16
-                for mut s in music {
-                    s.set_volume(Volume::Linear(
-                        settings.sound.general * settings.sound.music,
-                    ));
-                }
-                for mut s in sfx {
-                    s.set_volume(Volume::Linear(settings.sound.general * settings.sound.sfx));
-                }
-                *color = TextColor(WHITEISH);
-                *bg = BackgroundColor(TRANSPARENT);
-            } else {
-                // TODO: use seedling when it's migrated to 0.16
-                for mut s in music.iter_mut().chain(sfx.iter_mut()) {
-                    s.mute();
-                }
-                *color = TextColor(GRAY);
-                *bg = BackgroundColor(WHITEISH);
-            }
-        }
-        settings.muted = !settings.muted;
-    }
-
-    Ok(())
 }

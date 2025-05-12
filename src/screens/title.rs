@@ -23,16 +23,16 @@ fn setup_menu(
             // https://github.com/bevyengine/bevy/issues/18953
             #[cfg(target_family = "wasm")]
             children![
-                button("Play", to_gameplay),
-                button("Credits", to_credits),
-                button("Settings", to_settings),
+                btn("Play", to_gameplay),
+                btn("Credits", to_credits),
+                btn("Settings", to_settings),
             ],
             #[cfg(not(target_family = "wasm"))]
             children![
-                button("Play", to_gameplay),
-                button("Credits", to_credits),
-                button("Settings", to_settings),
-                button("Exit", exit_app)
+                btn("Play", to_gameplay),
+                btn("Credits", to_credits),
+                btn("Settings", to_settings),
+                btn("Exit", exit_app)
             ],
         ))
         .insert(StateScoped(Screen::Title));

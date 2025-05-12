@@ -25,17 +25,22 @@ pub(super) fn plugin(app: &mut App) {
 }
 
 #[derive(Component)]
+pub struct DevTools;
+#[derive(Component)]
 pub struct PauseLabel;
 #[derive(Component)]
 pub struct MuteLabel;
+#[derive(Component)]
+pub struct SunCycleLabel;
 // TODO: The idea is to create a boombox with spatial audio
 // <https://github.com/bevyengine/bevy/blob/main/examples/audio/spatial_audio_3d.rs>
 // #[derive(Component)]
 // pub struct Boombox;
 
-fn spawn_gameplay_ui(mut commands: Commands) {
+fn spawn_gameplay_ui(mut commands: Commands, settings: Res<Settings>) {
     commands.spawn((
         StateScoped(Screen::Gameplay),
+        DevTools,
         Node {
             flex_direction: FlexDirection::Row,
             ..Default::default()
@@ -53,16 +58,14 @@ fn spawn_gameplay_ui(mut commands: Commands) {
                     (label("M - mute"), MuteLabel),
                     label("F - diagnostics"),
                     label("V - incr fov"),
+                    label(format!("O - toggle sun cycle:{:?}", settings.sun_cycle)),
                     TextLayout::new_with_justify(JustifyText::Left)
                 ]
             ),
             // Demo title
             (
-                Node {
-                    justify_content: JustifyContent::Center,
-                    ..Default::default()
-                },
-                children![label("Hello Third Person"),]
+                ui_root("game name"),
+                children![label("{{ project-name }}"),]
             )
         ],
     ));
@@ -119,9 +122,17 @@ fn toggle_menu(
             Menu,
             ui_root("In game menu"),
             children![
-                button_small("x", trigger_toggle_menu),
-                button("Settings", to_settings),
-                button("Main Menu", to_title)
+                Node {
+                    flex_direction: FlexDirection::Column,
+                    justify_content: JustifyContent::End,
+                    ..Default::default()
+                },
+                children![
+                    Node { ..default() },
+                    btn_small("x", trigger_toggle_menu),
+                    btn("Settings", to_settings),
+                    btn("Main Menu", to_title)
+                ]
             ],
         ));
     } else if let Ok(menu) = menu.single() {

@@ -1,6 +1,5 @@
 use bevy::prelude::{App, Resource};
 
-pub mod audio;
 pub mod camera;
 pub mod player;
 pub mod scene;
@@ -12,8 +11,8 @@ pub fn plugin(app: &mut App) {
     app.add_plugins((
         settings::plugin,
         camera::plugin,
-        player::plugin,
         scene::plugin,
+        player::plugin,
         skybox::plugin,
     ));
 }

@@ -27,6 +27,7 @@ pub struct Music;
 
 /// A music audio instance.
 pub fn music(handle: Handle<AudioSource>, volume: f32) -> impl Bundle {
+    info!("music, volume:{volume}");
     (
         Music,
         AudioPlayer(handle),
@@ -46,6 +47,7 @@ pub struct SoundEffect;
 
 /// A sound effect audio instance.
 pub fn sfx(handle: Handle<AudioSource>, volume: f32) -> impl Bundle {
+    info!("sfx, volume:{volume}");
     (
         SoundEffect,
         AudioPlayer(handle),
