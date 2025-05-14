@@ -2,10 +2,10 @@
 use bevy::{app::App, asset::AssetMetaCheck, log, prelude::*, window::WindowResolution};
 
 mod audio;
-mod config;
 mod dev_tools;
 mod game;
 mod loading;
+mod pre_load;
 mod screens;
 mod ui;
 mod utils;
@@ -14,7 +14,6 @@ pub(crate) mod prelude {
     use super::*;
 
     pub use audio::{Music, Sound, SoundEffect, music, sfx};
-    pub use config::Config;
     pub use game::{
         Score,
         camera::SceneCamera,
@@ -24,6 +23,7 @@ pub(crate) mod prelude {
         skybox::SunCycle,
     };
     pub use loading::{AudioSources, LoadResource, Models, ResourceHandles, Textures};
+    pub use pre_load::{Config, Credits};
     pub use screens::Screen;
     pub use ui::*;
     pub use utils::despawn;

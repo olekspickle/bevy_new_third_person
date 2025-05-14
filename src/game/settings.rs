@@ -1,8 +1,5 @@
-use crate::{
-    prelude::*,
-    screens::gameplay::{MuteLabel, PauseLabel},
-};
-use bevy::{audio::Volume, prelude::*, ui::Display as NodeDisplay};
+use crate::prelude::*;
+use bevy::prelude::*;
 use leafwing_input_manager::prelude::*;
 
 pub fn plugin(app: &mut App) {

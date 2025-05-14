@@ -18,12 +18,21 @@
     ),
     sound: (
         general: 1.0,
-        music: 0.5,
-        sfx: 0.5,
+        music: 0.3,
+        sfx: 0.8,
     ),
     physics: (
         fog: true,
         fog_directional_light_exponent: 5.0,
         fog_visibility: 200.0,
+    ),
+    credits: (
+        assets: [
+        ("Bevy Logo", "All rights reserved by the Bevy Foundation, permission granted for splash screen use when unmodified" ),
+        ("Background Music", "smnbl-time-for-fun gifted to rust community under CC0" ),
+        ],
+        devs: [
+        ( "olekspickle", "compiled different bevy crates to have a consistent template covering stuff average third person game need")
+        ]
     )
 )

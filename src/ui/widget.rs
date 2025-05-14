@@ -45,7 +45,6 @@ pub fn label(opts: impl Into<Opts>) -> impl Bundle {
         Name::new(format!("Label {short}")),
         BorderRadius::all(Px(opts.border_radius)),
         opts.font.clone(),
-        opts.node.clone(),
         Label,
         text(opts),
     )

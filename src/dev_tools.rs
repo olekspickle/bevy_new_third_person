@@ -7,6 +7,7 @@ use crate::{
 use bevy::{
     audio::Volume,
     dev_tools::states::log_transitions,
+    input::common_conditions::input_just_pressed,
     prelude::*,
     ui::{Display as NodeDisplay, UiDebugOptions},
 };
@@ -25,7 +26,10 @@ pub(super) fn plugin(app: &mut App) {
     );
 
     #[cfg(feature = "dev_native")]
-    app.add_systems(Update, toggle_debug_ui);
+    app.add_systems(
+        Update,
+        toggle_debug_ui.run_if(input_just_pressed(KeyCode::Backquote)),
+    );
 }
 
 fn toggle_diagnostics(
@@ -74,7 +78,7 @@ fn toggle_pause(
         }
         // TODO: use seedling when it's migrated to 0.16
         for s in music.iter_mut().chain(sfx.iter_mut()) {
-            s.pause();
+            s.toggle_playback();
         }
         settings.paused = !settings.paused;
     }
@@ -95,24 +99,16 @@ fn toggle_mute(
     if state.just_pressed(&Action::Mute) {
         if let Ok((mut bg, mut color)) = label.single_mut() {
             if settings.muted {
-                // TODO: use seedling when it's migrated to 0.16
-                for mut s in music {
-                    s.set_volume(Volume::Linear(
-                        settings.sound.general * settings.sound.music,
-                    ));
-                }
-                for mut s in sfx {
-                    s.set_volume(Volume::Linear(settings.sound.general * settings.sound.sfx));
-                }
                 *color = TextColor(WHITEISH);
                 *bg = BackgroundColor(TRANSPARENT);
             } else {
-                // TODO: use seedling when it's migrated to 0.16
-                for mut s in music.iter_mut().chain(sfx.iter_mut()) {
-                    s.mute();
-                }
                 *color = TextColor(GRAY);
                 *bg = BackgroundColor(WHITEISH);
+            }
+            // TODO: use seedling when it's migrated to 0.16
+            // s.set_volume(Volume::Linear(settings.sound.general * settings.sound.sfx));
+            for mut s in music.iter_mut().chain(sfx.iter_mut()) {
+                s.toggle_mute();
             }
         }
         settings.muted = !settings.muted;

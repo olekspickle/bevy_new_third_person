@@ -17,7 +17,7 @@ pub struct Sun;
 #[derive(Debug)]
 pub enum SunCycle {
     DayNight,
-    Nimb,
+    Nimbus,
 }
 
 /// Mainly this example:
@@ -72,7 +72,7 @@ fn sun_cycle(
         SunCycle::DayNight => suns
             .iter_mut()
             .for_each(|mut tf| tf.rotate_x(-time.delta_secs() * std::f32::consts::PI / 50.0)),
-        SunCycle::Nimb => suns
+        SunCycle::Nimbus => suns
             .iter_mut()
             .for_each(|mut tf| tf.rotate_y(-time.delta_secs() * std::f32::consts::PI / 50.0)),
     }

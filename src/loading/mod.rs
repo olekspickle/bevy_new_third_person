@@ -17,8 +17,8 @@ pub fn plugin(app: &mut App) {
         .load_resource::<Models>();
 }
 
-// #[reflect(Resource)]
 #[derive(Asset, Clone, Reflect, Resource)]
+#[reflect(Resource)]
 pub struct Textures {
     #[dependency]
     pub github: Handle<Image>,
@@ -33,8 +33,8 @@ impl FromWorld for Textures {
     }
 }
 
-// #[reflect(Resource)]
 #[derive(Asset, Clone, Reflect, Resource)]
+#[reflect(Resource)]
 pub struct Models {
     #[dependency]
     pub player: Handle<Gltf>,
@@ -49,8 +49,8 @@ impl FromWorld for Models {
     }
 }
 
-// #[reflect(Resource)]
 #[derive(Asset, Clone, Reflect, Resource)]
+#[reflect(Resource)]
 pub struct AudioSources {
     // SFX
     #[dependency]

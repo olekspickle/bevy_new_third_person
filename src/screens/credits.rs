@@ -1,7 +1,7 @@
 //! A credits screen that can be accessed from the title screen.
 
-use crate::prelude::*;
-use bevy::{ecs::spawn::SpawnIter, prelude::*, ui::Val::*};
+use super::*;
+use bevy::{ecs::spawn::SpawnIter, ui::Val::*};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
@@ -10,16 +10,16 @@ pub(super) fn plugin(app: &mut App) {
     );
 }
 
-fn spawn_credits_screen(mut commands: Commands, credits: Res<Credits>) {
+fn spawn_credits_screen(mut commands: Commands, cfg: Res<Config>) {
     commands.spawn((
         ui_root("Credits Screen"),
         StateScoped(Screen::Credits),
         children![
             header("Created by"),
-            flatten(&credits.devs),
+            flatten(&cfg.credits.devs),
             header("Assets"),
-            // assets(),
-            btn("Back", enter_title_screen),
+            flatten(&cfg.credits.assets),
+            btn("Back", to_title),
         ],
     ));
 }
@@ -57,10 +57,6 @@ fn grid(content: Vec<[String; 2]>) -> impl Bundle {
     )
 }
 
-fn enter_title_screen(_: Trigger<Pointer<Click>>, mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Title);
-}
-
 #[derive(Component, Default)]
 struct CreditsMusic;
 
@@ -76,8 +72,8 @@ fn start_credits_music(
     let vol = settings.sound.general * settings.sound.music;
     let handle = sources.bg_music.clone();
     commands.spawn((
-        Name::new("Credits Music"),
         StateScoped(Screen::Credits),
+        Name::new("Credits Music"),
         music(handle, vol),
     ));
 }

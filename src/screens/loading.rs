@@ -13,9 +13,9 @@ pub(super) fn plugin(app: &mut App) {
 
 fn spawn_loading_screen(mut commands: Commands) {
     commands.spawn((
+        StateScoped(Screen::Loading),
         ui_root("loading screen"),
         children![label("Loading...")],
-        StateScoped(Screen::Loading),
     ));
 }
 

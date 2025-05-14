@@ -128,12 +128,10 @@ fn toggle_menu(
                     justify_content: JustifyContent::End,
                     ..Default::default()
                 },
-                children![
-                    Node { ..default() },
-                    btn_small("x", trigger_toggle_menu),
-                    btn("Settings", to_settings),
-                    btn("Main Menu", to_title)
-                ]
+                // children![
+                btn_small("x", trigger_toggle_menu),
+                btn("Settings", to_settings),
+                btn("Main Menu", to_title) // ]
             ],
         ));
     } else if let Ok(menu) = menu.single() {

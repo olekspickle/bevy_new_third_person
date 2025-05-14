@@ -9,6 +9,7 @@ pub struct Config {
     pub physics: Physics,
     pub geometry: Geometry,
     pub player: PlayerConfig,
+    pub credits: Credits,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
@@ -45,7 +46,7 @@ pub struct Movement {
     pub speed: f32,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize, Reflect, Asset, Resource)]
+#[derive(Clone, Debug, Serialize, Deserialize, Reflect)]
 pub struct Credits {
     pub assets: Vec<(String, String)>,
     pub devs: Vec<(String, String)>,

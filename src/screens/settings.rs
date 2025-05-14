@@ -20,27 +20,8 @@ fn spawn_settings_screen(mut commands: Commands) {
         ui_root("Settings Screen"),
         children![
             header("Settings"),
-            (
-                Name::new("Settings Grid"),
-                Node {
-                    display: Display::Grid,
-                    row_gap: Px(10.0),
-                    column_gap: Px(30.0),
-                    grid_template_columns: RepeatedGridTrack::px(2, 400.0),
-                    ..Default::default()
-                },
-                children![
-                    (
-                        label("Audio Volume"),
-                        Node {
-                            justify_self: JustifySelf::End,
-                            ..Default::default()
-                        }
-                    ),
-                    volume_widget(),
-                ],
-            ),
-            keybindings(),
+            settings_grid(),
+            // keybindings(),
             btn("Back", to_title),
         ],
     ));
@@ -50,6 +31,29 @@ fn spawn_settings_screen(mut commands: Commands) {
 // good example with serializeable keybindings:
 // <https://github.com/projectharmonia/bevy_enhanced_input/blob/master/examples/keybinding_menu.rs>
 fn keybindings() -> impl Bundle {}
+
+fn settings_grid() -> impl Bundle {
+    (
+        Name::new("Settings Grid"),
+        Node {
+            display: Display::Grid,
+            row_gap: Px(10.0),
+            column_gap: Px(30.0),
+            grid_template_columns: RepeatedGridTrack::px(2, 400.0),
+            ..default()
+        },
+        children![
+            (
+                label("Audio Volume"),
+                Node {
+                    justify_self: JustifySelf::End,
+                    ..default()
+                }
+            ),
+            volume_widget(),
+        ],
+    )
+}
 
 fn volume_widget() -> impl Bundle {
     (
@@ -87,6 +91,9 @@ fn lower_general(
     // TODO: update all playing music because updating global volume does not affect existing Playback
 }
 
+// fn mute(mut global_volume: Single<&mut VolumeNode, With<MainBus>>) {
+//     global_volume.volume = Volume::Linear(0.0);
+// }
 fn raise_general(
     _: Trigger<OnPress>,
     mut settings: ResMut<Settings>,
