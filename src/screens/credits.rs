@@ -4,46 +4,46 @@ use crate::prelude::*;
 use bevy::{ecs::spawn::SpawnIter, prelude::*, ui::Val::*};
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_systems(OnEnter(Screen::Credits), spawn_credits_screen);
-
-    app.register_type::<CreditsMusic>();
-    app.load_resource::<CreditsMusic>();
-    app.add_systems(OnEnter(Screen::Credits), start_credits_music);
-    app.add_systems(OnExit(Screen::Credits), stop_credits_music);
+    app.add_systems(
+        OnEnter(Screen::Credits),
+        (start_credits_music, spawn_credits_screen),
+    );
 }
 
-fn spawn_credits_screen(mut commands: Commands) {
+fn spawn_credits_screen(mut commands: Commands, credits: Res<Credits>) {
     commands.spawn((
         ui_root("Credits Screen"),
         StateScoped(Screen::Credits),
         children![
             header("Created by"),
-            created_by(),
+            flatten(&credits.devs),
             header("Assets"),
-            assets(),
+            // assets(),
             btn("Back", enter_title_screen),
         ],
     ));
 }
 
-fn created_by() -> impl Bundle {
-    grid(vec![
-        ["Joe Shmoe", "Implemented alligator wrestling AI"],
-        ["Jane Doe", "Made the music for the alien invasion"],
-    ])
+fn flatten(devs: &[(String, String)]) -> impl Bundle {
+    let devs: Vec<[String; 2]> = devs.iter().map(|(n, k)| [n.clone(), k.clone()]).collect();
+    grid(devs)
 }
 
-fn assets() -> impl Bundle {
-    grid(vec![
-        ["Music", "CC0 time-for-fun by smnbl"],
-        [
-            "Bevy logo",
-            "All rights reserved by the Bevy Foundation, permission granted for splash screen use when unmodified",
-        ],
-    ])
-}
+fn grid(content: Vec<[String; 2]>) -> impl Bundle {
+    let content = content.into_iter().flatten().enumerate().map(|(i, text)| {
+        (
+            label(text),
+            Node {
+                justify_self: if i % 2 == 0 {
+                    JustifySelf::End
+                } else {
+                    JustifySelf::Start
+                },
+                ..default()
+            },
+        )
+    });
 
-fn grid(content: Vec<[&'static str; 2]>) -> impl Bundle {
     (
         Name::new("Grid"),
         Node {
@@ -53,21 +53,7 @@ fn grid(content: Vec<[&'static str; 2]>) -> impl Bundle {
             grid_template_columns: RepeatedGridTrack::px(2, 400.0),
             ..default()
         },
-        Children::spawn(SpawnIter(content.into_iter().flatten().enumerate().map(
-            |(i, text)| {
-                (
-                    label(text),
-                    Node {
-                        justify_self: if i % 2 == 0 {
-                            JustifySelf::End
-                        } else {
-                            JustifySelf::Start
-                        },
-                        ..default()
-                    },
-                )
-            },
-        ))),
+        Children::spawn(SpawnIter(content)),
     )
 }
 
@@ -75,36 +61,23 @@ fn enter_title_screen(_: Trigger<Pointer<Click>>, mut next_screen: ResMut<NextSt
     next_screen.set(Screen::Title);
 }
 
-#[derive(Resource, Asset, Clone, Reflect)]
-#[reflect(Resource)]
-struct CreditsMusic {
-    #[dependency]
-    handle: Handle<AudioSource>,
-    entity: Option<Entity>,
-}
-
-impl FromWorld for CreditsMusic {
-    fn from_world(world: &mut World) -> Self {
-        let assets = world.resource::<AssetServer>();
-        Self {
-            handle: assets.load(AudioSources::BG_MUSIC),
-            entity: None,
-        }
-    }
-}
+#[derive(Component, Default)]
+struct CreditsMusic;
 
 fn start_credits_music(
     mut commands: Commands,
     settings: Res<Settings>,
-    mut credits_music: ResMut<CreditsMusic>,
+    sources: ResMut<AudioSources>,
+    mut bg_music: Query<&mut AudioSink, With<Music>>,
 ) {
-    let vol = settings.sound.general * settings.sound.music;
-    let handle = credits_music.handle.clone();
-    credits_music.entity = Some(commands.spawn(music(handle, vol)).id());
-}
-
-fn stop_credits_music(mut commands: Commands, mut credits_music: ResMut<CreditsMusic>) {
-    if let Some(entity) = credits_music.entity.take() {
-        commands.entity(entity).despawn();
+    for s in bg_music.iter_mut() {
+        s.pause();
     }
+    let vol = settings.sound.general * settings.sound.music;
+    let handle = sources.bg_music.clone();
+    commands.spawn((
+        Name::new("Credits Music"),
+        StateScoped(Screen::Credits),
+        music(handle, vol),
+    ));
 }

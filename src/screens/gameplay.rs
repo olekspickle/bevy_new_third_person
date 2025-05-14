@@ -8,6 +8,7 @@ use rand::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_event::<OnMenuToggle>()
+        .add_systems(OnExit(Screen::Gameplay), stop_soundtrack)
         .add_systems(
             OnEnter(Screen::Gameplay),
             (
@@ -166,6 +167,15 @@ fn start_or_resume_soundtrack(
     }
 
     Ok(())
+}
+
+fn stop_soundtrack(
+    // boombox: Query<Entity, With<Boombox>>,
+    mut bg_music: Query<&mut AudioSink, With<Music>>,
+) {
+    for s in bg_music.iter_mut() {
+        s.pause();
+    }
 }
 
 fn movement_sound(
