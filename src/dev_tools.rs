@@ -54,18 +54,14 @@ fn toggle_pause(
     mut settings: ResMut<Settings>,
     mut time: ResMut<Time<Virtual>>,
     action: Query<&ActionState<Action>>,
-    mut label_set: ParamSet<(
-        Query<(&mut BackgroundColor, &mut TextColor), With<PauseLabel>>,
-        Query<(&mut BackgroundColor, &mut TextColor), With<MuteLabel>>,
-    )>,
-
+    mut label: Query<(&mut BackgroundColor, &mut TextColor), With<PauseLabel>>,
     mut music: Query<&mut AudioSink, (With<Music>, Without<SoundEffect>)>,
     mut sfx: Query<&mut AudioSink, (With<SoundEffect>, Without<Music>)>,
 ) -> Result {
     let state = action.single()?;
 
     if state.just_pressed(&Action::Pause) || state.just_pressed(&Action::Menu) {
-        if let Ok((mut bg, mut color)) = label_set.p0().single_mut() {
+        if let Ok((mut bg, mut color)) = label.single_mut() {
             if time.is_paused() || settings.paused {
                 time.unpause();
                 *color = TextColor(WHITEISH);
