@@ -1,12 +1,10 @@
 [package]
-name = "bevy_new_third_person" # ToDo
-version = "0.1.2"
-authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
+name = "{{project-name}}"
+version = "0.1.0"
+authors = ["{{authors}}"]
 edition = "2024"
 license = "MIT OR Apache-2.0"
-exclude = ["dist", "build", "assets", "credits"]
-repository = "https://github.com/olekspickle/bevy_new_third_person"
-description = "Simple third person view 3D game template"
+repository = "https://github.com/{{authors}}/{{authors}}"
 
 [features]
 default = [
@@ -93,7 +91,7 @@ iyes_perf_ui = "0.5.0-rc.1"
 # key bindings
 leafwing-input-manager = "0.17"
 
-# misc
+# other
 ron = "0.10"
 rand = { version = "0.8" }
 serde = "1"

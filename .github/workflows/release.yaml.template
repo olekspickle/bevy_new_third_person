@@ -12,10 +12,12 @@ on:
         required: true
         type: string
 
+{% raw -%}
 # cancel the pending release if the new one is started
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
   cancel-in-progress: true
+{%- endraw %}
 
 permissions:
   contents: write
@@ -82,7 +84,7 @@ env:
   # See: https://github.com/orgs/community/discussions/27059
   use_github_cache: false
 
-{%- raw %}
+{% raw -%}
 jobs:
   get-version:
     runs-on: ubuntu-latest
@@ -325,4 +327,4 @@ jobs:
               tmp/"${channel}"/* \
               '${{ env.upload.itch }}':"${channel#package-}"
           done
-{% endraw -%}
+{%- endraw %}

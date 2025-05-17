@@ -8,7 +8,7 @@
         zoom: (1.5, 30.0),
         movement: (
             speed: 1000,
-            actions_in_air: 2,
+            actions_in_air: 3,
             dash_distance: 10,
         ),
         hitbox:(
@@ -18,18 +18,19 @@
     ),
     sound: (
         general: 1.0,
-        music: 0.3,
-        sfx: 0.8,
+        music: 0.1,
+        sfx: 0.5,
     ),
     physics: (
         fog: true,
         fog_directional_light_exponent: 5.0,
-        fog_visibility: 200.0,
+        fog_visibility: 500.0,
     ),
     credits: (
         assets: [
         ("Bevy Logo", "All rights reserved by the Bevy Foundation, permission granted for splash screen use when unmodified" ),
-        ("Background Music", "smnbl-time-for-fun gifted to rust community under CC0" ),
+        ("Background Music", "smnbl-time-for-fun\ngifted to rust community under CC0" ),
+        ("Button hover/press sounds, step sounds", "smnbl records\ngifted to rust community under CC0" ),
         ],
         devs: [
         ( "olekspickle", "compiled different bevy crates to have a consistent template covering stuff average third person game need")
