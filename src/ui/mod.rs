@@ -10,14 +10,12 @@ mod opts;
 mod palette;
 mod widget;
 
-pub use interaction::{InteractionPalette, OnPress};
+pub use interaction::*;
 pub use opts::*;
 pub use palette::*;
 pub use widget::*;
 
 pub fn plugin(app: &mut App) {
-    //app.load_resource_from_path::<Fira>("fonts/FiraCode-Regular.ttf");
-
     app.add_plugins((
         PerfUiPlugin,
         bevy::diagnostic::FrameTimeDiagnosticsPlugin::default(),

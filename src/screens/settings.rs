@@ -80,7 +80,7 @@ const MIN_VOLUME: f32 = 0.0;
 const MAX_VOLUME: f32 = 3.0;
 
 fn lower_general(
-    _: Trigger<OnPress>,
+    _: Trigger<Pointer<Click>>,
     mut settings: ResMut<Settings>,
     mut global_volume: ResMut<GlobalVolume>,
 ) {
@@ -95,7 +95,7 @@ fn lower_general(
 //     global_volume.volume = Volume::Linear(0.0);
 // }
 fn raise_general(
-    _: Trigger<OnPress>,
+    _: Trigger<Pointer<Click>>,
     mut settings: ResMut<Settings>,
     mut global_volume: ResMut<GlobalVolume>,
 ) {
@@ -115,6 +115,6 @@ fn update_volume_label(
     settings: Res<Settings>,
 ) {
     let percent = (settings.sound.general * 100.0).round();
-    let text = format!("{}%", percent);
+    let text = format!("{percent}%");
     label.0 = text;
 }

@@ -19,20 +19,24 @@ pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
             flex_direction: FlexDirection::Column,
             justify_content: JustifyContent::Center,
             align_items: AlignItems::Center,
-            row_gap: Px(10.0),
+            row_gap: Percent(2.0),
             ..default()
         },
+        // Don't block picking events for other UI roots.
+        Pickable::IGNORE,
     )
 }
 
 pub fn text(opts: impl Into<Opts>) -> impl Bundle {
     let opts = opts.into();
     (
+        BackgroundColor(opts.bg_color),
         Text(opts.text.to_string()),
         TextColor(opts.color),
-        // BackgroundColor(DEBUG_BLUE),
-        BackgroundColor(opts.bg_color),
+        opts.font.clone(),
         opts.text_layout,
+        // Don't bubble picking events from the text up to parent
+        Pickable::IGNORE,
     )
 }
 
@@ -42,23 +46,18 @@ pub fn label(opts: impl Into<Opts>) -> impl Bundle {
     let short = if s.len() > 10 { &s[..8] } else { &s };
 
     (
+        Label,
         Name::new(format!("Label {short}")),
         BorderRadius::all(Px(opts.border_radius)),
-        opts.font.clone(),
-        Label,
         text(opts),
     )
 }
 
 /// A simple header label. Bigger than [`label`].
 pub fn header(opts: impl Into<Opts>) -> impl Bundle {
-    let opts = opts.into();
-    (
-        Name::new("Header"),
-        Text(opts.text.into()),
-        TextFont::from_font_size(40.0),
-        TextColor(opts.color),
-    )
+    let mut opts = opts.into();
+    opts.font.font_size = 40.0;
+    (Label, Name::new("Header"), text(opts))
 }
 
 // A regular wide button with text and an action defined as an [`Observer`].
@@ -68,11 +67,11 @@ where
     B: Bundle,
     I: IntoObserverSystem<E, B, M>,
 {
-    let opts = opts.into().with_node(Node {
+    let opts = opts.into().node(Node {
         width: Px(30.0),
         height: Px(30.0),
         min_width: Px(MIN_WIDTH),
-        padding: UiRect::all(Px(10.0)),
+        padding: UiRect::all(Px(50.0)),
         align_items: AlignItems::Center,
         justify_content: JustifyContent::Center,
         ..default()
@@ -88,7 +87,7 @@ where
     B: Bundle,
     I: IntoObserverSystem<E, B, M>,
 {
-    let opts = opts.into().with_node(Node {
+    let opts = opts.into().node(Node {
         width: Px(30.0),
         height: Px(30.0),
         align_items: AlignItems::Center,
@@ -100,6 +99,7 @@ where
 }
 
 /// A simple button with text and an action defined as an [`Observer`]. The button's layout is provided by `button_bundle`.
+/// Background color is set by [`InteractionPalette`]
 pub fn btn_base<E, B, M, I>(opts: impl Into<Opts>, action: I) -> impl Bundle
 where
     E: Event,
@@ -110,23 +110,22 @@ where
     let action = IntoObserverSystem::into_system(action);
 
     (
-        Name::new(format!("Button {}", opts.text)),
+        Name::new("Button"),
         Node::default(),
         Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {
             parent
                 .spawn((
                     Button,
-                    opts.node.clone(),
                     BorderRadius::all(Px(opts.border_radius)),
                     BorderColor(opts.border_color),
-                    // Background color is set here
                     InteractionPalette {
                         none: BLUE,
                         hovered: DIM_BLUE,
                         pressed: LIGHT_BLUE,
                     },
-                    text(opts),
+                    children![Name::new("Button text"), text(opts.clone())],
                 ))
+                .insert(opts.node)
                 .observe(action);
         })),
     )

@@ -45,13 +45,20 @@ pub enum Screen {
     GameOver,
 }
 
-// TODO: seems cumbersome, find a way to pass screen type/name with event
+fn to_gameplay_or_loading(
+    _: Trigger<OnPress>,
+    resource_handles: Res<ResourceHandles>,
+    mut next_screen: ResMut<NextState<Screen>>,
+) {
+    if resource_handles.is_all_done() {
+        next_screen.set(Screen::Gameplay);
+    } else {
+        next_screen.set(Screen::Loading);
+    }
+}
 
 pub fn to_title(_trigger: Trigger<OnPress>, mut next_screen: ResMut<NextState<Screen>>) {
     next_screen.set(Screen::Title);
-}
-pub fn to_gameplay(_trigger: Trigger<OnPress>, mut next_screen: ResMut<NextState<Screen>>) {
-    next_screen.set(Screen::Gameplay);
 }
 pub fn to_credits(_trigger: Trigger<OnPress>, mut next_screen: ResMut<NextState<Screen>>) {
     next_screen.set(Screen::Credits);

@@ -42,45 +42,39 @@ impl Opts {
         }
     }
 
-    pub(crate) fn btn(s: impl Into<Cow<'static, str>>) -> Self {
-        let mut new = Self::new(s);
-        new.node.padding = UiRect::all(Px(10.0));
-        new
-    }
-
-    pub(crate) fn with_text(mut self, text: impl Into<Cow<'static, str>>) -> Self {
+    pub(crate) fn text(mut self, text: impl Into<Cow<'static, str>>) -> Self {
         self.text = text.into();
         self
     }
-    pub(crate) fn with_text_layout(mut self, layout: TextLayout) -> Self {
+    pub(crate) fn text_layout(mut self, layout: TextLayout) -> Self {
         self.text_layout = layout;
         self
     }
-    pub(crate) fn with_font(mut self, font: TextFont) -> Self {
+    pub(crate) fn font(mut self, font: TextFont) -> Self {
         self.font = font;
         self
     }
-    pub(crate) fn with_size(mut self, s: f32) -> Self {
+    pub(crate) fn size(mut self, s: f32) -> Self {
         self.font.font_size = s;
         self
     }
-    pub(crate) fn with_color(mut self, color: Color) -> Self {
+    pub(crate) fn color(mut self, color: Color) -> Self {
         self.color = color;
         self
     }
-    pub(crate) fn with_bg_color(mut self, bg_color: Color) -> Self {
+    pub(crate) fn bg_color(mut self, bg_color: Color) -> Self {
         self.bg_color = bg_color;
         self
     }
-    pub(crate) fn with_border_color(mut self, color: Color) -> Self {
+    pub(crate) fn border_color(mut self, color: Color) -> Self {
         self.border_color = color;
         self
     }
-    pub(crate) fn with_border_radius(mut self, radius: f32) -> Self {
+    pub(crate) fn border_radius(mut self, radius: f32) -> Self {
         self.border_radius = radius;
         self
     }
-    pub(crate) fn with_node(mut self, new: Node) -> Self {
+    pub(crate) fn node(mut self, new: Node) -> Self {
         let Node {
             width,
             height,
@@ -106,19 +100,19 @@ impl Opts {
         };
         self
     }
-    pub(crate) fn with_width(mut self, w: f32) -> Self {
+    pub(crate) fn width(mut self, w: f32) -> Self {
         self.node.width = Px(w);
         self
     }
-    pub(crate) fn with_height(mut self, h: f32) -> Self {
+    pub(crate) fn height(mut self, h: f32) -> Self {
         self.node.height = Px(h);
         self
     }
-    pub(crate) fn with_margin(mut self, m: UiRect) -> Self {
+    pub(crate) fn margin(mut self, m: UiRect) -> Self {
         self.node.margin = m;
         self
     }
-    pub(crate) fn with_padding(mut self, p: UiRect) -> Self {
+    pub(crate) fn padding(mut self, p: UiRect) -> Self {
         self.node.padding = p;
         self
     }
