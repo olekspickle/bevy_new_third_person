@@ -7,7 +7,7 @@ pub fn plugin(app: &mut App) {
     app.add_plugins(InputManagerPlugin::<Action>::default())
         .add_systems(Startup, spawn_player_input_map)
         .add_systems(
-            OnEnter(Screen::Gameplay),
+            OnEnter(Screen::Title),
             inject_settings_from_cfg.run_if(resource_exists::<Config>),
         );
 }
@@ -23,11 +23,13 @@ pub struct Settings {
     pub muted: bool,
     pub paused: bool,
     pub sun_cycle: SunCycle,
+    pub last_screen: Screen,
 }
 
 impl Default for Settings {
     fn default() -> Self {
         Self {
+            last_screen: Screen::Splash,
             sun_cycle: SunCycle::DayNight,
             sound: Sound::default(),
             diagnostics: true,
@@ -66,6 +68,7 @@ pub enum Action {
     Pause,
     ToggleDiagnostics,
     Toot,
+    ToggleSunCycle,
     FovIncr,
 }
 
@@ -93,6 +96,7 @@ fn spawn_player_input_map(mut commands: Commands) {
 
     input_map.insert(Action::DevTools, KeyCode::Backquote);
     input_map.insert(Action::Toot, KeyCode::KeyC);
+    input_map.insert(Action::ToggleSunCycle, KeyCode::KeyO);
     input_map.insert(Action::FovIncr, KeyCode::KeyV);
 
     commands.spawn(input_map);

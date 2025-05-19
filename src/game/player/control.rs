@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use avian3d::{math::PI, prelude::*};
+use avian3d::prelude::*;
 use bevy::prelude::*;
 use bevy_tnua::{
     builtins::{TnuaBuiltinCrouch, TnuaBuiltinDash},
@@ -48,6 +48,12 @@ pub fn movement(
 
     if state.just_pressed(&Action::Crouch) {
         // TODO: play crouch sink animation
+        #[cfg(feature = "dev_native")]
+        {
+            debug_capsule.scale.y = 0.5;
+        }
+        collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
+        avian_collider.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
     }
     if state.pressed(&Action::Crouch) {
         // TODO: replace with actual crouch animation instead of just scaling
@@ -63,9 +69,12 @@ pub fn movement(
     }
     if state.just_released(&Action::Crouch) {
         // TODO: replace with actual rise animation instead of just scaling
+        #[cfg(feature = "dev_native")]
+        {
+            debug_capsule.scale.y = 1.0;
+        }
         collider.set_scale(Vec3::ONE, 4);
         avian_collider.0.set_scale(Vec3::ONE, 4);
-        debug_capsule.scale.y = 1.0;
     }
 
     if state.pressed(&Action::Right) {
@@ -106,21 +115,20 @@ pub fn movement(
         ..Default::default()
     });
 
-    // Feed the jump action every frame as long as the player holds the jump button. If the player
-    // stops holding the jump button, simply stop feeding the action.
     let mut air_counter = air_counter.single_mut()?;
-    air_counter.update(controller.as_mut());
+    let mut timer = jump_timer.single_mut()?;
+    // if state.pressed(&Action::Jump) {
+    if state.pressed(&Action::Jump) && timer.0.tick(time.delta()).just_finished() {
+        // Feed the jump action every frame as long as the player holds the jump button. If the player
+        // stops holding the jump button, simply stop feeding the action.
+        air_counter.update(controller.as_mut());
 
-    if let Ok(mut timer) = jump_timer.single_mut() {
-        // if state.pressed(&Action::Jump) && timer.0.tick(time.delta()).just_finished() {
-        if state.pressed(&Action::Jump) {
-            controller.action(TnuaBuiltinJump {
-                // The height is the only mandatory field of the jump button.
-                height: 1.0,
-                allow_in_air: true,
-                ..Default::default()
-            });
-        }
+        controller.action(TnuaBuiltinJump {
+            // The height is the only mandatory field of the jump button.
+            height: 1.0,
+            allow_in_air: true,
+            ..Default::default()
+        });
     }
 
     if state.just_pressed(&Action::Dash) {

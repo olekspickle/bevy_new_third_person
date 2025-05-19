@@ -22,9 +22,17 @@ fn spawn_settings_screen(mut commands: Commands) {
             header("Settings"),
             settings_grid(),
             // keybindings(),
-            btn("Back", to_title),
+            btn("Back", back),
         ],
     ));
+}
+
+pub fn back(
+    _trigger: Trigger<OnPress>,
+    mut next_screen: ResMut<NextState<Screen>>,
+    settings: Res<Settings>,
+) {
+    next_screen.set(settings.last_screen.clone());
 }
 
 // TODO: implement keybinding

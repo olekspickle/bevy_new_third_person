@@ -2,13 +2,16 @@ use crate::prelude::*;
 use bevy::{prelude::*, scene::SceneInstanceReady};
 use bevy_tnua::{
     TnuaAnimatingState, TnuaAnimatingStateDirective,
-    builtins::{TnuaBuiltinCrouch, TnuaBuiltinCrouchState, TnuaBuiltinDash, TnuaBuiltinJumpState},
+    builtins::{
+        TnuaBuiltinCrouch, TnuaBuiltinCrouchState, TnuaBuiltinDash, TnuaBuiltinJumpState,
+        TnuaBuiltinKnockback, TnuaBuiltinKnockbackState,
+    },
     prelude::*,
 };
 
 const BASE_SPEED_SCALE: f32 = 0.2;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub enum AnimationState {
     #[default]
     StandIdle,
@@ -59,17 +62,18 @@ pub fn prepare_animations(
     let root_node = graph.root;
     let nodes = AnimationNodes {
         standing: graph.add_clip(gltf.named_animations["Idle_Loop"].clone(), 1.0, root_node),
-        running: graph.add_clip(
-            gltf.named_animations["Jog_Fwd_Loop"].clone(),
-            1.0,
-            root_node,
-        ),
         jump_start: graph.add_clip(gltf.named_animations["Jump_Start"].clone(), 1.0, root_node),
         jump_loop: graph.add_clip(gltf.named_animations["Jump_Loop"].clone(), 1.0, root_node),
         jump_land: graph.add_clip(gltf.named_animations["Jump_Land"].clone(), 1.0, root_node),
         falling: graph.add_clip(gltf.named_animations["Jump_Loop"].clone(), 1.0, root_node),
         dashing: graph.add_clip(gltf.named_animations["Roll"].clone(), 1.0, root_node),
         knockback: graph.add_clip(gltf.named_animations["Hit_Chest"].clone(), 1.0, root_node),
+        running: graph.add_clip(
+            // gltf.named_animations["Jog_Fwd_Loop"].clone(),
+            gltf.named_animations["Walk_Loop"].clone(),
+            1.0,
+            root_node,
+        ),
         crouch_walk: graph.add_clip(
             gltf.named_animations["Crouch_Fwd_Loop"].clone(),
             1.0,
@@ -89,20 +93,20 @@ pub fn prepare_animations(
 }
 
 pub fn animating(
-    time: Res<Time>,
-    cfg: Res<Config>,
-    player: Single<&Player>,
-    mut player_query: Query<(&TnuaController, &mut TnuaAnimatingState<AnimationState>)>,
+    mut player: Query<&mut Player>,
+    mut tnua_controller: Query<(&TnuaController, &mut TnuaAnimatingState<AnimationState>)>,
     mut animation_player: Query<&mut AnimationPlayer>,
-    mut jump_timer: Query<&mut JumpTimer>,
     animation_nodes: Option<Res<AnimationNodes>>,
 ) {
     // An actual game should match the animation player and the controller. Here we cheat for
     // simplicity and use the only controller and only player.
-    let Ok((controller, mut animating_state)) = player_query.single_mut() else {
+    let Ok((controller, mut animating_state)) = tnua_controller.single_mut() else {
         return;
     };
     let Ok(mut animation_player) = animation_player.single_mut() else {
+        return;
+    };
+    let Ok(mut player) = player.single_mut() else {
         return;
     };
     let Some(animation_nodes) = animation_nodes else {
@@ -115,6 +119,15 @@ pub fn animating(
     // First we look at the `action_name` to determine which action (if at all) the character is
     // currently performing:
     let current_status_for_animating = match controller.action_name() {
+        Some(TnuaBuiltinKnockback::NAME) => {
+            let (_, knockback_state) = controller
+                .concrete_action::<TnuaBuiltinKnockback>()
+                .expect("action name mismatch: Knockback");
+            match knockback_state {
+                TnuaBuiltinKnockbackState::Shove => AnimationState::KnockBack,
+                TnuaBuiltinKnockbackState::Pushback { .. } => AnimationState::KnockBack,
+            }
+        }
         Some(TnuaBuiltinCrouch::NAME) => {
             let (_, crouch_state) = controller
                 .concrete_action::<TnuaBuiltinCrouch>()
@@ -123,12 +136,12 @@ pub fn animating(
             let Some((_, basis_state)) = controller.concrete_basis::<TnuaBuiltinWalk>() else {
                 return;
             };
-            let speed = basis_state.running_velocity.length();
+            let basis_speed = basis_state.running_velocity.length();
 
             // TODO: have transition from/to crouch
             match crouch_state {
                 TnuaBuiltinCrouchState::Maintaining => {
-                    AnimationState::CrouchWalk(BASE_SPEED_SCALE * speed)
+                    AnimationState::CrouchWalk(BASE_SPEED_SCALE * basis_speed * player.speed)
                 }
                 TnuaBuiltinCrouchState::Rising => AnimationState::CrouchIdle,
                 TnuaBuiltinCrouchState::Sinking => AnimationState::CrouchIdle,
@@ -138,13 +151,6 @@ pub fn animating(
         // of the `TnuaAction` trait. Once `type_name` is stabilized as `const` Tnua will use it to
         // generate these names automatically, which may result in a change to the name.
         Some(TnuaBuiltinJump::NAME) => {
-            // does not work
-            if let Ok(mut timer) = jump_timer.single_mut() {
-                if timer.0.tick(time.delta()).just_finished() {
-                    return;
-                }
-            }
-
             // In case of jump, we want to cast it so that we can get the concrete jump state.
             let (_, jump_state) = controller
                 .concrete_action::<TnuaBuiltinJump>()
@@ -190,7 +196,7 @@ pub fn animating(
             } else {
                 let basis_speed = basis_state.running_velocity.length();
                 if basis_speed > 0.01 {
-                    AnimationState::Run(BASE_SPEED_SCALE * basis_speed)
+                    AnimationState::Run(BASE_SPEED_SCALE * basis_speed * player.speed)
                 } else {
                     AnimationState::StandIdle
                 }
@@ -198,6 +204,8 @@ pub fn animating(
         }
     };
 
+    // Update player animation state, it could be useful in some systems
+    player.animation_state = current_status_for_animating.clone();
     let animating_directive = animating_state.update_by_discriminant(current_status_for_animating);
 
     match animating_directive {

@@ -4,16 +4,15 @@ use bevy_third_person_camera::*;
 use leafwing_input_manager::prelude::ActionState;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Startup, spawn_scene_camera)
+    app.add_systems(Startup, spawn_camera)
         .add_systems(OnEnter(Screen::Gameplay), add_third_person_camera)
-        .add_systems(Update, change_fov.run_if(in_state(Screen::Gameplay)))
-        .add_systems(OnExit(Screen::Gameplay), despawn::<ThirdPersonCamera>);
+        .add_systems(Update, change_fov.run_if(in_state(Screen::Gameplay)));
 }
 
 #[derive(Component)]
 pub struct SceneCamera;
 
-pub fn spawn_scene_camera(mut commands: Commands) {
+pub fn spawn_camera(mut commands: Commands) {
     commands.spawn((
         Camera3d::default(),
         Msaa::Sample4,
@@ -30,11 +29,17 @@ pub fn spawn_scene_camera(mut commands: Commands) {
 fn add_third_person_camera(
     cfg: Res<Config>,
     mut commands: Commands,
-    mut camera: Query<Entity, With<SceneCamera>>,
+    mut camera: Query<Entity, With<Camera3d>>,
+    mut scene_cam: Query<Entity, With<ThirdPersonCamera>>,
 ) -> Result {
-    // info!("Camera settings: {:?}", camera2);
     let camera = camera.single_mut()?;
+    if scene_cam.single_mut().is_ok() {
+        debug!("ThirdPersonCamera already exist");
+        return Ok(());
+    }
+
     commands.entity(camera).insert((
+        // StateScoped(Screen::Gameplay),
         ThirdPersonCamera {
             aim_speed: 3.0,     // default
             aim_zoom: 0.7,      // default

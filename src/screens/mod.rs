@@ -23,7 +23,8 @@ pub(super) fn plugin(app: &mut App) {
         credits::plugin,
         gameplay::plugin,
         gameover::plugin,
-    ));
+    ))
+    .add_systems(Update, track_last_screen.run_if(state_changed::<Screen>));
 }
 
 /// The game's main screen states.
@@ -43,6 +44,10 @@ pub enum Screen {
     // During this State the actual game logic is executed
     Gameplay,
     GameOver,
+}
+
+fn track_last_screen(current: Res<State<Screen>>, mut settings: ResMut<Settings>) {
+    settings.last_screen = current.get().clone();
 }
 
 fn to_gameplay_or_loading(

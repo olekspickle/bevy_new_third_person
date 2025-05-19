@@ -5,7 +5,6 @@ use crate::{
     screens::gameplay::{MuteLabel, PauseLabel},
 };
 use bevy::{
-    audio::Volume,
     dev_tools::states::log_transitions,
     input::common_conditions::input_just_pressed,
     prelude::*,
@@ -53,7 +52,6 @@ fn toggle_diagnostics(
     Ok(())
 }
 
-#[allow(clippy::type_complexity)]
 fn toggle_pause(
     mut settings: ResMut<Settings>,
     mut time: ResMut<Time<Virtual>>,
@@ -86,7 +84,6 @@ fn toggle_pause(
     Ok(())
 }
 
-#[allow(clippy::type_complexity)]
 fn toggle_mute(
     mut settings: ResMut<Settings>,
     action: Query<&ActionState<Action>>,

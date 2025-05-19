@@ -3,30 +3,27 @@ use bevy::{app::App, asset::AssetMetaCheck, log, prelude::*, window::WindowResol
 
 mod audio;
 mod dev_tools;
-mod game;
+pub mod game;
 mod loading;
 mod pre_load;
 mod screens;
 mod ui;
-mod utils;
 
 pub(crate) mod prelude {
     use super::*;
 
     pub use audio::{Music, Sound, SoundEffect, music, sfx};
-    pub use game::{
+    pub(crate) use game::{
         Score,
         camera::SceneCamera,
-        player::{JumpTimer, Player, StepTimer},
-        scene,
+        player::{Player, StepTimer},
         settings::{Action, Settings},
-        skybox::SunCycle,
+        skybox::{SunCycle, SunCycleLabel},
     };
-    pub use loading::{AudioSources, LoadResource, Models, ResourceHandles, Textures};
-    pub use pre_load::{Config, Credits};
+    pub use loading::{AudioSources, Models, ResourceHandles};
+    pub use pre_load::Config;
     pub use screens::Screen;
     pub use ui::*;
-    pub use utils::despawn;
 }
 
 pub fn game(app: &mut App) {
@@ -66,7 +63,7 @@ pub fn game(app: &mut App) {
 
     // custom plugins. the order is important
     // be sure you use resources/types AFTER you add plugins that insert them
-    app.add_plugins((loading::plugin, game::plugin, ui::plugin, screens::plugin));
+    app.add_plugins((loading::plugin, ui::plugin, screens::plugin));
 
     #[cfg(feature = "dev_native")]
     app.add_plugins(dev_tools::plugin);
