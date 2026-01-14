@@ -26,16 +26,14 @@ pub fn add_new_modal(
     let mut target = commands.entity(on.entity);
     if modals.is_empty() {
         target.insert(ModalCtx);
-        if Modal::Main == on.modal {
-            if !state.paused {
-                commands.trigger(TogglePause);
-            }
-            commands.entity(on.entity).trigger(CamCursorToggle);
+        if Modal::Main == on.modal && !state.paused {
+            target.trigger(TogglePause);
         }
+        target.trigger(CamCursorToggle);
     }
 
     // despawn all previous modal entities to avoid clattering
-    commands.entity(on.entity).trigger(ClearModals);
+    target.trigger(ClearModals);
     match on.event().modal {
         Modal::Main => commands.spawn(menu_modal()),
         Modal::Settings => commands.spawn(settings_modal()),
@@ -84,10 +82,10 @@ pub fn pop_modal(
 
     if modals.is_empty() {
         info!("PopModal target entity: {}", pop.event_target());
-        commands.trigger(TogglePause);
         commands
             .entity(pop.event_target())
             .insert(ModalCtx)
+            .trigger(TogglePause)
             .trigger(CamCursorToggle);
     }
 }

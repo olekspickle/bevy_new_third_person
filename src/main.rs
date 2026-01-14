@@ -44,9 +44,8 @@ fn main() {
         meta_check: AssetMetaCheck::Never,
         ..default()
     };
-    // DEBUG
-    // let filter = "debug,symphonia=off,naga=off,wgpu=warn,bevy_enhanced_input=debug".to_string();
-    let filter = "info,cosmic_text=info,calloop=off,symphonia=off,naga=off,wgpu=warn".to_string();
+    let filter = "info,calloop=off,symphonia=off,naga=off,wgpu=warn".to_string();
+    // let filter = "debug,symphonia=off,naga=off,wgpu=warn,bevy_enhanced_input=debug".to_string(); // DEBUG
     let log_level = log::LogPlugin {
         level: log::Level::TRACE,
         filter,

@@ -33,7 +33,8 @@ fn crossfade_music(
 
         let mut audio = commands.entity(e);
         // to prevent doing both fades in case both components somehow made it to an entity
-        // it makes more sense to remove the FadeIn to not cause a cacophony of sounds
+        // I prefer FadeOut to not cause a cacophony of sounds
+        // TODO: figure out cleaner way to do this
         audio.remove::<FadeIn>();
         if node.volume.linear() <= 0.01 {
             audio.remove::<FadeOut>();

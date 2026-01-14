@@ -26,7 +26,7 @@ use easy_ext::ext;
 ///         );
 ///     }
 /// ```
-#[ext(SpawnCollidingMesh)]
+#[ext(CommandsExt)]
 impl Commands<'_, '_> {
     pub fn spawn_colliding_mesh(
         &mut self,
@@ -59,8 +59,24 @@ impl Commands<'_, '_> {
 }
 
 /// Helper trait to get direction of movement based on camera transform
-#[ext(MovementDirection)]
+///
+/// # Example
+///
+/// ```rust,no_run
+/// pub fn movement(
+///     mut player: Query<&mut Player>,
+///     mut camera: Query<&mut Camera3d>,
+///     input: Res<Input<KeyCode>>,
+/// ) {
+///     if let Ok(mut player) = player.single_mut() {
+///         if input.just_pressed(KeyCode::W) {
+///             player.movement.direction += player.movement.direction.movement_direction(Vec2::new(0.0, 1.0));
+///         }
+/// }
+/// ```
+#[ext(TransformExt)]
 impl Transform {
+    /// Get movement direction as normalized verticality-agnostic vector
     pub fn movement_direction(&self, input: Vec2) -> Vec3 {
         let forward = self.forward();
         let forward_flat = Vec3::new(forward.x, 0.0, forward.z);
@@ -70,7 +86,7 @@ impl Transform {
     }
 }
 
-#[ext(ReplaceRecursive)]
+#[ext(EntityExt)]
 impl Entity {
     pub fn replace_recursive(
         &mut self,
@@ -86,5 +102,34 @@ impl Entity {
             let text = commands.spawn(r).id();
             commands.entity(*self).add_children(&[text]);
         }
+    }
+
+    pub fn get_animation_player_e(
+        &self,
+        children_q: Query<&Children>,
+        animation_player_q: Query<Entity, With<AnimationPlayer>>,
+    ) -> Option<Entity> {
+        if animation_player_q.get(*self).is_ok() {
+            return Some(*self);
+        }
+
+        if let Ok(children) = children_q.get(*self) {
+            for child in children.iter() {
+                if let Some(anim) = child.get_animation_player_e(children_q, animation_player_q) {
+                    return Some(anim);
+                }
+            }
+        }
+
+        None
+    }
+}
+
+#[ext(AnimationPlayerExt)]
+impl AnimationPlayer {
+    pub fn zero_all_animations(&mut self) {
+        self.playing_animations_mut().for_each(|(_, a)| {
+            a.set_weight(0.0);
+        });
     }
 }

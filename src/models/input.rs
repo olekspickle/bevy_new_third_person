@@ -1,37 +1,36 @@
 use super::*;
+use bevy_ahoy::prelude::*;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins(EnhancedInputPlugin)
         .add_input_context::<PlayerCtx>()
         .add_input_context::<ModalCtx>()
         .add_systems(Startup, spawn_ctx)
-        // .add_observer(rm_modal_ctx)
-        // .add_observer(rm_player_ctx)
         .add_observer(add_modal_ctx)
         .add_observer(add_player_ctx);
 }
 
-markers!(GlobalCtx, PlayerCtx, ModalCtx);
+markers!(PlayerCtx, ModalCtx);
 
 fn spawn_ctx(mut commands: Commands) {
     commands.spawn(ModalCtx);
 }
 
-#[derive(InputAction)]
-#[action_output(Vec2)]
-pub struct Navigate;
-
-#[derive(InputAction)]
-#[action_output(Vec2)]
-pub struct Pan;
+// #[derive(InputAction)]
+// #[action_output(Vec2)]
+// pub struct Movement;
+//
+// #[derive(InputAction)]
+// #[action_output(bool)]
+// pub struct Jump;
+//
+// #[derive(InputAction)]
+// #[action_output(bool)]
+// pub struct Crouch;
 
 #[derive(InputAction)]
 #[action_output(bool)]
 pub struct Attack;
-
-#[derive(InputAction)]
-#[action_output(bool)]
-pub struct Jump;
 
 #[derive(InputAction)]
 #[action_output(bool)]
@@ -40,10 +39,6 @@ pub struct Sprint;
 #[derive(InputAction)]
 #[action_output(bool)]
 pub struct Dash;
-
-#[derive(InputAction)]
-#[action_output(bool)]
-pub struct Crouch;
 
 #[derive(InputAction)]
 #[action_output(bool)]
@@ -61,14 +56,17 @@ pub struct Escape;
 #[action_output(Vec2)]
 struct NavigateModal;
 
+/// Controller element select. F.e. for inventory cell
 #[derive(Debug, InputAction)]
 #[action_output(bool)]
 pub struct Select;
 
+/// Controller tab switch right
 #[derive(Debug, InputAction)]
 #[action_output(bool)]
 pub struct RightTab;
 
+/// Controller tab switch left
 #[derive(Debug, InputAction)]
 #[action_output(bool)]
 pub struct LeftTab;
@@ -78,19 +76,7 @@ pub fn add_player_ctx(add: On<Add, PlayerCtx>, mut commands: Commands) {
 
     e.insert(actions!(PlayerCtx[
         (
-            Action::<Pan>::new(),
-            ActionSettings {
-                require_reset: true,
-                ..Default::default()
-            },
-            Bindings::spawn((
-                Spawn((Binding::mouse_motion(),Scale::splat(0.1), Negate::all())),
-                Axial::right_stick().with((Scale::splat(2.0), Negate::x())) ,
-            )),
-        ),
-
-        (
-            Action::<Navigate>::new(),
+            Action::<Movement>::new(),
             DeadZone::default(),
             Scale::splat(0.3),
             Bindings::spawn(( Cardinal::wasd_keys(), Cardinal::arrows(), Axial::left_stick() )),
@@ -135,12 +121,6 @@ pub fn add_player_ctx(add: On<Add, PlayerCtx>, mut commands: Commands) {
     ]));
 }
 
-// fn rm_player_ctx(rm: On<Remove, PlayerCtx>, mut commands: Commands) {
-//     commands
-//         .entity(rm.entity)
-//         .despawn_related::<Actions<PlayerCtx>>();
-// }
-
 fn add_modal_ctx(add: On<Add, ModalCtx>, mut commands: Commands) {
     commands.entity(add.entity).insert((
         ContextPriority::<ModalCtx>::new(1),
@@ -179,9 +159,3 @@ fn add_modal_ctx(add: On<Add, ModalCtx>, mut commands: Commands) {
         ]),
     ));
 }
-
-// fn _rm_modal_ctx(rm: On<Remove, ModalCtx>, mut commands: Commands) {
-//     commands
-//         .entity(rm.entity)
-//         .despawn_related::<Actions<ModalCtx>>();
-// }

@@ -8,11 +8,10 @@ pub fn plugin(app: &mut App) {
 
 #[allow(clippy::too_many_arguments)]
 fn movement_sound(
-    on: On<Fire<Navigate>>,
+    on: On<Fire<Movement>>,
     time: Res<Time>,
     state: Res<GameState>,
     settings: Res<Settings>,
-    tnua: Query<&TnuaController, With<Player>>,
     crouch: Single<&Action<Crouch>>,
     mut cmds: Commands,
     mut sources: ResMut<AudioSources>,
@@ -22,25 +21,20 @@ fn movement_sound(
         return Ok(());
     }
 
-    let controller = tnua.get(on.context)?;
     let mut step_timer = step_timer.get_mut(on.context)?;
 
-    let Some((_, basis)) = controller.concrete_basis::<TnuaBuiltinWalk>() else {
-        return Ok(());
-    };
-
     // WALK SOUND
-    if step_timer.tick(time.delta()).just_finished() && basis.standing_on_entity().is_some() {
-        let mut rng = rand::rng();
-        let crouch = ***crouch;
-        let handle = if crouch {
-            // TODO: select crouch steps
-            sources.steps.pick(&mut rng)
-        } else {
-            sources.steps.pick(&mut rng)
-        };
-        cmds.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
-    }
+    // if step_timer.tick(time.delta()).just_finished() && basis.standing_on_entity().is_some() {
+    //     let mut rng = rand::rng();
+    //     let crouch = ***crouch;
+    //     let handle = if crouch {
+    //         // TODO: select crouch steps
+    //         sources.steps.pick(&mut rng)
+    //     } else {
+    //         sources.steps.pick(&mut rng)
+    //     };
+    //     cmds.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
+    // }
 
     Ok(())
 }

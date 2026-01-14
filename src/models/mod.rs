@@ -6,7 +6,6 @@ mod event_dispatch;
 mod ext_traits;
 mod input;
 mod keybinding;
-mod player;
 mod pre_load;
 mod primitives;
 mod settings;
@@ -16,7 +15,6 @@ pub use event_dispatch::*;
 pub use ext_traits::*;
 pub use input::*;
 pub use keybinding::*;
-pub use player::*;
 pub use pre_load::*;
 pub use primitives::*;
 pub use settings::*;
@@ -26,12 +24,12 @@ pub fn plugin(app: &mut App) {
     app.configure_sets(
         Update,
         (
-            PostPhysicsAppSystems::UserInput,
-            PostPhysicsAppSystems::TickTimers,
-            PostPhysicsAppSystems::ChangeUi,
-            PostPhysicsAppSystems::PlaySounds,
-            PostPhysicsAppSystems::PlayAnimations,
-            PostPhysicsAppSystems::Update,
+            AppSystems::UserInput,
+            AppSystems::TickTimers,
+            AppSystems::ChangeUi,
+            AppSystems::PlaySounds,
+            AppSystems::PlayAnimations,
+            AppSystems::Update,
         )
             .chain(),
     );
@@ -49,7 +47,7 @@ pub fn plugin(app: &mut App) {
 /// call above.
 /// courtesy of janhohenheim
 #[derive(SystemSet, Debug, Clone, Copy, Eq, PartialEq, Hash, PartialOrd, Ord)]
-pub enum PostPhysicsAppSystems {
+pub enum AppSystems {
     /// User Input
     UserInput,
     /// Tick timers.

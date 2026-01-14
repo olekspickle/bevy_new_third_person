@@ -35,6 +35,7 @@ pub struct PhysicsPreset {
     pub fog_directional_light_exponent: f32,
     pub fog_visibility: f32,
     pub shadow_distance: f32,
+    pub gravity: f32,
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, Reflect)]
@@ -54,11 +55,11 @@ pub struct HitboxPreset {
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, Reflect)]
 pub struct MovementPreset {
-    pub actions_in_air: u8,
-    pub dash_distance: f32,
-    pub speed: f32,
+    pub max_speed: f32,
+    pub jump_height: f32,
     pub sprint_factor: f32,
     pub crouch_factor: f32,
+    pub dash_distance: f32,
     pub idle_to_run_threshold: f32,
 }
 

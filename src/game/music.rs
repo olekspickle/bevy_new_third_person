@@ -1,5 +1,6 @@
 //! An abstraction for changing music of the game depending on some triggers
-use crate::*;
+use super::*;
+use crate::player::Player;
 use avian3d::prelude::Collisions;
 use bevy::time::common_conditions::on_timer;
 use std::time::Duration;

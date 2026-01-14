@@ -1,6 +1,11 @@
 
 # 3D RPG Bevy game template (WIP)
-<table border="0">
+<style>
+table, td, th {
+   border: none!important;
+}
+</style>
+<table>
     <tr>
         <td><video src="https://github.com/user-attachments/assets/6533b1d9-5971-41fd-acc4-5d2f567266be" controls="controls"></video></td>
         <td><video src="https://github.com/user-attachments/assets/3aadf8fc-7bb2-477d-82c6-44dc1d56ed08" controls="controls"></video></td>
@@ -51,12 +56,11 @@ To set this up, follow the instructions in the [release announcement](https://be
 - [x] serialize and save settings
 - [x] audio, video and keys rebind tabs in settings (currently broken)
 - [x] easy drop in scene integration using awesome [skein] with a simple scene
+- [x] different music(exploration, combat) on zone change event with music crossfade and playback tracking
+- [x] custom font replace example using pre-loaded font
 
 ### TODOs
-- [ ] implement different music states(exploration, combat) on mood change event
-- [ ] enhance ui widgets with feathers
 - [ ] pool with light textures
-- [ ] custom font replace example using pre-loaded font
 - [ ] Movement sfx sounds: jump, dash, sprint
 - [ ] sky background instead of just void lol
 - [ ] 3d and 2d particles demo: shooting magic balls, fireplace, step dust

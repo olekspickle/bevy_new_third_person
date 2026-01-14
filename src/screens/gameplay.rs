@@ -13,7 +13,7 @@ markers!(PauseIcon, MuteIcon, GameplayUi);
 
 fn spawn_gameplay_ui(mut cmds: Commands, textures: Res<Textures>, _settings: Res<Settings>) {
     // info!("settings on gameplay enter:{settings:?}");
-    let opts = Props::default().hidden().width(Vw(5.0)).height(Vw(5.0));
+    let ico = Props::default().hidden().width(Vw(1.0)).height(Vw(1.0));
     cmds.spawn((
         DespawnOnExit(Screen::Gameplay),
         GameplayUi,
@@ -31,8 +31,8 @@ fn spawn_gameplay_ui(mut cmds: Commands, textures: Res<Textures>, _settings: Res
                     ..Default::default()
                 },
                 children![
-                    (icon(opts.clone().image(textures.pause.clone())), PauseIcon),
-                    (icon(opts.clone().image(textures.mute.clone())), MuteIcon),
+                    (icon(ico.clone().image(textures.pause.clone())), PauseIcon),
+                    (icon(ico.image(textures.mute.clone())), MuteIcon),
                 ]
             ),
         ],
@@ -40,7 +40,9 @@ fn spawn_gameplay_ui(mut cmds: Commands, textures: Res<Textures>, _settings: Res
 }
 
 fn toggle_pause(
-    _: On<TogglePause>,
+    on: On<TogglePause>,
+    modals: ResMut<Modals>,
+    mut commands: Commands,
     mut time: ResMut<Time<Virtual>>,
     mut state: ResMut<GameState>,
     mut pause_label: Query<&mut Node, With<PauseIcon>>,
@@ -56,6 +58,10 @@ fn toggle_pause(
     }
 
     state.paused = !state.paused;
+    if modals.is_empty() {
+        commands.entity(on.event_target()).trigger(CamCursorToggle);
+    }
+
     info!("paused: {}", state.paused);
 }
 

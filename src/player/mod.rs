@@ -1,15 +1,13 @@
 use crate::*;
 use avian3d::prelude::*;
-use bevy::scene::SceneInstanceReady;
+use bevy::prelude::AnimationTransitions;
+use bevy_ahoy::prelude::*;
 use bevy_enhanced_input::prelude::*;
 #[cfg(feature = "third_person")]
 use bevy_third_person_camera::*;
-use bevy_tnua::prelude::*;
-use bevy_tnua::{TnuaAnimatingState, control_helpers::TnuaSimpleAirActionsCounter};
-use bevy_tnua_avian3d::*;
 #[cfg(feature = "top_down")]
 use bevy_top_down_camera::*;
-use std::time::Duration;
+use std::{collections::HashMap, time::Instant};
 
 mod animation;
 mod control;
@@ -20,13 +18,6 @@ pub use animation::*;
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
-    app.add_plugins((
-        TnuaControllerPlugin::new(FixedUpdate),
-        TnuaAvian3dPlugin::new(FixedUpdate),
-        control::plugin,
-        sound::plugin,
-    ));
-
     #[cfg(feature = "third_person")]
     app.add_plugins(ThirdPersonCameraPlugin).configure_sets(
         PostUpdate,
@@ -38,14 +29,14 @@ pub fn plugin(app: &mut App) {
         bevy_top_down_camera::CameraSyncSet.before(TransformSystems::Propagate),
     );
 
-    app.add_systems(OnEnter(Screen::Gameplay), spawn_player)
-        .add_systems(
-            Update,
-            animating
-                .in_set(TnuaUserControlsSystems)
-                .run_if(in_state(Screen::Gameplay)),
-        )
-        .add_observer(player_post_spawn);
+    app.add_plugins((
+        AhoyPlugin::default(),
+        control::plugin,
+        sound::plugin,
+        animation::plugin,
+    ))
+    .add_systems(OnEnter(Screen::Gameplay), spawn_player)
+    .add_observer(player_post_spawn);
 }
 
 pub fn spawn_player(
@@ -64,42 +55,36 @@ pub fn spawn_player(
     let mesh = SceneRoot(gltf.scenes[0].clone());
     let pos = Vec3::from(cfg.player.spawn_pos);
     let pos = Transform::from_translation(pos);
-    let player = Player {
-        speed: cfg.player.movement.speed,
-        animation_state: AnimationState::StandIdle,
-        ..default()
-    };
-    let collider = Collider::capsule(cfg.player.hitbox.radius, cfg.player.hitbox.height);
+    let hitbox = Capsule3d::new(cfg.player.hitbox.radius, cfg.player.hitbox.height);
+    let collider = Collider::from(hitbox);
 
     commands
         .spawn((
             DespawnOnExit(Screen::Gameplay),
             pos,
-            player,
-            // camera target component
+            Player::default(),
+            // controller
+            (
+                PlayerCtx,
+                CharacterController {
+                    gravity: cfg.physics.gravity,
+                    max_speed: cfg.player.movement.max_speed,
+                    crouch_speed_scale: cfg.player.movement.crouch_factor,
+                    ..default()
+                },
+            ),
             (
                 #[cfg(feature = "third_person")]
                 ThirdPersonCameraTarget,
                 #[cfg(feature = "top_down")]
                 TopDownCameraTarget,
             ),
-            PlayerCtx,
-            // tnua character control bundles
-            (
-                TnuaController::default(),
-                // Tnua can fix the rotation, but the character will still get rotated before it can do so.
-                // By locking the rotation we can prevent this.
-                LockedAxes::ROTATION_LOCKED.unlock_rotation_y(),
-                TnuaAnimatingState::<AnimationState>::default(),
-                TnuaSimpleAirActionsCounter::default(),
-                // A sensor shape is not strictly necessary, but without it we'll get weird results.
-                TnuaAvian3dSensorShape(collider.clone()),
-            ),
             // physics
             (
                 collider,
                 RigidBody::Dynamic,
-                Friction::ZERO.with_combine_rule(CoefficientCombine::Multiply),
+                Friction::default(),
+                Mass(10.0),
             ),
             // other player related components
             (
@@ -110,14 +95,16 @@ pub fn spawn_player(
         ))
         // spawn character mesh as child to adjust mesh position relative to the player origin
         .with_children(|parent| {
-            let mut e = parent.spawn((Transform::from_xyz(0.0, -1.0, 0.0), mesh));
+            let mut e = parent.spawn((
+                mesh,
+                // AnimationTransitions::default(),
+                Transform::from_xyz(0.0, -1.0, 0.0),
+            ));
+            info!("spawning player: {}", e.id());
             e.observe(prepare_animations);
 
             // DEBUG
-            let collider_mesh = Mesh::from(Capsule3d::new(
-                cfg.player.hitbox.radius,
-                cfg.player.hitbox.height,
-            ));
+            let collider_mesh = Mesh::from(hitbox);
             let debug_collider_mesh = Mesh3d(meshes.add(collider_mesh.clone()));
             let debug_collider_color: MeshMaterial3d<StandardMaterial> =
                 MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 0.1)));
@@ -135,6 +122,87 @@ pub fn spawn_player(
 fn player_post_spawn(on: On<Add, Player>, mut players: Query<&mut Player>) {
     if let Ok(mut p) = players.get_mut(on.entity) {
         p.id = on.entity; // update player id with spawned entity
-        // info!("player entity: Player.id: {}", p.id);
+        info!("player entity: Player.id: {}", p.id);
     }
+}
+
+#[derive(Component, Reflect, Clone)]
+#[reflect(Component)]
+pub struct Player {
+    /// Will be used in the UI and split screen
+    pub id: Entity,
+    /// Used for time based effects, like slide dust or magic attacks
+    pub last_input_change: Instant,
+    pub animation: Animation,
+}
+
+impl Default for Player {
+    fn default() -> Self {
+        Self {
+            // FIXME: stupid hack
+            // u32::MAX is Entity::PLACEHOLDER and using placeholder leads to issues and using option
+            // here while being idiomatic will unnecessary complicate handling it in systems
+            // We replace it with real id when the player entity is spawned anyway
+            id: Entity::from_raw_u32(1_000_000).unwrap(),
+            last_input_change: Instant::now(),
+            animation: Animation::default(),
+        }
+    }
+}
+
+/// Holds all animations, their [`AnimationGraph`] node index and state of the animation
+#[derive(Component, Reflect, Clone)]
+pub struct Animation {
+    /// Sometimes we want to change animation speed,
+    /// f.e. when we are in a sprint or drank a potion
+    pub speed: f32,
+    /// Current animation state: current, next
+    pub state: (AnimationState, AnimationState),
+    /// Animation map,
+    pub map: HashMap<String, AnimationNodeIndex>,
+}
+
+impl Default for Animation {
+    fn default() -> Self {
+        Self {
+            speed: 1.0,
+            state: (AnimationState::StandIdle, AnimationState::StandIdle),
+            map: HashMap::new(),
+        }
+    }
+}
+
+impl Animation {
+    pub fn next(&self) -> AnimationState {
+        self.state.1
+    }
+    pub fn alter(&self) -> bool {
+        self.state.0 != self.state.1
+    }
+    pub fn running(&self) -> bool {
+        matches!(
+            self.state.0,
+            AnimationState::Run(_) | AnimationState::Sprint(_)
+        )
+    }
+}
+
+#[derive(Component, Reflect, PartialEq, Default, Clone, Copy)]
+#[reflect(Component)]
+pub enum AnimationState {
+    #[default]
+    StandIdle,
+    Run(f32),
+    Sprint(f32),
+    Climb(f32),
+    JumpStart,
+    JumpLoop,
+    JumpLand,
+    Fall,
+    Crouch(f32),
+    CrouchIdle,
+    Dash,
+    WallSlide,
+    WallJump,
+    Knockback,
 }

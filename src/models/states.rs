@@ -41,10 +41,11 @@ impl GameState {
 /// Or <https://github.com/bevyengine/bevy/blob/main/examples/ecs/state.rs>
 #[derive(States, Default, Clone, Eq, PartialEq, Debug, Hash, Reflect)]
 pub enum Screen {
+    // TODO: splash should be first
     // Bevy tribute <3
-    #[default]
     Splash,
     // During the loading State the LoadingPlugin will load our assets
+    #[default]
     Loading,
     Tutorial,
     Credits,

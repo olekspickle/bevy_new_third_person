@@ -20,10 +20,10 @@ pub struct SwitchTab {
 }
 #[derive(EntityEvent)]
 pub struct CamCursorToggle(pub Entity);
-#[derive(Event)]
-pub struct TogglePause;
-#[derive(Event)]
-pub struct ToggleMute;
+#[derive(EntityEvent)]
+pub struct TogglePause(pub Entity);
+#[derive(EntityEvent)]
+pub struct ToggleMute(pub Entity);
 #[derive(Event)]
 pub struct ToggleDebugUi;
 #[derive(EntityEvent)]
@@ -56,9 +56,9 @@ fn back(
         }
     }
 }
-fn pause(_: On<Start<Pause>>, mut commands: Commands) {
-    commands.trigger(TogglePause);
+fn pause(on: On<Start<Pause>>, mut commands: Commands) {
+    commands.entity(on.event_target()).trigger(TogglePause);
 }
-fn mute(_: On<Start<Mute>>, mut commands: Commands) {
-    commands.trigger(ToggleMute);
+fn mute(on: On<Start<Mute>>, mut commands: Commands) {
+    commands.entity(on.event_target()).trigger(ToggleMute);
 }
