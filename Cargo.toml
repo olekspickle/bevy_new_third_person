@@ -1,9 +1,9 @@
 [package]
 name = "bevy_new_3d_rpg"
-edition = "2024"
 version = "0.1.5"
 authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
 license = "MIT OR Apache-2.0"
+edition = "2024"
 exclude = ["assets"]
 repository = "https://github.com/olekspickle/bevy_new_3d_rpg"
 description = "Simple but comprehensive 3D RPG game template with gamepad support"
@@ -18,7 +18,7 @@ third_person = ["bevy_third_person_camera"]
 dev = [
     "bevy/bevy_dev_tools",
     "bevy/bevy_ui_debug",
-    # "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
+    "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/track_location",          # Improve error messages coming from Bevy
 ]
 dev_native = [

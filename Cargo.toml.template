@@ -67,18 +67,21 @@ features = [
     "bevy_gltf",
     "bevy_scene",
     "bevy_picking",
+    "bevy_ui_picking_backend",
     "bevy_mesh_picking_backend",
     "bevy_text",
     "animation",
-    "experimental_bevy_ui_widgets",
+    "png",
+    "ktx2",
     # < DELETE after 0.18
     # specific plugins
+    "jpeg",
     "bevy_ui",
     "bevy_ui_render",
-    "hotpatching",
+    "experimental_bevy_ui_widgets",
     "reflect_auto_register",
-    "jpeg",
     "serialize",
+    "hotpatching",
     # TODO: play with these features
     # "pbr_light_textures"
 ]
@@ -93,17 +96,13 @@ bevy_skein = "^0.4"                                                             
 avian3d = { version = "^0.4", features = ["debug-plugin", "3d", "parallel", "collider-from-mesh"] }   # physics
 bevy_seedling = { version = "^0.6", features = ["hrtf", "ogg"] }                            # audio plugin using firewheel
 bevy_shuffle_bag = "^0.3"                                                                   # random container for audio
-firewheel = "^0.9"
-fundsp = "^0.20"
-
 
 bevy_third_person_camera = { version = "^0.3", optional = true }                            # 3rd person camera
 bevy_top_down_camera = { version = "^0.2", optional = true }                                # top down camera
 
-# characrter control
-bevy-tnua = "^0.25.0-rc"                                                                    # floating character control
-bevy-tnua-avian3d = "^0.6.0-rc"                                                             # tnua-avian interaction
-bevy_enhanced_input = { version = "^0.19.0-rc", features = ["serialize"] }                  # keyboard/gamepad input
+# character control
+bevy_ahoy = "0.0.2"
+bevy_enhanced_input = { version = "^0.20", features = ["serialize"] }                       # keyboard/gamepad input
 
 # dialogue
 bevy_yarnspinner = "^0.6.0-rc"
@@ -111,6 +110,8 @@ bevy_yarnspinner_example_dialogue_view = "^0.6.0-rc"
 
 # misc
 # itertools = "0.14.0"
+firewheel = "^0.9"
+fundsp = "^0.20"
 image = "^0.25.6"
 ron = "^0.10"
 rand = "^0.9"
@@ -126,17 +127,15 @@ tracing = { version = "^0.1", features = ["max_level_debug", "release_max_level_
 easy-ext = "1.0.2"
 
 [target.wasm32-unknown-unknown.dependencies]
-firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", rev = "65888f3" }
-getrandom = { version = "0.3", features = ["wasm_js"] }
+firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", rev = "ad810af" }
 
 [patch.crates-io]
-# bevy-inspector-egui = { git = "https://github.com/dsgallups/bevy-inspector-egui", branch = "dsgallups/0.17" }
-avian3d = { git = "https://github.com/Jondolf/avian", branch = "main" }
-bevy-tnua = { git = "https://github.com/janhohenheim/bevy-tnua", branch = "bevy-0.17.0-dev" }
-bevy-tnua-avian3d = { git = "https://github.com/janhohenheim/bevy-tnua", branch = "bevy-0.17.0-dev" }
-# Fix [crash on Chromium](https://github.com/CorvusPrudens/bevy_seedling/issues/60)
-firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", rev = "65888f3" }
+avian3d = { git = "https://github.com/avianphysics/avian" }
 bevy_third_person_camera = { git = "https://github.com/olekspickle/bevy_third_person_camera", branch = "0.17.0" }
+# Fix [crash on Chromium](https://github.com/CorvusPrudens/bevy_seedling/issues/60)
+firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", rev = "ad810af" }
+
+
 
 # LINT
 [lints.clippy]
