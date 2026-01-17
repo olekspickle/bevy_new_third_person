@@ -69,7 +69,9 @@ pub fn spawn_player(
                 CharacterController {
                     gravity: cfg.physics.gravity,
                     max_speed: cfg.player.movement.max_speed,
+                    speed: cfg.player.movement.max_speed / 2.0,
                     crouch_speed_scale: cfg.player.movement.crouch_factor,
+                    // crouch_height: 0.5,
                     ..default()
                 },
             ),
@@ -126,7 +128,7 @@ fn player_post_spawn(on: On<Add, Player>, mut players: Query<&mut Player>) {
     }
 }
 
-#[derive(Component, Reflect, Clone)]
+#[derive(Component, Reflect, Clone, Debug)]
 #[reflect(Component)]
 pub struct Player {
     /// Will be used in the UI and split screen
@@ -151,11 +153,8 @@ impl Default for Player {
 }
 
 /// Holds all animations, their [`AnimationGraph`] node index and state of the animation
-#[derive(Component, Reflect, Clone)]
+#[derive(Component, Reflect, Clone, Debug)]
 pub struct Animation {
-    /// Sometimes we want to change animation speed,
-    /// f.e. when we are in a sprint or drank a potion
-    pub speed: f32,
     /// Current animation state: current, next
     pub state: (AnimationState, AnimationState),
     /// Animation map,
@@ -165,7 +164,6 @@ pub struct Animation {
 impl Default for Animation {
     fn default() -> Self {
         Self {
-            speed: 1.0,
             state: (AnimationState::StandIdle, AnimationState::StandIdle),
             map: HashMap::new(),
         }
@@ -179,15 +177,33 @@ impl Animation {
     pub fn alter(&self) -> bool {
         self.state.0 != self.state.1
     }
-    pub fn running(&self) -> bool {
-        matches!(
-            self.state.0,
-            AnimationState::Run(_) | AnimationState::Sprint(_)
-        )
+    pub fn idle(&mut self) {
+        if matches!(self.state.0, AnimationState::StandIdle) {
+            return;
+        }
+        self.state.1 = AnimationState::StandIdle;
+    }
+    pub fn run(&mut self, speed: f32) {
+        if matches!(self.state.0, AnimationState::Run(_)) {
+            return;
+        }
+        self.state.1 = AnimationState::Run(speed);
+    }
+    pub fn sprint(&mut self, speed: f32) {
+        if matches!(self.state.0, AnimationState::Sprint(_)) {
+            return;
+        }
+        self.state.1 = AnimationState::Sprint(speed);
+    }
+    pub fn crouch(&mut self, speed: f32) {
+        if matches!(self.state.0, AnimationState::Crouch(_)) {
+            return;
+        }
+        self.state.1 = AnimationState::Crouch(speed);
     }
 }
 
-#[derive(Component, Reflect, PartialEq, Default, Clone, Copy)]
+#[derive(Component, Reflect, PartialEq, Default, Debug, Clone, Copy)]
 #[reflect(Component)]
 pub enum AnimationState {
     #[default]

@@ -1,4 +1,5 @@
 use super::*;
+use bevy_ahoy::CharacterControllerState;
 use std::time::Duration;
 
 pub fn plugin(app: &mut App) {
@@ -24,7 +25,7 @@ fn movement(
             &mut Player,
             &mut Transform,
             &mut StepTimer,
-            &CharacterController,
+            &CharacterControllerState,
         ),
         Without<SceneCamera>,
     >,
@@ -37,23 +38,26 @@ fn movement(
         let input_dir = cam_transform.movement_direction(*navigate);
         pos.rotation = Quat::from_rotation_y(-input_dir.x.atan2(-input_dir.z));
 
-        if !player.animation.running() {
-            player.animation.state.1 = AnimationState::Run(ahoy.speed);
-        }
+        info!(
+            "speed: {}, animation state:{:?}",
+            ahoy.speed(),
+            player.animation.state
+        );
 
         // update step timer dynamically based on actual speed
         // Note: this is specific to the animation provided
         // normal step: 0.475
         // sprint step (x1.5): 0.354
         // step on sprint timer: 0.317
-        if ahoy.speed > cfg.player.movement.idle_to_run_threshold {
-            let ratio = cfg.player.movement.max_speed / ahoy.speed;
+        if ahoy.speed() > cfg.player.movement.idle_to_run_threshold {
+            let ratio = cfg.player.movement.max_speed / ahoy.speed();
             let adjusted_step_time_f32 = cfg.timers.step * ratio;
             let adjusted_step_time = Duration::from_secs_f32(adjusted_step_time_f32);
             // info!("step timer:{adjusted_step_time_f32}s");
             step_timer.set_duration(adjusted_step_time);
+            player.animation.run(ahoy.speed());
         } else {
-            player.animation.state.1 = AnimationState::StandIdle
+            player.animation.idle()
         }
     }
 
@@ -63,13 +67,13 @@ fn movement(
 fn handle_sprint_in(
     on: On<Start<Sprint>>,
     cfg: Res<Config>,
-    mut player_q: Query<(&mut Player, &mut CharacterController)>,
+    mut player_q: Query<(&mut Player, &mut CharacterControllerState)>,
 ) -> Result {
     let entity = on.context;
     if let Ok((mut player, mut ahoy)) = player_q.get_mut(entity) {
-        if ahoy.speed <= cfg.player.movement.max_speed {
-            ahoy.speed *= cfg.player.movement.sprint_factor;
-            player.animation.state.1 = AnimationState::Sprint(ahoy.speed);
+        if ahoy.speed() <= cfg.player.movement.max_speed {
+            // ahoy.speed *= cfg.player.movement.sprint_factor;
+            player.animation.sprint(ahoy.speed());
             info!("Sprint started for entity: {entity}");
         }
     }

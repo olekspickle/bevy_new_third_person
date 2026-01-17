@@ -1,7 +1,9 @@
+//! This module contains the logic for handling interactions
+//! with the UI using picking backend observers
+//!
+//! TODO: this is quite a lot of duplication, maybe there is a better way to structure it?..
 use super::*;
 use bevy::window::CursorOptions;
-
-// TODO: there is quite a lot of duplication, maybe there is a better way
 
 pub(super) fn plugin(app: &mut App) {
     app.add_observer(on_hover)
@@ -76,10 +78,6 @@ fn on_hover(
 
 fn on_out(
     hover: On<Pointer<Out>>,
-    settings: Res<Settings>,
-    sources: If<Res<AudioSources>>,
-    cursor_opt: Query<&CursorOptions>,
-    mut commands: Commands,
     mut palette_q: Query<(
         &PaletteSet,
         &mut BorderColor,
@@ -97,13 +95,7 @@ fn on_out(
 
     for c in &*children {
         if let Ok(mut t) = text_color_q.get_mut(*c) {
-            t.0 = palette.hovered.text;
-        }
-    }
-
-    if let Ok(cursor) = cursor_opt.single() {
-        if cursor.visible {
-            commands.spawn(SamplePlayer::new(sources.hover.clone()).with_volume(settings.sfx()));
+            t.0 = palette.none.text;
         }
     }
 }
@@ -111,57 +103,4 @@ fn on_out(
 // TODO: adding Disabled observer
 // fn on_disable(disable: On<Add, Disabled>, mut commands: Commands) {
 //      // painting button gray or something
-// }
-
-// fn apply_interaction_palette(
-//     mut palette_query: Query<(&PaletteSet, &mut BorderColor, &mut BackgroundColor)>,
-//     mut over_events: EventReader<Pointer<Over>>,
-//     mut out_events: EventReader<Pointer<Out>>,
-//     mut down_events: EventReader<Pointer<Down>>,
-//     mut up_events: EventReader<Pointer<Up>>,
-// ) {
-//     for event in out_events.read() {
-//         let Ok((palette, mut border, mut bg)) = palette_query.get_mut(event.target) else {
-//             continue;
-//         };
-//         (*bg, *border) = (palette.none.0.into(), palette.none.1.clone());
-//     }
-//     for event in down_events.read() {
-//         let Ok((palette, mut border, mut bg)) = palette_query.get_mut(event.target) else {
-//             continue;
-//         };
-//         (*bg, *border) = (palette.pressed.0.into(), palette.pressed.1.clone());
-//     }
-//     for event in up_events.read() {
-//         let Ok((palette, mut border, mut bg)) = palette_query.get_mut(event.target) else {
-//             continue;
-//         };
-//         (*bg, *border) = (palette.hovered.0.into(), palette.hovered.1.clone());
-//     }
-// }
-//
-// fn play_interaction_sound(
-//     settings: Res<Settings>,
-//     sources: Res<AudioSources>,
-//     cursor_opt: Query<&CursorOptions>,
-//     mut down: MessageReader<Pointer<Down>>,
-//     mut over: EventReader<Pointer<Over>>,
-//     mut commands: Commands,
-// ) {
-//     if let Ok(cursor) = cursor_opt.single() {
-//         if !cursor.visible {
-//             return;
-//         }
-//     }
-//
-//     let source = if !over.is_empty() {
-//         over.clear();
-//         sources.hover.clone()
-//     } else if !down.is_empty() {
-//         down.clear();
-//         sources.press.clone()
-//     } else {
-//         return;
-//     };
-//     commands.spawn(SamplePlayer::new(source).with_volume(settings.sfx()));
 // }

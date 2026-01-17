@@ -91,7 +91,6 @@ pub mod colors {
     pub const RED: Color = Color::oklcha(0.5232, 0.1404, 13.84, 1.0);
 }
 
-/// TODO: text is not working at the moment due to a button ECS hierarchy being tricky
 #[derive(Component, Clone, Debug, Reflect)]
 pub struct Palette {
     pub text: Color,
@@ -127,7 +126,7 @@ impl Default for PaletteSet {
                 colors::BRIGHT_BLUE,
                 BorderColor::DEFAULT,
             ),
-            hovered: Palette::new(colors::WHITEISH, colors::DIM_BLUE, BorderColor::DEFAULT),
+            hovered: Palette::new(colors::DIM_BLUE, colors::TRANSPARENT, BorderColor::DEFAULT),
             disabled: Palette::new(colors::TRANSPARENT, colors::DIM_BLUE, BorderColor::DEFAULT),
         }
     }
