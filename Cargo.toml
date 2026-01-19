@@ -129,7 +129,7 @@ easy-ext = "1.0.2"
 firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", rev = "ad810af" }
 
 [patch.crates-io]
-avian3d = { git = "https://github.com/avianphysics/avian" }
+avian3d = { git = "https://github.com/avianphysics/avian", rev = "5bef382" }
 bevy_third_person_camera = { git = "https://github.com/olekspickle/bevy_third_person_camera", branch = "0.17.0" }
 # Fix [crash on Chromium](https://github.com/CorvusPrudens/bevy_seedling/issues/60)
 firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", rev = "ad810af" }
