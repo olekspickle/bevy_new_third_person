@@ -1,22 +1,18 @@
 //! This module contains the logic for handling interactions
 //! with the UI using picking backend observers
-//!
-//! TODO: this is quite a lot of duplication, maybe there is a better way to structure it?..
 use super::*;
 use bevy::window::CursorOptions;
 
 pub(super) fn plugin(app: &mut App) {
-    app.add_observer(on_hover)
-        .add_observer(on_click)
-        .add_observer(on_out);
+    app.add_observer(apply_palette_on_over)
+        .add_observer(apply_palette_on_click)
+        .add_observer(apply_palette_on_out)
+        .add_observer(play_sound_effect_on_click)
+        .add_observer(play_sound_effect_on_over);
 }
 
-fn on_click(
+fn apply_palette_on_click(
     click: On<Pointer<Click>>,
-    settings: Res<Settings>,
-    sources: If<Res<AudioSources>>,
-    cursor_opt: Query<&CursorOptions>,
-    mut commands: Commands,
     mut palette_q: Query<(
         &PaletteSet,
         &mut BorderColor,
@@ -36,19 +32,10 @@ fn on_click(
             t.0 = palette.hovered.text;
         }
     }
-
-    if let Ok(cursor) = cursor_opt.single() {
-        if cursor.visible {
-            commands.spawn(SamplePlayer::new(sources.press.clone()).with_volume(settings.sfx()));
-        }
-    }
 }
-fn on_hover(
+
+fn apply_palette_on_over(
     hover: On<Pointer<Over>>,
-    settings: Res<Settings>,
-    sources: If<Res<AudioSources>>,
-    cursor_opt: Query<&CursorOptions>,
-    mut commands: Commands,
     mut palette_q: Query<(
         &PaletteSet,
         &mut BorderColor,
@@ -68,15 +55,9 @@ fn on_hover(
             t.0 = palette.hovered.text;
         }
     }
-
-    if let Ok(cursor) = cursor_opt.single() {
-        if cursor.visible {
-            commands.spawn(SamplePlayer::new(sources.hover.clone()).with_volume(settings.sfx()));
-        }
-    }
 }
 
-fn on_out(
+fn apply_palette_on_out(
     hover: On<Pointer<Out>>,
     mut palette_q: Query<(
         &PaletteSet,
@@ -96,6 +77,34 @@ fn on_out(
     for c in &*children {
         if let Ok(mut t) = text_color_q.get_mut(*c) {
             t.0 = palette.none.text;
+        }
+    }
+}
+
+fn play_sound_effect_on_click(
+    _: On<Pointer<Click>>,
+    settings: Res<Settings>,
+    sources: If<Res<AudioSources>>,
+    cursor_opt: Query<&CursorOptions>,
+    mut commands: Commands,
+) {
+    if let Ok(cursor) = cursor_opt.single() {
+        if cursor.visible {
+            commands.spawn(SamplePlayer::new(sources.press.clone()).with_volume(settings.sfx()));
+        }
+    }
+}
+
+fn play_sound_effect_on_over(
+    _: On<Pointer<Over>>,
+    settings: Res<Settings>,
+    sources: If<Res<AudioSources>>,
+    cursor_opt: Query<&CursorOptions>,
+    mut commands: Commands,
+) {
+    if let Ok(cursor) = cursor_opt.single() {
+        if cursor.visible {
+            commands.spawn(SamplePlayer::new(sources.hover.clone()).with_volume(settings.sfx()));
         }
     }
 }
