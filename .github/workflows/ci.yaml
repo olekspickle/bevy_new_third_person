@@ -12,12 +12,30 @@ concurrency:
 
 env:
   # Reduce compile time and cache size.
-  RUSTFLAGS: -Dwarnings -Zshare-generics=y -Zthreads=0 -Cdebuginfo=line-tables-only
+  RUSTFLAGS: -Dwarnings -Zshare-generics=y -Zthreads=0
   RUSTDOCFLAGS: -Dwarnings -Zshare-generics=y -Zthreads=0
   # Use the same Rust toolchain across jobs so they can share a cache.
-  toolchain: nightly-2025-08-07
+  toolchain: nightly-2025-06-26
 
 jobs:
+  # Check formatting.
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.toolchain }}
+          components: rustfmt
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
   # Check documentation.
   docs:
     name: Docs
@@ -46,8 +64,8 @@ jobs:
       - name: Check documentation
         run: cargo doc --locked --workspace --profile ci --all-features --document-private-items --no-deps
 
-  # Run rustfmt, clippy, machete lints.
-  lint:
+  # Run Clippy lints.
+  clippy-lints:
     name: Clippy lints
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -59,10 +77,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.toolchain }}
-          components: clippy,rustfmt
-
-      - name: Machete
-        uses: bnjbvr/cargo-machete@main
+          components: clippy
 
       - name: Restore Rust cache
         id: cache
@@ -75,16 +90,10 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
 
-      - name: Run format check
-        run: cargo fmt --all -- --check
-
       - name: Run Clippy lints
         run: cargo clippy --locked --workspace --all-targets --profile ci --all-features
 
-      - name: Run Dependency Machete
-        run: cargo machete
-
-  # bevy_cli has pretty outdated nightly version
+  # Run Bevy lints.
   bevy-lints:
     name: Bevy lints
     runs-on: ubuntu-latest
@@ -93,14 +102,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up environment
-        run: echo "RUSTFLAGS=${RUSTFLAGS:+$RUSTFLAGS }-Zcodegen-backend=cranelift" >> "${GITHUB_ENV}"
-
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@master
+      - name: Install Rust toolchain (plus bevy_lint)
+        uses: TheBevyFlock/bevy_cli/bevy_lint@lint-v0.4.0
         with:
-          components: rustc-codegen-cranelift-preview, rustc-dev, llvm-tools-preview
-          toolchain: ${{ env.toolchain }} #
+          cache: true
+          save-cache-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Restore Rust cache
         id: cache
@@ -113,13 +119,10 @@ jobs:
         if: steps.cache.outputs.cache-hit != 'true'
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
 
-      - name: Install Bevy Lint
-        run: cargo install --git https://github.com/TheBevyFlock/bevy_cli --rev 949b808e6bbf11be0f61b236fbbc4e35854698af --locked bevy_lint
-
       - name: Run Bevy lints
         run: bevy_lint --locked --workspace --all-targets --profile ci --all-features
 
-  # Run tests
+  # Run tests.
   tests:
     name: Tests
     runs-on: ubuntu-latest
@@ -148,7 +151,7 @@ jobs:
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
 
       - name: Run tests
-        run: cargo test run --locked --workspace --all-targets --profile ci --no-fail-fast
+        run: cargo test --locked --workspace --all-targets --profile ci --no-fail-fast
 
   # Check that the web build compiles.
   check-web:
@@ -158,6 +161,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up environment
+        run: echo "RUSTFLAGS=${RUSTFLAGS:+$RUSTFLAGS }--cfg getrandom_backend=\"wasm_js\"" >> "${GITHUB_ENV}"
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
@@ -177,5 +183,4 @@ jobs:
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev libudev-dev libwayland-dev
 
       - name: Check web
-        run: cargo check --profile ci --no-default-features --features web --target wasm32-unknown-unknown
-
+        run: cargo check --config 'profile.web.inherits="dev"' --profile ci --no-default-features --features dev --target wasm32-unknown-unknown
