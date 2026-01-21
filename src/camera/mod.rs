@@ -28,8 +28,8 @@ pub fn spawn_camera(mut commands: Commands) {
     commands.spawn((
         SceneCamera,
         IsDefaultUiCamera,
-        Camera3d::default(),
         Camera::default(),
+        Camera3d::default(),
         Transform::from_xyz(100., 50., 100.).looking_at(Vec3::ZERO, Vec3::Y),
         Hdr,
         DeferredPrepass,
