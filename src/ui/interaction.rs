@@ -11,6 +11,9 @@ pub(super) fn plugin(app: &mut App) {
         .add_observer(play_sound_effect_on_over);
 }
 
+#[derive(Component)]
+pub struct Interactable;
+
 fn apply_palette_on_click(
     click: On<Pointer<Click>>,
     mut palette_q: Query<(
@@ -82,30 +85,34 @@ fn apply_palette_on_out(
 }
 
 fn play_sound_effect_on_click(
-    _: On<Pointer<Click>>,
+    on: On<Pointer<Click>>,
+    btn_q: Query<&Button>,
     settings: Res<Settings>,
     sources: If<Res<AudioSources>>,
     cursor_opt: Query<&CursorOptions>,
     mut commands: Commands,
 ) {
-    if let Ok(cursor) = cursor_opt.single() {
-        if cursor.visible {
-            commands.spawn(SamplePlayer::new(sources.press.clone()).with_volume(settings.sfx()));
-        }
+    if btn_q.get(on.event_target()).is_ok()
+        && let Ok(cursor) = cursor_opt.single()
+        && cursor.visible
+    {
+        commands.spawn(SamplePlayer::new(sources.press.clone()).with_volume(settings.sfx()));
     }
 }
 
 fn play_sound_effect_on_over(
-    _: On<Pointer<Over>>,
+    on: On<Pointer<Over>>,
+    btn_q: Query<&Button>,
     settings: Res<Settings>,
     sources: If<Res<AudioSources>>,
     cursor_opt: Query<&CursorOptions>,
     mut commands: Commands,
 ) {
-    if let Ok(cursor) = cursor_opt.single() {
-        if cursor.visible {
-            commands.spawn(SamplePlayer::new(sources.hover.clone()).with_volume(settings.sfx()));
-        }
+    if btn_q.get(on.event_target()).is_ok()
+        && let Ok(cursor) = cursor_opt.single()
+        && cursor.visible
+    {
+        commands.spawn(SamplePlayer::new(sources.hover.clone()).with_volume(settings.sfx()));
     }
 }
 

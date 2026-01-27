@@ -1,4 +1,5 @@
 use super::*;
+use crate::ui::Interactable;
 use bevy::ecs::system::IntoObserverSystem;
 use std::borrow::Cow;
 
@@ -28,8 +29,7 @@ pub fn icon(opts: impl Into<Props>) -> impl Bundle {
         Name::new("Icon"),
         opts.node.clone(),
         opts.border_radius,
-        children![opts.into_image_bundle()],
-        Pickable::IGNORE,
+        opts.into_image_bundle(),
     )
 }
 pub fn label(opts: impl Into<Props>) -> impl Bundle {
@@ -104,9 +104,9 @@ where
 
     (
         Button,
+        Interactable,
         Name::new("Button"),
         Node::default(),
-        Pickable::IGNORE,
         Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {
             let content = match &opts.content {
                 WidgetContent::Image(_) => parent
@@ -121,11 +121,11 @@ where
 
             parent
                 .spawn((
-                    Name::new("Button Content"),
                     opts.bg_color,
                     opts.border_radius,
                     opts.border_color,
                     opts.palette_set.clone(),
+                    Name::new("Button Content"),
                 ))
                 .insert(opts.node)
                 .add_children(&[content])

@@ -23,6 +23,7 @@ mod props;
 mod widget;
 
 pub use constants::*;
+pub use interaction::*;
 pub use modal::*;
 pub use prefabs::*;
 pub use props::*;

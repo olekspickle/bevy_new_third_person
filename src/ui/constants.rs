@@ -126,7 +126,7 @@ impl Default for PaletteSet {
                 colors::BRIGHT_BLUE,
                 BorderColor::DEFAULT,
             ),
-            hovered: Palette::new(colors::DIM_BLUE, colors::TRANSPARENT, BorderColor::DEFAULT),
+            hovered: Palette::new(colors::WHITEISH, colors::TRANSPARENT, BorderColor::DEFAULT),
             disabled: Palette::new(colors::TRANSPARENT, colors::DIM_BLUE, BorderColor::DEFAULT),
         }
     }
