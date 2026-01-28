@@ -125,19 +125,22 @@ impl FromIterator<(Mood, Entity)> for MusicPlaybacks {
 impl MusicPlaybacks {
     fn track_entity(
         on: On<Add, (Mood, SamplePlayer)>,
-        mut music_pb: ResMut<MusicPlaybacks>,
         moods: Query<&Mood>,
+        mut music_pbs: ResMut<MusicPlaybacks>,
     ) {
         if let Ok(&mood) = moods.get(on.entity) {
             info!("adding entity for {mood:?} {}", on.entity);
-            music_pb.insert(mood, on.entity);
+            music_pbs.insert(mood, on.entity);
         }
     }
 
     /// When [`SamplePlayer`] finishes playing, it removes the entity, so we have to remove entity
     /// from the [`MusicPlaybacks`] resource as well
-    fn clear_entity_on_finish(on: On<Despawn, SamplePlayer>, mut music_pb: ResMut<MusicPlaybacks>) {
-        music_pb.retain(|z, e| {
+    fn clear_entity_on_finish(
+        on: On<Despawn, SamplePlayer>,
+        mut music_pbs: ResMut<MusicPlaybacks>,
+    ) {
+        music_pbs.retain(|z, e| {
             if e == &on.entity {
                 info!("removing entity for {z:?} zone");
             }

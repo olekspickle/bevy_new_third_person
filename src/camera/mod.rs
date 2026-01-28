@@ -1,9 +1,11 @@
 use crate::*;
 use avian3d::prelude::*;
 use bevy::{
-    anti_alias::{fxaa::Fxaa, taa::TemporalAntiAliasing},
-    core_pipeline::prepass::DeferredPrepass,
+    anti_alias::taa::TemporalAntiAliasing,
+    camera::Exposure,
+    core_pipeline::{prepass::DeferredPrepass, tonemapping::Tonemapping},
     pbr::DefaultOpaqueRendererMethod,
+    post_process::bloom::Bloom,
     render::view::Hdr,
 };
 
@@ -31,9 +33,12 @@ pub fn spawn_camera(mut commands: Commands) {
         Camera::default(),
         Camera3d::default(),
         Transform::from_xyz(100., 50., 100.).looking_at(Vec3::ZERO, Vec3::Y),
+        Tonemapping::BlenderFilmic,
+        Exposure::OVERCAST,
+        Bloom::NATURAL,
         Hdr,
+        Msaa::Off,
         DeferredPrepass,
         TemporalAntiAliasing::default(),
-        Fxaa::default(),
     ));
 }

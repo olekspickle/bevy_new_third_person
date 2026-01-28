@@ -3,7 +3,7 @@ use bevy::{
     camera::Exposure,
     core_pipeline::tonemapping::Tonemapping,
     light::{CascadeShadowConfigBuilder, light_consts::lux},
-    pbr::{Atmosphere, AtmosphereSettings, DistanceFog, FogFalloff},
+    pbr::{Atmosphere, AtmosphereMode, AtmosphereSettings, DistanceFog, FogFalloff},
 };
 use serde::{Deserialize, Serialize};
 
@@ -78,12 +78,9 @@ pub fn add_skybox_to_camera(
             multiscattering_lut_samples: 30, // More samples for multiscattering accuracy
             sky_view_lut_samples: 24,      // More samples for sky appearance
             aerial_view_lut_samples: 15,   // More samples for aerial view depth
+            rendering_method: AtmosphereMode::LookupTexture,
             ..Default::default()
         },
-        Exposure::OVERCAST,
-        Tonemapping::BlenderFilmic,
-        // BloomSettings::NATURAL,
-        // DebandDither::Enabled, // Bloom causes gradients which cause banding
     ));
 
     if cfg.physics.distance_fog {
