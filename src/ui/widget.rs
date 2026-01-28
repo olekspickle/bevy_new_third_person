@@ -1,5 +1,4 @@
 use super::*;
-use crate::ui::Interactable;
 use bevy::ecs::system::IntoObserverSystem;
 use std::borrow::Cow;
 
@@ -104,7 +103,6 @@ where
 
     (
         Button,
-        Interactable,
         Name::new("Button"),
         Node::default(),
         Children::spawn(SpawnWith(move |parent: &mut ChildSpawner| {

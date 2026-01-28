@@ -1,12 +1,37 @@
 use super::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_observer(add_new_modal)
+    app.init_state::<Modal>()
+        .init_resource::<Modals>()
+        .add_observer(add_new_modal)
         .add_observer(pop_modal)
         .add_observer(clear_modals);
 }
 
 markers!(MenuModal, SettingsModal);
+
+#[derive(Resource, Default, Deref, DerefMut, Debug, Clone)]
+pub struct Modals(pub Vec<Modal>);
+
+/// Modal stack. kudo for the idea to @skyemakesgames
+/// Only relevant in [`Screen::Gameplay`]
+#[derive(States, Reflect, Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub enum Modal {
+    #[default]
+    Main,
+    Settings,
+}
+
+#[derive(EntityEvent)]
+pub struct NewModal {
+    pub entity: Entity,
+    pub modal: Modal,
+}
+#[derive(EntityEvent)]
+pub struct PopModal(pub Entity);
+
+#[derive(EntityEvent)]
+pub struct ClearModals(pub Entity);
 
 pub fn click_pop_modal(on: On<Pointer<Click>>, mut commands: Commands) {
     commands.entity(on.entity).trigger(PopModal);
@@ -54,11 +79,13 @@ pub fn pop_modal(
         return;
     }
 
-    info!("Chat are we popping? {:?}", modals);
+    debug!("Chat, are we popping? {:?}", modals);
     // just a precaution
     assert!(!modals.is_empty());
 
-    let popped = modals.pop().expect("failed to pop modal");
+    let popped = modals
+        .pop()
+        .expect("failed to pop modal after assert on non-empty passed");
     match popped {
         Modal::Main => {
             if let Ok(menu) = menu_marker.single() {
@@ -112,24 +139,3 @@ pub fn clear_modals(
         }
     }
 }
-
-/// Modal stack. kudo for the idea to @skyemakesgames
-/// Only relevant in [`Screen::Gameplay`]
-#[derive(Reflect, Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub enum Modal {
-    Main,
-    Settings,
-}
-
-#[derive(EntityEvent)]
-pub struct NewModal {
-    pub entity: Entity,
-    pub modal: Modal,
-}
-#[derive(EntityEvent)]
-pub struct PopModal(pub Entity);
-#[derive(EntityEvent)]
-pub struct ClearModals(pub Entity);
-
-#[derive(Resource, Deref, DerefMut, Debug, Clone)]
-pub struct Modals(pub Vec<Modal>);

@@ -1,8 +1,10 @@
 //! The screen state for the main gameplay.
+//!
+//! Place to all UI HUD, modal logic and other gameplay effects
 use super::*;
 
 pub(super) fn plugin(app: &mut App) {
-    app.insert_resource(Modals(Vec::default()))
+    app.add_plugins(ui::modal::plugin)
         .add_systems(OnEnter(Screen::Gameplay), spawn_gameplay_ui)
         .add_observer(toggle_mute)
         .add_observer(toggle_pause)
@@ -11,10 +13,10 @@ pub(super) fn plugin(app: &mut App) {
 
 markers!(PauseIcon, MuteIcon, GameplayUi);
 
-fn spawn_gameplay_ui(mut cmds: Commands, textures: Res<Textures>, _settings: Res<Settings>) {
+fn spawn_gameplay_ui(mut commands: Commands, textures: Res<Textures>, _settings: Res<Settings>) {
     // info!("settings on gameplay enter:{settings:?}");
-    let ico = Props::default().hidden().width(Vw(1.0)).height(Vw(1.0));
-    cmds.spawn((
+    let ico = Props::default().hidden().width(Vw(1.0)).height(Vw(5.0));
+    commands.spawn((
         DespawnOnExit(Screen::Gameplay),
         GameplayUi,
         ui_root("Gameplay Ui"),
@@ -26,7 +28,7 @@ fn spawn_gameplay_ui(mut cmds: Commands, textures: Res<Textures>, _settings: Res
                     align_items: AlignItems::Start,
                     justify_content: JustifyContent::Start,
                     position_type: PositionType::Absolute,
-                    top: Px(0.0),
+                    top: Vh(5.0),
                     left: Vw(47.5),
                     ..Default::default()
                 },
@@ -43,8 +45,8 @@ fn toggle_pause(
     on: On<TogglePause>,
     modals: ResMut<Modals>,
     mut commands: Commands,
-    mut time: ResMut<Time<Virtual>>,
     mut state: ResMut<GameState>,
+    mut time: ResMut<Time<Virtual>>,
     mut pause_label: Query<&mut Node, With<PauseIcon>>,
 ) {
     if let Ok(mut label) = pause_label.single_mut() {

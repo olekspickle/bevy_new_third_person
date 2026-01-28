@@ -10,8 +10,6 @@ mod splash;
 mod title;
 
 pub fn plugin(app: &mut App) {
-    app.init_state::<Screen>();
-
     app.add_plugins((
         camera::plugin,
         splash::plugin,
@@ -40,8 +38,8 @@ fn track_last_screen(
 
 fn on_back(
     trigger: On<Back>,
-    mut next_screen: ResMut<NextState<Screen>>,
     screen: Res<State<Screen>>,
+    mut next_screen: ResMut<NextState<Screen>>,
 ) {
     // Do not go to the title on back, we'd rather handle it in gameplay observers
     if *screen.get() == Screen::Gameplay {
@@ -56,10 +54,6 @@ pub fn on_go_to(goto: On<GoTo>, mut next_screen: ResMut<NextState<Screen>>) {
     next_screen.set(goto.event().0.clone());
 }
 
-// TODO: figure out nice click_go_to(Screen::Title) HOF
-// fn click_go_to<E, B, M>(s: Screen) -> impl IntoObserverSystem<OnPress, B, M> {
-//     |_: On<OnPress>, mut cmds: Commands| cmds.trigger(OnGoTo(s.clone()))
-// }
 pub mod to {
     use super::*;
 

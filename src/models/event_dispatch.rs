@@ -31,24 +31,20 @@ pub struct ChangeMood {
     pub entity: Entity,
     pub mood: Mood,
 }
-/// Event triggered on a UI entity when the [`Interaction`] component on the same entity changes to
-/// [`Interaction::Pressed`]. Observe this event to detect e.g. button presses.
-#[derive(Event)]
-pub struct Press;
 #[derive(Event)]
 pub struct SettingsChanged;
 
 // ================== trigger events on input ========================
 fn back(
     on: On<Start<Escape>>,
+    state: Res<GameState>,
     screen: Res<State<Screen>>,
-    states: Res<GameState>,
     mut commands: Commands,
 ) {
     match screen.get() {
         Screen::Splash | Screen::Title | Screen::Loading => {}
         _ => {
-            let last = states.last_screen.clone();
+            let last = state.last_screen.clone();
             commands.trigger(Back {
                 entity: on.event_target(),
                 screen: last,

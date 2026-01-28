@@ -11,9 +11,6 @@ pub(super) fn plugin(app: &mut App) {
         .add_observer(play_sound_effect_on_over);
 }
 
-#[derive(Component)]
-pub struct Interactable;
-
 fn apply_palette_on_click(
     click: On<Pointer<Click>>,
     mut palette_q: Query<(

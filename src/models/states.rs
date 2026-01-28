@@ -1,14 +1,15 @@
 use super::*;
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<GameState>().register_type::<Mood>();
+    app.init_resource::<GameState>()
+        .init_state::<Mood>()
+        .init_state::<Screen>();
 }
 
 #[derive(Resource, Reflect, Debug, Clone)]
 #[reflect(Resource)]
 pub struct GameState {
     pub last_screen: Screen,
-    pub current_mood: Mood,
 
     pub diagnostics: bool,
     pub debug_ui: bool,
@@ -20,7 +21,6 @@ impl Default for GameState {
     fn default() -> Self {
         Self {
             last_screen: Screen::Title,
-            current_mood: Mood::Exploration,
             diagnostics: true,
             debug_ui: true,
             paused: false,
@@ -39,7 +39,7 @@ impl GameState {
 /// The game's main screen states.
 /// See <https://bevy-cheatbook.github.io/programming/states.html>
 /// Or <https://github.com/bevyengine/bevy/blob/main/examples/ecs/state.rs>
-#[derive(States, Default, Clone, Eq, PartialEq, Debug, Hash, Reflect)]
+#[derive(Component, States, Default, Clone, Eq, PartialEq, Debug, Hash, Reflect)]
 pub enum Screen {
     // TODO: splash should be first
     // Bevy tribute <3
@@ -56,7 +56,7 @@ pub enum Screen {
     Gameplay,
 }
 
-#[derive(Component, Reflect, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+#[derive(Component, States, Reflect, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
 #[reflect(Component)]
 pub enum Mood {
     #[default]
