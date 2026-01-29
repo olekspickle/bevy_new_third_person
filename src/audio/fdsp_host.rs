@@ -35,7 +35,7 @@ pub struct FundspConfig {
 }
 
 impl FundspConfig {
-    pub fn new<U: AudioUnit + 'static>(unit: U) -> Self {
+    pub fn _new<U: AudioUnit + 'static>(unit: U) -> Self {
         Self {
             skip_silence: true,
             unit: Box::new(unit),
@@ -45,7 +45,7 @@ impl FundspConfig {
     /// Create a stereo node from a mono processing chain.
     ///
     /// This simply downmixes the input and splits the output.
-    pub fn new_downmix<U: fundsp::audionode::AudioNode<Inputs = U1, Outputs = U1> + 'static>(
+    pub fn _new_downmix<U: fundsp::audionode::AudioNode<Inputs = U1, Outputs = U1> + 'static>(
         unit: An<U>,
     ) -> Self {
         let graph = ((pass() + pass()) * 0.5) >> unit >> split::<U2>();
@@ -56,15 +56,15 @@ impl FundspConfig {
         }
     }
 
-    pub fn audio_unit(&self) -> &dyn AudioUnit {
+    pub fn _audio_unit(&self) -> &dyn AudioUnit {
         self.unit.as_ref()
     }
 
-    pub fn audio_unit_mut(&mut self) -> &mut dyn AudioUnit {
+    pub fn _audio_unit_mut(&mut self) -> &mut dyn AudioUnit {
         self.unit.as_mut()
     }
 
-    pub fn with_skip_silence(self, skip_silence: bool) -> Self {
+    pub fn _with_skip_silence(self, skip_silence: bool) -> Self {
         Self {
             skip_silence,
             unit: self.unit,

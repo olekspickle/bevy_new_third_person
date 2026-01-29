@@ -8,22 +8,21 @@ pub fn plugin(app: &mut App) {
 
 #[allow(clippy::too_many_arguments)]
 fn movement_sound(
-    on: On<Fire<Movement>>,
-    time: Res<Time>,
+    _on: On<Fire<Movement>>,
     state: Res<GameState>,
-    settings: Res<Settings>,
-    crouch: Single<&Action<Crouch>>,
-    mut cmds: Commands,
-    mut sources: ResMut<AudioSources>,
-    mut step_timer: Query<&mut StepTimer, With<Player>>,
+    // time: Res<Time>,
+    // settings: Res<Settings>,
+    // crouch: Single<&Action<Crouch>>,
+    // mut commands: Commands,
+    // mut sources: ResMut<AudioSources>,
+    // mut step_timer: Query<&mut StepTimer, With<Player>>,
 ) -> Result {
     if state.muted || state.paused {
         return Ok(());
     }
 
-    let mut step_timer = step_timer.get_mut(on.context)?;
-
     // WALK SOUND
+    // let mut step_timer = step_timer.get_mut(on.context)?;
     // if step_timer.tick(time.delta()).just_finished() && basis.standing_on_entity().is_some() {
     //     let mut rng = rand::rng();
     //     let crouch = ***crouch;
@@ -33,7 +32,7 @@ fn movement_sound(
     //     } else {
     //         sources.steps.pick(&mut rng)
     //     };
-    //     cmds.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
+    //     commands.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
     // }
 
     Ok(())
@@ -44,7 +43,7 @@ fn jump_sound(
     state: Res<GameState>,
     settings: Res<Settings>,
     // jump_timer: Query<&JumpTimer, With<Player>>,
-    mut cmds: Commands,
+    mut commands: Commands,
     mut sources: ResMut<AudioSources>,
 ) -> Result {
     if state.muted || state.paused {
@@ -55,7 +54,7 @@ fn jump_sound(
     // if jump_timer.just_finished() {
     let mut rng = rand::rng();
     let handle = sources.steps.pick(&mut rng);
-    cmds.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
+    commands.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
     // }
 
     Ok(())
@@ -66,7 +65,7 @@ fn dash_sound(
     state: Res<GameState>,
     settings: Res<Settings>,
     // jump_timer: Query<&JumpTimer, With<Player>>,
-    mut cmds: Commands,
+    mut commands: Commands,
     mut sources: ResMut<AudioSources>,
 ) -> Result {
     if state.muted || state.paused {
@@ -77,7 +76,7 @@ fn dash_sound(
     // if jump_timer.just_finished() {
     let mut rng = rand::rng();
     let handle = sources.steps.pick(&mut rng);
-    cmds.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
+    commands.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
     // }
 
     Ok(())

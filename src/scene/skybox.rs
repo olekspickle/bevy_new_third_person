@@ -1,7 +1,5 @@
 use super::*;
 use bevy::{
-    camera::Exposure,
-    core_pipeline::tonemapping::Tonemapping,
     light::{CascadeShadowConfigBuilder, light_consts::lux},
     pbr::{Atmosphere, AtmosphereMode, AtmosphereSettings, DistanceFog, FogFalloff},
 };

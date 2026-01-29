@@ -1,5 +1,5 @@
 use super::*;
-use bevy_ahoy::CharacterControllerState;
+use bevy_ahoy::{CharacterControllerState, CharacterLook};
 use std::time::Duration;
 
 pub fn plugin(app: &mut App) {
@@ -25,6 +25,7 @@ fn movement(
             &mut Player,
             &mut Transform,
             &mut StepTimer,
+            &CharacterLook,
             &CharacterControllerState,
         ),
         Without<SceneCamera>,
@@ -33,16 +34,16 @@ fn movement(
     let dt = time.delta_secs();
     let navigate = *navigate.into_inner();
 
-    for (mut player, mut pos, mut step_timer, ahoy) in player_q.iter_mut() {
+    for (mut player, mut pos, mut step_timer, look, ahoy) in player_q.iter_mut() {
         let cam_transform = camera.single()?;
         let input_dir = cam_transform.movement_direction(*navigate);
         pos.rotation = Quat::from_rotation_y(-input_dir.x.atan2(-input_dir.z));
 
-        info!(
-            "speed: {}, animation state:{:?}",
-            ahoy.speed(),
-            player.animation.state
-        );
+        // info!(
+        //     "speed: {}, animation state:{:?}",
+        //     ahoy.speed(),
+        //     player.animation.state
+        // );
 
         // update step timer dynamically based on actual speed
         // Note: this is specific to the animation provided

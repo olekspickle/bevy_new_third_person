@@ -30,7 +30,7 @@ pub fn plugin(app: &mut App) {
     );
 
     app.add_plugins((
-        AhoyPlugin::default(),
+        AhoyPlugins::default(),
         control::plugin,
         sound::plugin,
         animation::plugin,
