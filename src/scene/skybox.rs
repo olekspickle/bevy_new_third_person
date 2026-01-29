@@ -1,7 +1,9 @@
 use super::*;
 use bevy::{
     light::{CascadeShadowConfigBuilder, light_consts::lux},
-    pbr::{Atmosphere, AtmosphereMode, AtmosphereSettings, DistanceFog, FogFalloff},
+    pbr::{
+        Atmosphere, AtmosphereMode, AtmosphereSettings, DistanceFog, FogFalloff, ScatteringMedium,
+    },
 };
 use serde::{Deserialize, Serialize};
 
@@ -17,6 +19,7 @@ pub fn add_skybox_to_camera(
     cfg: Res<Config>,
     mut commands: Commands,
     mut camera: Query<Entity, With<SceneCamera>>,
+    mut scattering_mediums: ResMut<Assets<ScatteringMedium>>,
 ) -> Result {
     let camera = camera.single_mut()?;
 
@@ -56,8 +59,8 @@ pub fn add_skybox_to_camera(
     // Lighting
     commands.entity(camera).insert((
         // This is the component that enables atmospheric scattering for a camera
-        // TODO: manipulate ground_albedo depending on the angle of the sun
-        Atmosphere::EARTH,
+        // TODO: experiment with scattering medium
+        Atmosphere::earthlike(scattering_mediums.add(ScatteringMedium::default())),
         // The scene is in units of 10km, so we need to scale up the
         // aerial view lut distance and set the scene scale accordingly.
         // Most usages of this feature will not need to adjust this.

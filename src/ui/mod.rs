@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 mod constants;
 mod interaction;
 pub mod modal;
+#[cfg(all(feature = "dev", not(feature = "web")))]
 mod perf;
 mod prefabs;
 mod props;
@@ -31,6 +32,6 @@ pub use widget::*;
 pub fn plugin(app: &mut App) {
     app.add_plugins((prefabs::plugin, interaction::plugin));
 
-    #[cfg(feature = "dev")]
+    #[cfg(all(feature = "dev", not(feature = "web")))]
     app.add_plugins(perf::plugin);
 }

@@ -25,6 +25,7 @@ where
 }
 
 /// Loads your asset type `A` from ron files
+#[derive(TypePath)]
 pub struct RonAssetLoader<A>(PhantomData<A>);
 
 /// Possible errors that can be produced by [`RonAssetLoader`]

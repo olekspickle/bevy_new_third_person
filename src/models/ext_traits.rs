@@ -1,7 +1,6 @@
 use super::*;
 use avian3d::prelude::*;
 use bevy::gltf::GltfMesh;
-use bevy_ahoy::CharacterControllerState;
 use easy_ext::ext;
 
 /// Helper trait to spawn mesh with minimum effort
@@ -132,14 +131,5 @@ impl AnimationPlayer {
         self.playing_animations_mut().for_each(|(_, a)| {
             a.set_weight(0.0);
         });
-    }
-}
-
-#[ext(CharacterControllerStateExt)]
-impl CharacterControllerState {
-    pub fn speed(&self) -> f32 {
-        self.touching_entities
-            .iter()
-            .fold(0.0, |acc, t| acc + t.character_velocity.length())
     }
 }

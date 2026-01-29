@@ -14,7 +14,7 @@
         zoom: (1.5, 30),
         movement: (
             max_speed: 100,
-            jump_height: 3.0,
+            jump_height: 5.0,
             sprint_factor: 1.5,
             crouch_factor: 0.2,
             dash_distance: 10,

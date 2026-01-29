@@ -1,13 +1,8 @@
 use crate::*;
-use avian3d::prelude::*;
-use bevy::prelude::AnimationTransitions;
+use bevy::platform::time::Instant;
 use bevy_ahoy::prelude::*;
 use bevy_enhanced_input::prelude::*;
-#[cfg(feature = "third_person")]
-use bevy_third_person_camera::*;
-#[cfg(feature = "top_down")]
-use bevy_top_down_camera::*;
-use std::{collections::HashMap, time::Instant};
+use std::collections::HashMap;
 
 mod animation;
 mod control;
@@ -18,25 +13,9 @@ pub use animation::*;
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
-    #[cfg(feature = "third_person")]
-    app.add_plugins(ThirdPersonCameraPlugin).configure_sets(
-        PostUpdate,
-        bevy_third_person_camera::CameraSyncSet.before(TransformSystems::Propagate),
-    );
-    #[cfg(feature = "top_down")]
-    app.add_plugins(TopDownCameraPlugin).configure_sets(
-        PostUpdate,
-        bevy_top_down_camera::CameraSyncSet.before(TransformSystems::Propagate),
-    );
-
-    app.add_plugins((
-        AhoyPlugins::default(),
-        control::plugin,
-        sound::plugin,
-        animation::plugin,
-    ))
-    .add_systems(OnEnter(Screen::Gameplay), spawn_player)
-    .add_observer(player_post_spawn);
+    app.add_plugins((control::plugin, sound::plugin, animation::plugin))
+        .add_systems(OnEnter(Screen::Gameplay), spawn_player)
+        .add_observer(player_post_spawn);
 }
 
 pub fn spawn_player(
@@ -71,6 +50,7 @@ pub fn spawn_player(
                     max_speed: cfg.player.movement.max_speed,
                     speed: cfg.player.movement.max_speed / 2.0,
                     crouch_speed_scale: cfg.player.movement.crouch_factor,
+                    jump_height: cfg.player.movement.jump_height,
                     // crouch_height: 0.5,
                     ..default()
                 },

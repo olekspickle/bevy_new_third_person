@@ -1,6 +1,6 @@
 [package]
 name = "bevy_new_3d_rpg"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2024"
@@ -9,131 +9,90 @@ repository = "https://github.com/olekspickle/bevy_new_3d_rpg"
 description = "Simple but comprehensive 3D RPG game template with gamepad support"
 keywords = ["bevy", "game", "template", "devkit", "third person", "topdown", "gamedev"]
 
+[dependencies.bevy]
+version = "0.18"
+default-features = false
+features = [
+    # opinionated list without bevy_audio
+    "default_app",
+    "default_platform",
+    "3d_api",
+    "3d_bevy_render",
+    "ui_api",
+    "ui_bevy_render",
+    "scene",
+    "picking",
+    "jpeg",
+    "serialize",
+    "hotpatching",
+    "reflect_auto_register",
+    "experimental_bevy_ui_widgets"
+]
+
+[dependencies]
+bevy-inspector-egui = { version = "0.36", optional = true }             # entity inspector
+bevy_skein = "0.5"                                                      # blender integration
+
+avian3d = "0.6.0-dev"                                                   # physics
+bevy_seedling = { version = "0.7", features = ["hrtf"] }                # audio plugin using firewheel
+bevy_shuffle_bag = "0.4"                                                # deterministically random container
+
+bevy_third_person_camera = { version = "0.4", optional = true }         # 3rd person camera
+bevy_top_down_camera = { version = "0.2", optional = true }             # top down camera
+
+bevy_ahoy = "0.0.3"                                                     # character controller
+avian_pickup = "0.5.0-dev"                                              # pickup plugin
+bevy_enhanced_input = { version = "0.22", features = ["serialize"] }    # keyboard/gamepad input
+
+# dialogue
+bevy_yarnspinner = "0.7"
+bevy_yarnspinner_example_dialogue_view = "0.7"
+
+# misc
+easy-ext = "1"
+firewheel = "0.10"
+fundsp = "0.20"
+image = "0.25.6"
+ron = "0.10"
+rand = "0.9"
+serde = "1"
+thiserror = "2"
+# keep the following in sync with Bevy's dependencies
+winit = { version = "0.30", default-features = false }
+# Compile low-severity logs out of builds for performance.
+# Remove these features if you want to profile your game with tracy.
+# (see <https://github.com/bevyengine/bevy/blob/main/docs/profiling.md#tracy-profiler>)
+tracing = { version = "0.1", features = ["max_level_debug", "release_max_level_warn"] }
+
 [features]
 default = [ "dev_native", "third_person" ]
-web = []
+native = []
 custom_cursor  = []
+web = [ "bevy/webgpu", "bevy_seedling/web_audio" ]
 top_down = ["bevy_top_down_camera"]
 third_person = ["bevy_third_person_camera"]
 dev = [
-    "bevy/bevy_dev_tools",
     "bevy/bevy_ui_debug",
     "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/track_location",          # Improve error messages coming from Bevy
 ]
 dev_native = [
     "dev",
+    "native",
     "enhanced",
     "custom_cursor",
     "bevy-inspector-egui",
+    "bevy/dev",                     # Enable aggressive file watcher
+    "bevy/bevy_remote",             # Enable remote protocol for 3rd party extensions and plugins
     "bevy/embedded_watcher",        # Enable embedded asset hot reloading for native dev builds.
-    "bevy/file_watcher",            # Enable asset hot reloading for native dev builds.
 ]
 enhanced = [
     "bevy/meshlet",                 # new nanite-like rendering system
-    "bevy/bevy_pbr",                # PBR
+    "bevy/meshlet_processor",       # Enables processing meshes into meshlet meshes for bevy_pbr
+    "bevy/pbr_light_textures",      # PBR light textures
     "bevy/pbr_specular_textures",   # PBR specular maps
+
 ]
-
-[dependencies.bevy]
-version = "^0.17"
-default-features = false
-# opinionated list without bevy_audio
-features = [
-    # TODO: use shorter list on 0.18
-    # "default_app",
-    # "default_platform",
-    # "3d_api",
-    # "3d_bevy_render",
-    # "ui",
-    # "scene",
-    # "picking",
-    # DELETE after 0.18 >
-    "std",
-    "zstd_rust",
-    "sysinfo_plugin",
-    "multi_threaded",
-    "smaa_luts",
-    "bevy_core_pipeline",
-    "bevy_anti_alias",
-    "bevy_render",
-    "bevy_color",
-    "bevy_post_process",
-    "bevy_winit",
-    "bevy_state",
-    "bevy_asset",
-    "bevy_gltf",
-    "bevy_scene",
-    "bevy_picking",
-    "bevy_ui",
-    "bevy_ui_render",
-    "bevy_ui_picking_backend",
-    "bevy_mesh_picking_backend",
-    "bevy_text",
-    "tonemapping_luts",
-    "animation",
-    "png",
-    "ktx2",
-    # < DELETE after 0.18
-    # specific plugins
-    "jpeg",
-    "experimental_bevy_ui_widgets",
-    "reflect_auto_register",
-    "serialize",
-    "hotpatching",
-    # TODO: play with these features
-    # "pbr_light_textures"
-]
-
-[dependencies]
-# plugins
-bevy_fix_cursor_unlock_web = "^0.2.0-rc"
-bevy-inspector-egui = { version = "^0.35", optional = true }
-bevy_skein = "^0.4"                                                                         # blender integration
-# iyes_perf_ui = "0.5"                                                                      # diagnostics overlay
-
-avian3d = { version = "^0.4", features = ["debug-plugin", "3d", "parallel", "collider-from-mesh"] }   # physics
-bevy_seedling = { version = "^0.6", features = ["hrtf", "ogg"] }                            # audio plugin using firewheel
-bevy_shuffle_bag = "^0.3"                                                                   # random container for audio
-
-bevy_third_person_camera = { version = "^0.3", optional = true }                            # 3rd person camera
-bevy_top_down_camera = { version = "^0.2", optional = true }                                # top down camera
-
-# character control
-bevy_ahoy = "0.0.2"
-bevy_enhanced_input = { version = "^0.20", features = ["serialize"] }                       # keyboard/gamepad input
-
-# dialogue
-bevy_yarnspinner = "^0.6.0-rc"
-bevy_yarnspinner_example_dialogue_view = "^0.6.0-rc"
-
-# misc
-# itertools = "0.14.0"
-firewheel = "^0.9"
-fundsp = "^0.20"
-image = "^0.25.6"
-ron = "^0.10"
-rand = "^0.9"
-serde = "1"
-thiserror = "2"
-smol_str = { version = "0.3", default-features = false }
-# keep the following in sync with Bevy's dependencies
-winit = { version = "^0.30", default-features = false }
-# Compile low-severity logs out of builds for performance.
-# Remove these features if you want to profile your game with tracy.
-# (see <https://github.com/bevyengine/bevy/blob/main/docs/profiling.md#tracy-profiler>)
-tracing = { version = "^0.1", features = ["max_level_debug", "release_max_level_warn"] }
-easy-ext = "1.0.2"
-
-[target.wasm32-unknown-unknown.dependencies]
-firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", rev = "ad810af" }
-
-[patch.crates-io]
-avian3d = { git = "https://github.com/avianphysics/avian", rev = "5bef382" }
-bevy_third_person_camera = { git = "https://github.com/olekspickle/bevy_third_person_camera", branch = "0.17.0" }
-# Fix [crash on Chromium](https://github.com/CorvusPrudens/bevy_seedling/issues/60)
-firewheel-web-audio = { git = "https://github.com/CorvusPrudens/firewheel-web-audio", rev = "ad810af" }
-
 
 
 # LINT
@@ -184,3 +143,10 @@ strip = true
 [profile.wasm-release]              # Optimize for size in the wasm-release profile to reduce load times and bandwidth usage on web.
 inherits = "release"
 strip = "debuginfo"                 # Strip all debugging information from the binary to slightly reduce file size.
+
+[patch.crates-io]
+avian3d = { git = "https://github.com/avianphysics/avian" }
+avian_pickup = { git = "https://github.com/janhohenheim/avian_pickup" }
+bevy_ahoy = { git = "https://github.com/janhohenheim/bevy_ahoy", rev = "51efcce" }
+bevy_third_person_camera = { git = "https://github.com/olekspickle/bevy_third_person_camera" }
+

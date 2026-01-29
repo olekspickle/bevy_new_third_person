@@ -16,19 +16,13 @@
 //! more on that here: https://bevyskein.dev/docs/migration-tools
 //! Scene logic is only active during the State `Screen::Playing`
 use crate::*;
-use avian3d::prelude::*;
-use bevy_skein::SkeinPlugin;
 
 mod skybox;
 pub use skybox::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((
-        PhysicsPlugins::default(),
-        SkeinPlugin::default(),
-        skybox::plugin,
-    ))
-    .add_systems(OnEnter(Screen::Title), setup);
+    app.add_plugins(skybox::plugin)
+        .add_systems(OnEnter(Screen::Title), setup);
 }
 
 pub fn setup(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut commands: Commands) {
@@ -41,7 +35,7 @@ pub fn setup(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut commands: 
     ));
 
     // to see something when suns go away
-    commands.insert_resource(AmbientLight {
+    commands.insert_resource(GlobalAmbientLight {
         color: Color::WHITE,
         brightness: 500.0,
         ..Default::default()

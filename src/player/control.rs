@@ -1,5 +1,5 @@
 use super::*;
-use bevy_ahoy::{CharacterControllerState, CharacterLook};
+use bevy_ahoy::CharacterLook;
 use std::time::Duration;
 
 pub fn plugin(app: &mut App) {
@@ -17,7 +17,7 @@ pub fn plugin(app: &mut App) {
 /// <https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_control_systems/platformer_control_systems.rs>
 fn movement(
     cfg: Res<Config>,
-    time: Res<Time>,
+    // time: Res<Time>,
     navigate: Single<&Action<Movement>>,
     camera: Query<&Transform, With<SceneCamera>>,
     mut player_q: Query<
@@ -25,23 +25,25 @@ fn movement(
             &mut Player,
             &mut Transform,
             &mut StepTimer,
-            &CharacterLook,
-            &CharacterControllerState,
+            &mut CharacterLook,
+            &CharacterController,
         ),
         Without<SceneCamera>,
     >,
 ) -> Result {
-    let dt = time.delta_secs();
+    // let dt = time.delta_secs();
     let navigate = *navigate.into_inner();
 
-    for (mut player, mut pos, mut step_timer, look, ahoy) in player_q.iter_mut() {
+    for (mut player, mut pos, mut step_timer, mut look, ahoy) in player_q.iter_mut() {
         let cam_transform = camera.single()?;
         let input_dir = cam_transform.movement_direction(*navigate);
-        pos.rotation = Quat::from_rotation_y(-input_dir.x.atan2(-input_dir.z));
+        let rotation = Quat::from_rotation_y(-input_dir.x.atan2(-input_dir.z));
+        *look = CharacterLook::from_quat(rotation);
+        pos.rotation = rotation;
 
         // info!(
         //     "speed: {}, animation state:{:?}",
-        //     ahoy.speed(),
+        //     ahoy.speed,
         //     player.animation.state
         // );
 
@@ -50,13 +52,13 @@ fn movement(
         // normal step: 0.475
         // sprint step (x1.5): 0.354
         // step on sprint timer: 0.317
-        if ahoy.speed() > cfg.player.movement.idle_to_run_threshold {
-            let ratio = cfg.player.movement.max_speed / ahoy.speed();
+        if ahoy.speed > cfg.player.movement.idle_to_run_threshold {
+            let ratio = cfg.player.movement.max_speed / ahoy.speed;
             let adjusted_step_time_f32 = cfg.timers.step * ratio;
             let adjusted_step_time = Duration::from_secs_f32(adjusted_step_time_f32);
             // info!("step timer:{adjusted_step_time_f32}s");
             step_timer.set_duration(adjusted_step_time);
-            player.animation.run(ahoy.speed());
+            player.animation.run(ahoy.speed);
         } else {
             player.animation.idle()
         }
@@ -68,13 +70,13 @@ fn movement(
 fn handle_sprint_in(
     on: On<Start<Sprint>>,
     cfg: Res<Config>,
-    mut player_q: Query<(&mut Player, &mut CharacterControllerState)>,
+    mut player_q: Query<(&mut Player, &mut CharacterController)>,
 ) -> Result {
     let entity = on.context;
     if let Ok((mut player, mut ahoy)) = player_q.get_mut(entity) {
-        if ahoy.speed() <= cfg.player.movement.max_speed {
-            // ahoy.speed *= cfg.player.movement.sprint_factor;
-            player.animation.sprint(ahoy.speed());
+        if ahoy.speed <= cfg.player.movement.max_speed {
+            ahoy.speed *= cfg.player.movement.sprint_factor;
+            player.animation.sprint(ahoy.speed);
             info!("Sprint started for entity: {entity}");
         }
     }

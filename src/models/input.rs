@@ -2,8 +2,7 @@ use super::*;
 use bevy_ahoy::prelude::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(EnhancedInputPlugin)
-        .add_input_context::<PlayerCtx>()
+    app.add_input_context::<PlayerCtx>()
         .add_input_context::<ModalCtx>()
         .add_systems(Startup, spawn_ctx)
         .add_observer(add_modal_ctx)

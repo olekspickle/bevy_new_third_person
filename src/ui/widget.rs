@@ -27,7 +27,6 @@ pub fn icon(opts: impl Into<Props>) -> impl Bundle {
         Label,
         Name::new("Icon"),
         opts.node.clone(),
-        opts.border_radius,
         opts.into_image_bundle(),
     )
 }
@@ -37,7 +36,6 @@ pub fn label(opts: impl Into<Props>) -> impl Bundle {
         Label,
         Name::new("Label"),
         opts.node.clone(),
-        opts.border_radius,
         opts.into_text_bundle(),
         Pickable::IGNORE,
     )
@@ -82,12 +80,11 @@ where
         padding: UiRect::horizontal(Vw(1.0)),
         align_items: AlignItems::Center,
         justify_content: JustifyContent::Center,
+        border_radius: BorderRadius::all(Px(7.0)),
         ..opts.node.clone()
     };
-    let mut opts = opts.node(new_node);
-    opts.border_radius = BorderRadius::all(Px(7.0));
 
-    btn(opts, action)
+    btn(opts.node(new_node), action)
 }
 
 /// A simple button with text and an action defined as an [`Observer`]. The button's layout is provided by `button_bundle`.
@@ -120,7 +117,6 @@ where
             parent
                 .spawn((
                     opts.bg_color,
-                    opts.border_radius,
                     opts.border_color,
                     opts.palette_set.clone(),
                     Name::new("Button Content"),

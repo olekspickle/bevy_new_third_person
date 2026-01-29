@@ -209,7 +209,7 @@ fn sfx_lower(
     _: On<Pointer<Click>>,
     cfg: ResMut<Config>,
     mut settings: ResMut<Settings>,
-    mut sfx: Single<&mut VolumeNode, With<SfxBus>>,
+    mut sfx: Single<&mut VolumeNode, With<SoundEffectsBus>>,
 ) {
     let new_volume = (settings.sound.sfx - cfg.settings.step).max(cfg.settings.min_volume);
     settings.sound.sfx = new_volume;
@@ -220,7 +220,7 @@ fn sfx_raise(
     _: On<Pointer<Click>>,
     cfg: ResMut<Config>,
     mut settings: ResMut<Settings>,
-    mut sfx: Single<&mut VolumeNode, With<SfxBus>>,
+    mut sfx: Single<&mut VolumeNode, With<SoundEffectsBus>>,
 ) {
     let new_volume = (settings.sound.sfx + cfg.settings.step).min(cfg.settings.max_volume);
     settings.sound.sfx = new_volume;

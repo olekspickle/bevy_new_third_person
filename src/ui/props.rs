@@ -6,7 +6,6 @@ pub struct Props {
     pub content: WidgetContent,
     pub palette_set: PaletteSet,
     // layout
-    pub border_radius: BorderRadius,
     pub border_color: BorderColor,
     pub bg_color: BackgroundColor,
     pub node: Node,
@@ -26,11 +25,11 @@ impl Props {
                 justify_content: JustifyContent::Center,
                 border: UiRect::all(Px(2.0)),
                 padding: UiRect::horizontal(Vw(3.0)),
+                border_radius: BorderRadius::all(size::BORDER_RADIUS),
                 ..Default::default()
             },
             bg_color: BackgroundColor(colors::TRANSPARENT),
             border_color: BorderColor::all(colors::WHITEISH),
-            border_radius: BorderRadius::all(size::BORDER_RADIUS),
         }
     }
 
@@ -61,7 +60,7 @@ impl Props {
         self
     }
     pub fn border_radius(mut self, r: Val) -> Self {
-        self.border_radius = BorderRadius::all(r);
+        self.node.border_radius = BorderRadius::all(r);
         self
     }
     pub fn node(mut self, new: Node) -> Self {

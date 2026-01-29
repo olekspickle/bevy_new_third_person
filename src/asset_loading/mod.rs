@@ -1,5 +1,5 @@
 use crate::*;
-use bevy::{asset::Asset, gltf::GltfLoaderSettings};
+use bevy::asset::Asset;
 use bevy_seedling::sample::AudioSample;
 
 mod ron;
@@ -73,12 +73,7 @@ impl FromWorld for Models {
     fn from_world(world: &mut World) -> Self {
         let assets = world.resource::<AssetServer>();
         Self {
-            player: assets.load_with_settings(
-                "models/player.glb",
-                |settings: &mut GltfLoaderSettings| {
-                    settings.use_model_forward_direction = Some(true);
-                },
-            ),
+            player: assets.load("models/player.glb"),
             scene: assets.load("models/scene.glb"),
         }
     }

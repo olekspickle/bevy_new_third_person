@@ -1,5 +1,4 @@
 use crate::*;
-use avian3d::prelude::*;
 use bevy::{
     anti_alias::taa::TemporalAntiAliasing,
     camera::Exposure,

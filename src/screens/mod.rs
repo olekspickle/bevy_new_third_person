@@ -11,7 +11,6 @@ mod title;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((
-        camera::plugin,
         splash::plugin,
         loading::plugin,
         title::plugin,
@@ -67,6 +66,14 @@ pub mod to {
         modals.clear();
         commands.trigger(GoTo(Screen::Title));
     }
+
+    // pub fn go_to(on: On<Pointer<Click>>, screen_q: Query<&Screen>, mut commands: Commands) {
+    //     info!("going to");
+    //     if let Ok(screen) = screen_q.get(on.entity) {
+    //         info!("going to {screen:?}");
+    //         commands.trigger(GoTo(screen.clone()));
+    //     }
+    // }
     pub fn settings(_: On<Pointer<Click>>, mut commands: Commands) {
         commands.trigger(GoTo(Screen::Settings));
     }
