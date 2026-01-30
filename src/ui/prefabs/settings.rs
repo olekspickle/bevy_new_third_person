@@ -28,7 +28,7 @@ markers!(
     TabContent,
     PerfUi
 );
-#[cfg(feature = "dev_native")]
+#[cfg(feature = "dev")]
 markers!(DiagnosticsLabel, DebugUiLabel);
 
 // ============================ CONTROL KNOBS OBSERVERS ============================
@@ -260,7 +260,7 @@ fn click_toggle_vsync(
     Ok(())
 }
 
-#[cfg(not(feature = "web"))]
+#[cfg(feature = "dev")]
 fn click_toggle_diagnostics(
     _: On<Pointer<Click>>,
     mut state: ResMut<GameState>,
@@ -283,7 +283,7 @@ fn click_toggle_diagnostics(
     }
 }
 
-#[cfg(not(feature = "web"))]
+#[cfg(feature = "dev")]
 fn click_toggle_debug_ui(
     _: On<Pointer<Click>>,
     children: Query<&Children>,
@@ -434,7 +434,7 @@ fn video_grid(cycle: &SunCycle) -> impl Bundle {
             align_items: AlignItems::Center,
             ..default()
         },
-        #[cfg(feature = "web")]
+        #[cfg(not(feature = "dev"))]
         children![
             label("Sun cycle"),
             (btn(cycle.as_str(), click_toggle_sun_cycle), SunCycleLabel),
@@ -444,7 +444,7 @@ fn video_grid(cycle: &SunCycle) -> impl Bundle {
             label("VSync"),
             (btn("on", click_toggle_vsync), VsyncLabel),
         ],
-        #[cfg(not(feature = "web"))]
+        #[cfg(feature = "dev")]
         children![
             label("Sun cycle"),
             (btn(cycle.as_str(), click_toggle_sun_cycle), SunCycleLabel),

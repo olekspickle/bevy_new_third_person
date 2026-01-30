@@ -1,4 +1,4 @@
-name: release-flow
+name: release
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'version - in the form of v1.2.3'
+        description: 'version in the form of v1.2.3'
         required: true
         type: string
       build_windows:
@@ -32,7 +32,7 @@ on:
         type: string
       upload_to_github:
         description: "Upload to GitHub releases"
-        default: true
+        default: false
         type: boolean
       deploy_to_github_pages:
         description: "Deploy web build to GitHub Pages"
@@ -98,6 +98,8 @@ env:
   # Enabling this only helps with consecutive releases to the same version (and takes up cache storage space).
   # See: https://github.com/orgs/community/discussions/27059
   use_github_cache: false
+
+  toolchain: nightly-2026-01-20
 
 jobs:
   get-version:
@@ -211,13 +213,13 @@ jobs:
             echo "SDKROOT=$(xcrun --sdk macosx --show-sdk-path)" >> "${GITHUB_ENV}"
           fi
 
-      - name: Should continue
-        if: |
-          (matrix.platform == 'web' && env.build_web) ||
-          (matrix.platform == 'linux' && env.build_linux) ||
-          (matrix.platform == 'windows' && env.build_windows) ||
-          (matrix.platform == 'macos' && env.build_macos)
-        run: echo 'is_platform_enabled=true' >> "${GITHUB_ENV}"
+          # Check if building for this platform is enabled.
+          echo 'is_platform_enabled=${{
+            (matrix.platform == 'web' && inputs.build_web) ||
+            (matrix.platform == 'linux' && inputs.build_linux) ||
+            (matrix.platform == 'windows' && inputs.build_windows) ||
+            (matrix.platform == 'macos' && inputs.build_macos)
+          }}' >> "${GITHUB_ENV}"
 
       - name: Checkout repository
         if: ${{ env.is_platform_enabled == 'true' }}
@@ -231,12 +233,12 @@ jobs:
         with:
           targets: ${{ matrix.targets }}
           components: rust-src
+          toolchain: ${{ env.toolchain }}
 
       - name: Restore Rust cache
         if: ${{ env.is_platform_enabled == 'true' && env.use_github_cache == 'true' }}
         uses: Swatinem/rust-cache@v2
         with:
-          shared-key: release
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: Install dependencies (Linux)
@@ -261,7 +263,6 @@ jobs:
           cargo binstall --locked -y --force wasm-bindgen-cli
           cargo binstall --locked -y --force wasm-opt
           bevy build --locked --release --features='${{ matrix.features }}' --yes web --bundle
-          tree target/bevy_web || sudo apt-get install tree && tree target/bevy_web
           mv 'target/bevy_web/web-release/${{ env.pkg_name }}' '${{ env.app }}'
 
       - name: Build binaries and add them to app (non-Web)
@@ -269,7 +270,6 @@ jobs:
         run: |
           for target in ${{ matrix.targets }}; do
             bevy build --locked --release --target="${target}" --features='${{ matrix.features }}'
-            ls "target/${target}" && ls "target/${target}/release"
             mv target/"${target}"/release/'${{ env.pkg_name }}${{ matrix.binary_ext }}' tmp/binary/"${target}"'${{ matrix.binary_ext }}'
           done
           if [ '${{ matrix.platform }}' == 'macos' ]; then
@@ -385,7 +385,7 @@ jobs:
           chmod +x butler
           ./butler -V
 
-      - name: Upload packages to itch.io
+      - name: Upload all packages to itch.io
         env:
           BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
         run: |
