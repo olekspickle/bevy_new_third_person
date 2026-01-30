@@ -2,10 +2,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use avian3d::prelude::*;
-use bevy::asset::load_internal_binary_asset;
-use bevy::pbr::DefaultOpaqueRendererMethod;
+use bevy::log::tracing_subscriber::field::MakeExt;
 use bevy::{
-    app::App, asset::AssetMetaCheck, log, prelude::*, window::PrimaryWindow, winit::WINIT_WINDOWS,
+    app::App, asset::AssetMetaCheck, asset::load_internal_binary_asset, ecs::error::error, log,
+    pbr::DefaultOpaqueRendererMethod, prelude::*, window::PrimaryWindow, winit::WINIT_WINDOWS,
 };
 use bevy_enhanced_input::EnhancedInputPlugin;
 use bevy_skein::SkeinPlugin;
@@ -26,41 +26,52 @@ pub mod ui;
 
 use asset_loading::{AudioSources, Models, ResourceHandles, Textures};
 use audio::*;
+use game::*;
 use models::*;
 use scene::*;
-pub use third_party::*;
+use screens::*;
+use third_party::*;
 use ui::*;
 
 fn main() {
     let mut app = App::new();
-
-    let filter =
-        "info,bevy_new_3d_rpg=debug,calloop=off,symphonia=off,naga=off,wgpu=warn".to_string();
-    // let filter = "debug,symphonia=off,naga=off,wgpu=warn,bevy_enhanced_input=debug".to_string(); // DEBUG
+    // Don't panic on Bevy system errors, just log them.
+    app.set_error_handler(error);
 
     app.insert_resource(DefaultOpaqueRendererMethod::deferred());
-    app.add_plugins((DefaultPlugins
-        .set(WindowPlugin {
-            primary_window: Some(Window {
-                title: "Bevy Game".to_string(),
-                // Bind to canvas included in `index.html` for custom wasm js logic
-                // canvas: Some("#bevy".to_owned()),
-                fit_canvas_to_parent: true,
-                // Tells wasm not to override default event handling, like F5 and Ctrl+R
-                prevent_default_event_handling: false,
+    app.add_plugins(
+        DefaultPlugins
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "Bevy 3D Game".to_string(),
+                    fit_canvas_to_parent: true,
+                    prevent_default_event_handling: false,
+                    ..default()
+                }),
                 ..default()
-            }),
-            ..default()
-        })
-        .set(AssetPlugin {
-            meta_check: AssetMetaCheck::Never,
-            ..default()
-        })
-        .set(log::LogPlugin {
-            level: log::Level::TRACE,
-            filter,
-            ..default()
-        }),));
+            })
+            .set(AssetPlugin {
+                meta_check: AssetMetaCheck::Never,
+                ..default()
+            })
+            .set(log::LogPlugin {
+                level: log::Level::TRACE,
+                filter: format!(
+                    concat!("info,", "{default},"),
+                    default = bevy::log::DEFAULT_FILTER
+                ),
+                fmt_layer: |_| {
+                    Some(Box::new(
+                        bevy::log::tracing_subscriber::fmt::Layer::default()
+                            .without_time()
+                            .map_fmt_fields(MakeExt::debug_alt)
+                            .with_writer(std::io::stderr),
+                    ))
+                },
+                ..default()
+            })
+            .set(ImagePlugin::default_nearest()),
+    );
 
     app.add_plugins(third_party::plugin);
 
@@ -98,6 +109,7 @@ fn set_window_icon(
     // windows: NonSend<WinitWindows>,
     primary_window: Query<Entity, With<PrimaryWindow>>,
 ) -> Result {
+    info!("setting window icon");
     // let Some(primary) = windows.get_window(primary_entity) else {
     //     return Ok(());
     // };

@@ -27,13 +27,13 @@ fn setup_menu(mut commands: Commands, mut state: ResMut<GameState>) {
             },
             // Crutch until we can use #cfg in children![] macro
             // https://github.com/bevyengine/bevy/issues/18953
-            #[cfg(target_arch = "wasm32")]
+            #[cfg(feature = "web")]
             children![
                 btn_big("Play", to::gameplay_or_loading),
                 btn_big("Credits", to::credits),
                 btn_big("Settings", to::settings),
             ],
-            #[cfg(not(target_arch = "wasm32"))]
+            #[cfg(not(feature = "web"))]
             children![
                 btn_big("Play", to::gameplay_or_loading),
                 btn_big("Credits", to::credits),
@@ -67,7 +67,7 @@ fn start_main_menu_music(
     ));
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(feature = "web"))]
 fn exit_app(_: On<Pointer<Click>>, mut app_exit: MessageWriter<AppExit>) {
     app_exit.write(AppExit::Success);
 }

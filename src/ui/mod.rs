@@ -17,6 +17,7 @@ use serde::{Deserialize, Serialize};
 mod constants;
 mod interaction;
 pub mod modal;
+
 #[cfg(all(feature = "dev", not(feature = "web")))]
 mod perf;
 mod prefabs;

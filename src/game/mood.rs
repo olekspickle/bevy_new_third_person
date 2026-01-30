@@ -6,6 +6,8 @@ use bevy::time::common_conditions::on_timer;
 use std::time::Duration;
 
 pub fn plugin(app: &mut App) {
+    app.init_state::<Mood>();
+
     app.add_systems(OnExit(Screen::Gameplay), stop_soundtrack)
         .add_systems(OnEnter(Screen::Gameplay), start_soundtrack)
         .add_systems(
@@ -15,6 +17,14 @@ pub fn plugin(app: &mut App) {
                 .run_if(on_timer(Duration::from_millis(200))),
         )
         .add_observer(change_mood);
+}
+
+#[derive(Component, States, Reflect, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+#[reflect(Component)]
+pub enum Mood {
+    #[default]
+    Exploration,
+    Combat,
 }
 
 fn start_soundtrack(

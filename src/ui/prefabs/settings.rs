@@ -260,7 +260,7 @@ fn click_toggle_vsync(
     Ok(())
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(feature = "web"))]
 fn click_toggle_diagnostics(
     _: On<Pointer<Click>>,
     mut state: ResMut<GameState>,
@@ -283,7 +283,7 @@ fn click_toggle_diagnostics(
     }
 }
 
-#[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(feature = "web"))]
 fn click_toggle_debug_ui(
     _: On<Pointer<Click>>,
     children: Query<&Children>,
@@ -434,7 +434,7 @@ fn video_grid(cycle: &SunCycle) -> impl Bundle {
             align_items: AlignItems::Center,
             ..default()
         },
-        #[cfg(target_arch = "wasm32")]
+        #[cfg(feature = "web")]
         children![
             label("Sun cycle"),
             (btn(cycle.as_str(), click_toggle_sun_cycle), SunCycleLabel),
@@ -444,7 +444,7 @@ fn video_grid(cycle: &SunCycle) -> impl Bundle {
             label("VSync"),
             (btn("on", click_toggle_vsync), VsyncLabel),
         ],
-        #[cfg(not(target_arch = "wasm32"))]
+        #[cfg(not(feature = "web"))]
         children![
             label("Sun cycle"),
             (btn(cycle.as_str(), click_toggle_sun_cycle), SunCycleLabel),

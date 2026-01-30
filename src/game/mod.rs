@@ -1,13 +1,15 @@
 use crate::*;
 
-#[cfg(any(feature = "dev_native", not(target_arch = "wasm32")))]
+#[cfg(all(feature = "dev_native", not(feature = "web")))]
 mod dev_tools;
-mod music;
+mod mood;
+
+pub use mood::*;
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((
-        music::plugin,
-        #[cfg(any(feature = "dev_native", not(target_arch = "wasm32")))]
+        mood::plugin,
+        #[cfg(all(feature = "dev_native", not(feature = "web")))]
         dev_tools::plugin,
     ));
 }

@@ -2,20 +2,20 @@ use crate::*;
 use bevy_enhanced_input::prelude::*;
 use serde::Serialize;
 
+mod config;
 mod event_dispatch;
 mod ext_traits;
 mod input;
 mod keybinding;
-mod pre_load;
 mod primitives;
 mod settings;
 mod states;
 
+pub use config::*;
 pub use event_dispatch::*;
 pub use ext_traits::*;
 pub use input::*;
 pub use keybinding::*;
-pub use pre_load::*;
 pub use primitives::*;
 pub use settings::*;
 pub use states::*;

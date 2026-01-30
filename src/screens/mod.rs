@@ -10,6 +10,8 @@ mod splash;
 mod title;
 
 pub fn plugin(app: &mut App) {
+    app.init_state::<Screen>();
+
     app.add_plugins((
         splash::plugin,
         loading::plugin,
@@ -21,6 +23,26 @@ pub fn plugin(app: &mut App) {
     .add_systems(Update, track_last_screen.run_if(state_changed::<Screen>))
     .add_observer(on_back)
     .add_observer(on_go_to);
+}
+
+/// The game's main screen states.
+/// See <https://bevy-cheatbook.github.io/programming/states.html>
+/// Or <https://github.com/bevyengine/bevy/blob/main/examples/ecs/state.rs>
+#[derive(Component, States, Default, Clone, Eq, PartialEq, Debug, Hash, Reflect)]
+pub enum Screen {
+    // TODO: splash should be first
+    // Bevy tribute <3
+    Splash,
+    // During the loading State the LoadingPlugin will load our assets
+    #[default]
+    Loading,
+    Tutorial,
+    Credits,
+    Settings,
+    // Here the menu is drawn and waiting for player interaction
+    Title,
+    // During this State the actual game logic is executed
+    Gameplay,
 }
 
 // TODO: figure out how to make it a cool observer

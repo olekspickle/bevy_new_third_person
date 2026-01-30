@@ -36,5 +36,8 @@ hot:
 run:
 	cargo run
 
+# if you get this error while trying bevy/webgpu feature, that probably means your browser doesn't support webgpu
+# SES_UNCAUGHT_EXCEPTION: TypeError: invalid array type for the operation
+# --headers="Cross-Origin-Opener-Policy:same-origin" --headers="Cross-Origin-Embedder-Policy:credentialless"
 run-web:
-	bevy run web --headers="Cross-Origin-Opener-Policy:same-origin" --headers="Cross-Origin-Embedder-Policy:credentialless"
+	bevy run --features web web -U multi-threading
