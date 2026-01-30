@@ -18,8 +18,9 @@ mod third_person;
 mod top_down;
 
 pub fn plugin(app: &mut App) {
-    app.insert_resource(DefaultOpaqueRendererMethod::deferred())
-        .add_systems(Startup, spawn_camera)
+    app.insert_resource(DefaultOpaqueRendererMethod::deferred());
+
+    app.add_systems(Startup, spawn_camera)
         .add_systems(OnEnter(Screen::Title), add_skybox_to_camera);
 
     app.add_plugins(hdr::plugin);
