@@ -121,7 +121,16 @@
 # debug = 1
 
 [target.wasm32-unknown-unknown]
-rustflags = ["-C", "target-feature=+atomics,+bulk-memory,+mutable-globals"]
+rustflags = [
+  "-Ctarget-feature=+atomics",
+  "-Clink-arg=--shared-memory",
+  "-Clink-arg=--max-memory=1073741824",
+  "-Clink-arg=--import-memory",
+  "-Clink-arg=--export=__wasm_init_tls",
+  "-Clink-arg=--export=__tls_size",
+  "-Clink-arg=--export=__tls_align",
+  "-Clink-arg=--export=__tls_base",
+]
 
 # For this you'll need a nightly version of the compiler
 [unstable]
