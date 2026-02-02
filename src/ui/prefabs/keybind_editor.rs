@@ -370,7 +370,7 @@ pub fn keybind_editor(_keybind: &InputSettings) -> impl Bundle {
 //         commands
 //             .entity(player)
 //             .despawn_related::<Actions<Player>>()
-//             .insert(PlayerCtx);
+//             .insert(PlayerInput);
 //     }
 // }
 //

@@ -18,7 +18,7 @@ mod constants;
 mod interaction;
 pub mod modal;
 
-#[cfg(all(feature = "dev", not(feature = "web")))]
+#[cfg(feature = "dev")]
 mod perf;
 mod prefabs;
 mod props;
@@ -33,6 +33,6 @@ pub use widget::*;
 pub fn plugin(app: &mut App) {
     app.add_plugins((prefabs::plugin, interaction::plugin));
 
-    #[cfg(all(feature = "dev", not(feature = "web")))]
+    #[cfg(feature = "dev")]
     app.add_plugins(perf::plugin);
 }

@@ -1,5 +1,4 @@
 use super::*;
-// use bevy::dev_tools::fps_overlay::FpsOverlayPlugin;
 use bevy_perf_ui::{
     PerfUiPlugin,
     entries::{PerfUiFramerateEntries, PerfUiWindowEntries},
@@ -9,9 +8,12 @@ use bevy_perf_ui::{
 pub fn plugin(app: &mut App) {
     app.add_plugins((
         PerfUiPlugin,
-        // FpsOverlayPlugin::default(),
         bevy::render::diagnostic::RenderDiagnosticsPlugin,
-        bevy::diagnostic::EntityCountDiagnosticsPlugin::default(),
+        #[cfg(feature = "dev_native")]
+        (
+            bevy::diagnostic::FrameTimeDiagnosticsPlugin::default(),
+            bevy::diagnostic::EntityCountDiagnosticsPlugin::default(),
+        ),
         // https://github.com/IyesGames/iyes_perf_ui/issues/30
         // bevy::diagnostic::SystemInformationDiagnosticsPlugin,
     ));

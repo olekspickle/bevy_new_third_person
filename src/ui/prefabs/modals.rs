@@ -14,7 +14,7 @@ pub fn click_spawn_settings(on: On<Pointer<Click>>, mut commands: Commands) {
 pub fn settings_modal() -> impl Bundle {
     (
         DespawnOnExit(Screen::Gameplay),
-        SettingsModal,
+        Modal::Settings,
         settings_ui(),
     )
 }
@@ -25,7 +25,7 @@ pub fn menu_modal() -> impl Bundle {
         .padding(UiRect::axes(Vw(2.0), Vw(0.5)));
     (
         DespawnOnExit(Screen::Gameplay),
-        MenuModal,
+        Modal::Main,
         ui_root("In game menu"),
         children![(
             BorderColor::all(colors::WHITEISH),

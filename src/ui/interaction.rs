@@ -29,6 +29,29 @@ fn apply_palette_on_click(
 
     for c in &*children {
         if let Ok(mut t) = text_color_q.get_mut(*c) {
+            t.0 = palette.pressed.text;
+        }
+    }
+}
+
+fn apply_palette_on_release(
+    click: On<Pointer<Release>>,
+    mut palette_q: Query<(
+        &PaletteSet,
+        &mut BorderColor,
+        &mut BackgroundColor,
+        &mut Children,
+    )>,
+    mut text_color_q: Query<&mut TextColor>,
+) {
+    let Ok((palette, mut border, mut bg, children)) = palette_q.get_mut(click.event_target())
+    else {
+        return;
+    };
+    (*bg, *border) = (palette.hovered.bg.into(), palette.hovered.border);
+
+    for c in &*children {
+        if let Ok(mut t) = text_color_q.get_mut(*c) {
             t.0 = palette.hovered.text;
         }
     }

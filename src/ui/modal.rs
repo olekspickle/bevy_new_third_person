@@ -1,21 +1,68 @@
 use super::*;
+use bevy_enhanced_input::prelude::*;
 
 pub fn plugin(app: &mut App) {
     app.init_state::<Modal>()
+        .add_input_context::<ModalInput>()
         .init_resource::<Modals>()
         .add_observer(add_new_modal)
         .add_observer(pop_modal)
-        .add_observer(clear_modals);
+        .add_observer(clear_modals)
+        .add_observer(on_modal_add);
 }
 
-markers!(MenuModal, SettingsModal);
+fn spawn_ctx(mut commands: Commands) {
+    commands.spawn(ModalInput);
+}
+
+#[derive(Component, Default)]
+pub(crate) struct ModalInput;
+
+fn on_modal_add(on: On<Add, Modal>, mut commands: Commands) {
+    commands.entity(on.entity).insert((
+        ContextPriority::<ModalInput>::new(1),
+        actions!(ModalInput[
+            (
+                Action::<NavigateModal>::new(),
+                ActionSettings {
+                    require_reset: true,
+                    ..Default::default()
+                },
+                Bindings::spawn((
+                    Spawn((Binding::mouse_motion(),Scale::splat(0.1), Negate::all())),
+                    Axial::right_stick().with((Scale::splat(2.0), Negate::x())) ,
+                )),
+            ),
+        (
+            Action::<Select>::new(),
+            bindings![KeyCode::Enter, GamepadButton::South, MouseButton::Left],
+        ),
+        (
+            Action::<RightTab>::new(),
+            bindings![KeyCode::Tab, GamepadButton::RightTrigger],
+        ),
+        (
+            Action::<LeftTab>::new(),
+            bindings![GamepadButton::LeftTrigger],
+        ),
+        (
+            Action::<Escape>::new(),
+                ActionSettings {
+                    require_reset: true,
+                    ..Default::default()
+                },
+            bindings![KeyCode::Escape, GamepadButton::Select],
+        ),
+        ]),
+    ));
+}
 
 #[derive(Resource, Default, Deref, DerefMut, Debug, Clone)]
 pub struct Modals(pub Vec<Modal>);
 
 /// Modal stack. kudo for the idea to @skyemakesgames
 /// Only relevant in [`Screen::Gameplay`]
-#[derive(States, Reflect, Default, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(States, Component, Reflect, Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Modal {
     #[default]
     Main,
@@ -50,7 +97,7 @@ pub fn add_new_modal(
 
     let mut target = commands.entity(on.entity);
     if modals.is_empty() {
-        target.insert(ModalCtx);
+        target.insert(ModalInput);
         if Modal::Main == on.modal && !state.paused {
             target.trigger(TogglePause);
         }
@@ -70,8 +117,7 @@ pub fn add_new_modal(
 pub fn pop_modal(
     pop: On<PopModal>,
     screen: Res<State<Screen>>,
-    menu_marker: Query<Entity, With<MenuModal>>,
-    settings_marker: Query<Entity, With<SettingsModal>>,
+    modals_q: Query<(Entity, &Modal)>,
     mut commands: Commands,
     mut modals: ResMut<Modals>,
 ) {
@@ -86,16 +132,10 @@ pub fn pop_modal(
     let popped = modals
         .pop()
         .expect("failed to pop modal after assert on non-empty passed");
-    match popped {
-        Modal::Main => {
-            if let Ok(menu) = menu_marker.single() {
-                commands.entity(menu).despawn();
-            }
-        }
-        Modal::Settings => {
-            if let Ok(menu) = settings_marker.single() {
-                commands.entity(menu).despawn();
-            }
+
+    for (e, modal) in modals_q.iter() {
+        if *modal == popped {
+            commands.entity(e).despawn();
         }
     }
 
@@ -111,7 +151,7 @@ pub fn pop_modal(
         info!("PopModal target entity: {}", pop.event_target());
         commands
             .entity(pop.event_target())
-            .insert(ModalCtx)
+            .insert(ModalInput)
             .trigger(TogglePause)
             .trigger(CamCursorToggle);
     }
@@ -119,23 +159,10 @@ pub fn pop_modal(
 
 pub fn clear_modals(
     _: On<ClearModals>,
-    menu_marker: Query<Entity, With<MenuModal>>,
-    settings_marker: Query<Entity, With<SettingsModal>>,
+    modals_q: Query<Entity, With<Modal>>,
     mut commands: Commands,
-    mut modals: ResMut<Modals>,
 ) {
-    for m in &modals.as_deref_mut() {
-        match m {
-            Modal::Main => {
-                if let Ok(modal) = menu_marker.single() {
-                    commands.entity(modal).despawn();
-                }
-            }
-            Modal::Settings => {
-                if let Ok(modal) = settings_marker.single() {
-                    commands.entity(modal).despawn();
-                }
-            }
-        }
+    for m in modals_q.iter() {
+        commands.entity(m).despawn();
     }
 }

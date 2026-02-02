@@ -1,5 +1,5 @@
 use super::*;
-#[cfg(feature = "dev_native")]
+#[cfg(feature = "dev")]
 use bevy::ui::Display as NodeDisplay;
 use bevy::window::{PresentMode, PrimaryWindow};
 
