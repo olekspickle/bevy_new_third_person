@@ -67,10 +67,10 @@ env:
   {%- if itch_project != "" %}
   itch: {{itch_username}}/{{itch_project}}
   {%- else %}
-  itch: {{itch_username}}/{{project-name}}
+  itch: {{itch_username}}/{{project-name | kebab_case}}
   {%- endif %}
   {%- else %}
-  #itch: your-itch-username/{{project-name}}
+  #itch: your-itch-username/{{project-name | kebab_case}}
   {%- endif %}
   upload_github: true
 

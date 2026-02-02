@@ -1,0 +1,29 @@
+[tasks]
+clean = { command = "cargo", args = ["clean"] }
+build = { command = "cargo", args = ["build"] }
+fmt = { command = "cargo", args = ["fmt", "--all", "--", "--check"] }
+clippy = { command = "cargo", args = ["clippy", "--all-targets", "--", "-D", "warnings"] }
+lint = { dependencies = ["clippy", "fmt"] }
+clean-build = { dependencies = ["clean", "build"] }
+
+[tasks.check-web]
+command = "cargo"
+args = ["check", "--profile", "ci", "--no-default-features", "--features", "web", "--target", "wasm32-unknown-unknown"]
+
+[tasks.install-wasm-deps]
+command = "cargo"
+args = ["binstall", "--locked", "-y", "--force", "wasm-bindgen-cli", "wasm-opt"]
+
+[tasks.build-web]
+command = "bevy"
+args = ["build", "--locked", "--release", "--features=web", "--yes", "web", "--bundle"]
+
+[tasks.run-web]
+command = "bevy"
+args = ["run", "--features", "web", "web", "-U", "multi-threading"]
+
+[tasks.hot]
+install_crate = "dioxus-cli"
+command = "dx"
+args = ["serve", "--hot-patch", "--features", "dev_native"]
+
