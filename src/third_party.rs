@@ -14,8 +14,8 @@ pub fn plugin(app: &mut App) {
         #[cfg(feature = "web")]
         SeedlingPlugin::new_web_audio(),
         EnhancedInputPlugin,
-        PhysicsPlugins::default(),
         SkeinPlugin::default(),
+        PhysicsPlugins::default(),
         AhoyPlugins::default(),
     ));
 

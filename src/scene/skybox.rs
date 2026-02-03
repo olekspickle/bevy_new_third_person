@@ -6,10 +6,11 @@ use bevy::{
     },
 };
 use serde::{Deserialize, Serialize};
+use std::f32::consts::PI;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(Update, sun_cycle.run_if(in_state(Screen::Gameplay)))
-        .add_observer(add_skybox_to_camera);
+        .add_systems(OnEnter(Screen::Title), add_skybox_to_camera);
 }
 
 markers!(Sun, Moon);
@@ -17,12 +18,11 @@ markers!(Sun, Moon);
 /// Mainly this example:
 /// <https://bevyengine.org/examples/3d-rendering/atmosphere/>
 pub fn add_skybox_to_camera(
-    on: On<Add, SceneCamera>,
     cfg: Res<Config>,
+    camera: Single<Entity, With<SceneCamera>>,
     mut commands: Commands,
     mut scattering_mediums: ResMut<Assets<ScatteringMedium>>,
 ) -> Result {
-    let camera = on.entity;
     let cascade_shadow_config = CascadeShadowConfigBuilder {
         first_cascade_far_bound: 0.3,
         maximum_distance: cfg.physics.shadow_distance,
@@ -36,10 +36,10 @@ pub fn add_skybox_to_camera(
         DirectionalLight {
             color: colors::SUN,
             shadows_enabled: true,
-            illuminance: light_consts::lux::FULL_DAYLIGHT,
+            illuminance: lux::AMBIENT_DAYLIGHT,
             ..Default::default()
         },
-        // Transform::from_translation(Vec3::new(0.0, 0.0, 200.0)),
+        Transform::from_xyz(0.0, 0.0, 200.0).looking_at(Vec3::ZERO, Vec3::Y),
         cascade_shadow_config.clone(),
     ));
 
@@ -49,15 +49,15 @@ pub fn add_skybox_to_camera(
         DirectionalLight {
             color: colors::MOON,
             shadows_enabled: true,
-            illuminance: lux::FULL_MOON_NIGHT,
+            illuminance: 24.0,
             ..Default::default()
         },
-        Transform::from_translation(Vec3::new(0.0, 10.0, -200.0)),
+        Transform::from_xyz(0.0, 0.0, -200.0).looking_at(Vec3::ZERO, Vec3::Y),
         cascade_shadow_config,
     ));
 
     // Lighting
-    commands.entity(camera).insert((
+    commands.entity(*camera).insert((
         // This is the component that enables atmospheric scattering for a camera
         // TODO: experiment with scattering medium
         Atmosphere::earthlike(scattering_mediums.add(ScatteringMedium::default())),
@@ -85,7 +85,7 @@ pub fn add_skybox_to_camera(
     ));
 
     if cfg.physics.distance_fog {
-        commands.entity(camera).insert(distance_fog(cfg));
+        commands.entity(*camera).insert(distance_fog(cfg));
     }
 
     Ok(())
@@ -105,19 +105,20 @@ pub fn distance_fog(cfg: Res<Config>) -> impl Bundle {
     }
 }
 
-#[allow(clippy::type_complexity)]
 fn sun_cycle(
+    time: Res<Time>,
+    cfg: Res<Config>,
     settings: Res<Settings>,
     mut sky_lights: Query<&mut Transform, Or<(With<Moon>, With<Sun>)>>,
-    time: Res<Time>,
 ) {
+    let dt = time.delta_secs();
     match settings.sun_cycle {
         SunCycle::DayNight => sky_lights
             .iter_mut()
-            .for_each(|mut tf| tf.rotate_x(-time.delta_secs() * std::f32::consts::PI / 50.0)),
+            .for_each(|mut tf| tf.rotate_x(-dt * PI / cfg.physics.day_length)),
         SunCycle::Nimbus => sky_lights
             .iter_mut()
-            .for_each(|mut tf| tf.rotate_y(-time.delta_secs() * std::f32::consts::PI / 50.0)),
+            .for_each(|mut tf| tf.rotate_y(-dt * PI / cfg.physics.day_length)),
     }
 }
 

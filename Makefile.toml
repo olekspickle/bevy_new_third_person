@@ -4,7 +4,7 @@ build = { command = "cargo", args = ["build"] }
 fmt = { command = "cargo", args = ["fmt", "--all", "--", "--check"] }
 clippy = { command = "cargo", args = ["clippy", "--all-targets", "--", "-D", "warnings"] }
 lint = { dependencies = ["clippy", "fmt"] }
-clean-build = { dependencies = ["clean", "build"] }
+clean-build = { dependencies = ["clean", "build", "lint"] }
 
 [tasks.check-web]
 command = "cargo"

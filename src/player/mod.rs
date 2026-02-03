@@ -110,12 +110,18 @@ pub fn spawn_player(
 
 fn player_post_spawn(
     on: On<Add, Player>,
-    modal_ctx: Query<Entity, With<ModalInput>>,
+    modal_input_q: Query<Entity, With<ModalInput>>,
     mut players: Query<&mut Player>,
+    mut commands: Commands,
 ) {
     if let Ok(mut p) = players.get_mut(on.entity) {
         p.id = on.entity; // update player id with spawned entity
         info!("player entity: Player.id: {}", p.id);
+    }
+
+    // remove placeholder modal ctx
+    if let Ok(modal_ctx) = modal_input_q.single() {
+        commands.entity(modal_ctx).remove::<ModalInput>();
     }
 }
 

@@ -38,6 +38,7 @@
         sfx: 0.5,
     ),
     physics: (
+        day_length: 10.0,
         distance_fog: true,
         fog_directional_light_exponent: 10,
         fog_visibility: 500,

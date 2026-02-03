@@ -31,6 +31,7 @@ impl Default for SoundPreset {
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, Reflect)]
 pub struct PhysicsPreset {
+    pub day_length: f32,
     pub distance_fog: bool,
     pub fog_directional_light_exponent: f32,
     pub fog_visibility: f32,

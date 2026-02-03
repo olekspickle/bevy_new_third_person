@@ -41,9 +41,8 @@ bevy_shuffle_bag = "0.4"                                                # determ
 bevy_third_person_camera = { version = "0.4", optional = true }         # 3rd person camera
 bevy_top_down_camera = { version = "0.2", optional = true }             # top down camera
 
-# avian_pickup = "0.5.0-dev"                                              # pickup plugin
-bevy_ahoy = { version = "0.0.3", git = "https://github.com/janhohenheim/bevy_ahoy" }
-avian3d = { version = "0.6.0-dev", git = "https://github.com/avianphysics/avian" }
+avian3d = { version = "0.6.0-dev", default-features = false, features = ["default-collider", "3d", "f32"] }
+bevy_ahoy =  "0.0.3"                                                    # character controller
 bevy_enhanced_input = { version = "0.22", features = ["serialize"] }    # keyboard/gamepad input
 
 # dialogue
@@ -52,8 +51,11 @@ bevy_yarnspinner_example_dialogue_view = "0.7"
 
 # to play with
 # bevy_open_vat
-# bevy_hanabi
 # bevy_wind_waker_shader
+# bevy_hanabi = { version = "0.18", default-features = false, features = [
+#     "3d",
+#     "gpu_tests",
+# ] }
 
 
 # misc
@@ -157,8 +159,7 @@ strip = "debuginfo"                 # Strip all debugging information from the b
 
 [patch.crates-io]
 avian3d = { git = "https://github.com/avianphysics/avian" }
-# avian_pickup = { git = "https://github.com/janhohenheim/avian_pickup" }
-# bevy_ahoy = { git = "https://github.com/janhohenheim/bevy_ahoy", rev = "02aa985" }
+bevy_ahoy = { git = "https://github.com/olekspickle/bevy_ahoy" }
 bevy_third_person_camera = { git = "https://github.com/olekspickle/bevy_third_person_camera" }
 bevy_perf_ui = { git = "https://github.com/olekspickle/perf_ui" }
 
