@@ -1,6 +1,6 @@
 use crate::*;
 use bevy::platform::time::Instant;
-use bevy_ahoy::prelude::*;
+use bevy_ahoy::{CharacterLook, prelude::*};
 use bevy_enhanced_input::prelude::*;
 use std::collections::HashMap;
 
@@ -10,6 +10,7 @@ mod input;
 mod sound;
 
 pub use animation::*;
+pub use control::*;
 pub use input::*;
 
 /// This plugin handles player related stuff like movement, shooting
@@ -53,14 +54,15 @@ pub fn spawn_player(
             (
                 PlayerInput,
                 CharacterController {
+                    crouch_height: 2.0,
                     gravity: cfg.physics.gravity,
+                    speed: cfg.player.movement.speed(),
                     max_speed: cfg.player.movement.max_speed,
-                    speed: cfg.player.movement.max_speed / 2.0,
                     crouch_speed_scale: cfg.player.movement.crouch_factor,
                     jump_height: cfg.player.movement.jump_height,
-                    // crouch_height: 0.5,
                     ..default()
                 },
+                CharacterLook::default(),
             ),
             (
                 #[cfg(feature = "third_person")]
@@ -84,11 +86,7 @@ pub fn spawn_player(
         ))
         // spawn character mesh as child to adjust mesh position relative to the player origin
         .with_children(|parent| {
-            let mut e = parent.spawn((
-                mesh,
-                // AnimationTransitions::default(),
-                Transform::from_xyz(0.0, -1.0, 0.0),
-            ));
+            let mut e = parent.spawn((mesh, Transform::from_xyz(0.0, -1.0, 0.0)));
             info!("spawning player: {}", e.id());
             e.observe(prepare_animations);
 
@@ -96,7 +94,7 @@ pub fn spawn_player(
             let collider_mesh = Mesh::from(hitbox);
             let debug_collider_mesh = Mesh3d(meshes.add(collider_mesh.clone()));
             let debug_collider_color: MeshMaterial3d<StandardMaterial> =
-                MeshMaterial3d(materials.add(Color::srgba(0.9, 0.9, 0.9, 0.1)));
+                MeshMaterial3d(materials.add(Color::srgba(0.9, 0.1, 0.9, 0.1)));
             parent.spawn((
                 debug_collider_mesh,
                 debug_collider_color,
@@ -171,32 +169,42 @@ impl Animation {
     pub fn next(&self) -> AnimationState {
         self.state.1
     }
+    pub fn is_jumping(&self) -> bool {
+        self.state.0 == AnimationState::JumpStart
+            || self.state.0 == AnimationState::JumpLoop
+            || self.state.0 == AnimationState::JumpLand
+    }
     pub fn alter(&self) -> bool {
         self.state.0 != self.state.1
     }
     pub fn idle(&mut self) {
-        if matches!(self.state.0, AnimationState::StandIdle) {
-            return;
-        }
-        self.state.1 = AnimationState::StandIdle;
+        self.set_if_not_already(AnimationState::StandIdle);
+    }
+    pub fn jump_start(&mut self) {
+        self.set_if_not_already(AnimationState::JumpStart);
+    }
+    pub fn jump_loop(&mut self) {
+        self.set_if_not_already(AnimationState::JumpLoop);
+    }
+    pub fn jump_land(&mut self) {
+        self.set_if_not_already(AnimationState::JumpLand);
     }
     pub fn run(&mut self, speed: f32) {
-        if matches!(self.state.0, AnimationState::Run(_)) {
-            return;
-        }
-        self.state.1 = AnimationState::Run(speed);
+        self.set_if_not_already(AnimationState::Run(speed));
     }
     pub fn sprint(&mut self, speed: f32) {
-        if matches!(self.state.0, AnimationState::Sprint(_)) {
-            return;
-        }
-        self.state.1 = AnimationState::Sprint(speed);
+        self.set_if_not_already(AnimationState::Sprint(speed));
     }
     pub fn crouch(&mut self, speed: f32) {
-        if matches!(self.state.0, AnimationState::Crouch(_)) {
-            return;
+        self.set_if_not_already(AnimationState::Crouch(speed));
+    }
+    pub fn dash(&mut self) {
+        self.set_if_not_already(AnimationState::Dash);
+    }
+    fn set_if_not_already(&mut self, state: AnimationState) {
+        if self.state.1 != state {
+            self.state.1 = state;
         }
-        self.state.1 = AnimationState::Crouch(speed);
     }
 }
 

@@ -41,7 +41,7 @@ bevy_shuffle_bag = "0.4"                                                # determ
 bevy_third_person_camera = { version = "0.4", optional = true }         # 3rd person camera
 bevy_top_down_camera = { version = "0.2", optional = true }             # top down camera
 
-avian3d = { version = "0.6.0-dev", default-features = false, features = ["default-collider", "3d", "f32"] }
+avian3d = "0.6.0-dev"
 bevy_ahoy =  "0.0.3"                                                    # character controller
 bevy_enhanced_input = { version = "0.22", features = ["serialize"] }    # keyboard/gamepad input
 
@@ -88,7 +88,7 @@ dev = [
     "bevy-inspector-egui",
     "bevy/bevy_ui_debug",
     "bevy/track_location",          # Improve error messages coming from Bevy
-    "bevy/debug_glam_assert",       # when need to debug physics\collider issues
+    # "bevy/debug_glam_assert",       # when need to debug physics\collider issues
 ]
 dev_native = [
     "dev",

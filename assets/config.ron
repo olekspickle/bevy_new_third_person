@@ -43,7 +43,7 @@
         fog_directional_light_exponent: 10,
         fog_visibility: 500,
         shadow_distance: 500,
-        gravity: 25.0,
+        gravity: 50.0,
     ),
     settings: (
         min_volume: 0.0,

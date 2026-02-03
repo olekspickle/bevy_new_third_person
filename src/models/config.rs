@@ -64,6 +64,12 @@ pub struct MovementPreset {
     pub idle_to_run_threshold: f32,
 }
 
+impl MovementPreset {
+    pub fn speed(&self) -> f32 {
+        self.max_speed / 2.0
+    }
+}
+
 #[derive(Clone, Debug, Default, Serialize, Deserialize, Reflect)]
 pub struct SettingsPreset {
     pub min_volume: f32,

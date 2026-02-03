@@ -85,8 +85,8 @@ pub mod colors {
     pub const CHROME_BLUE: Color = Color::srgb(0.286, 0.478, 0.773);
     /// #fac896
     pub const SUN: Color = Color::srgb(250.0 / 255.0, 200.0 / 255.0, 150.0 / 255.0);
-    /// #506886
-    pub const MOON: Color = Color::srgb(80.0 / 255.0, 104.0 / 255.0, 134.0 / 255.0);
+    /// #4d5ad5
+    pub const MOON: Color = Color::srgb(77.0 / 255.0, 90.0 / 255.0, 213.0 / 255.0);
     /// #AB4051
     pub const RED: Color = Color::oklcha(0.5232, 0.1404, 13.84, 1.0);
 }

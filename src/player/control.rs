@@ -1,24 +1,30 @@
 use super::*;
-use bevy_ahoy::CharacterLook;
+use bevy_ahoy::{CharacterControllerOutput, CharacterLook};
 use std::time::Duration;
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, movement.run_if(in_state(Screen::Gameplay)));
-    //     .add_observer(handle_sprint_in)
-    //     .add_observer(handle_sprint_out)
-    //     .add_observer(handle_jump)
-    //     .add_observer(handle_dash)
-    //     // .add_observer(handle_attack)
-    //     .add_observer(crouch_in)
-    //     .add_observer(crouch_out);
+    app.add_systems(
+        PreUpdate,
+        movement
+            .run_if(in_state(Screen::Gameplay))
+            .in_set(AppSystems::UserInput),
+    )
+    .add_observer(handle_sprint_in)
+    .add_observer(handle_sprint_out)
+    .add_observer(handle_dash)
+    //  .add_observer(handle_jump)
+    //  .add_observer(handle_attack)
+    .add_observer(crouch_in)
+    .add_observer(crouch_out);
 }
+
+#[derive(Component)]
+pub struct Dashing(pub Instant);
 
 /// Tnua configuration is tricky to grasp from the get go, this is the best demo:
 /// <https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_control_systems/platformer_control_systems.rs>
 fn movement(
-    cfg: Res<Config>,
-    // time: Res<Time>,
-    navigate: Single<&Action<Movement>>,
+    movement: Single<&Action<Movement>>,
     camera: Query<&Transform, With<SceneCamera>>,
     mut player_q: Query<
         (
@@ -27,41 +33,22 @@ fn movement(
             &mut StepTimer,
             &mut CharacterLook,
             &CharacterController,
+            &CharacterControllerOutput,
         ),
         Without<SceneCamera>,
     >,
 ) -> Result {
-    // let dt = time.delta_secs();
-    let navigate = *navigate.into_inner();
+    let movement = *movement.into_inner();
 
-    for (mut player, mut pos, mut step_timer, mut look, ahoy) in player_q.iter_mut() {
+    for (mut player, mut pos, mut step_timer, mut look, ahoy, ahoy_out) in player_q.iter_mut() {
         let cam_transform = camera.single()?;
-        let input_dir = cam_transform.movement_direction(*navigate);
-        let rotation = Quat::from_rotation_y(-input_dir.x.atan2(-input_dir.z));
+        let input_dir = cam_transform.movement_direction(*movement);
+        let rotation = Quat::from_rotation_arc(
+            Vec3::NEG_Z,
+            Vec3::new(input_dir.x, 0.0, input_dir.z).normalize_or_zero(),
+        );
         *look = CharacterLook::from_quat(rotation);
         pos.rotation = rotation;
-
-        // info!(
-        //     "speed: {}, animation state:{:?}",
-        //     ahoy.speed,
-        //     player.animation.state
-        // );
-
-        // update step timer dynamically based on actual speed
-        // Note: this is specific to the animation provided
-        // normal step: 0.475
-        // sprint step (x1.5): 0.354
-        // step on sprint timer: 0.317
-        if ahoy.speed > cfg.player.movement.idle_to_run_threshold {
-            let ratio = cfg.player.movement.max_speed / ahoy.speed;
-            let adjusted_step_time_f32 = cfg.timers.step * ratio;
-            let adjusted_step_time = Duration::from_secs_f32(adjusted_step_time_f32);
-            // info!("step timer:{adjusted_step_time_f32}s");
-            step_timer.set_duration(adjusted_step_time);
-            player.animation.run(ahoy.speed);
-        } else {
-            player.animation.idle()
-        }
     }
 
     Ok(())
@@ -74,7 +61,7 @@ fn handle_sprint_in(
 ) -> Result {
     let entity = on.context;
     if let Ok((mut player, mut ahoy)) = player_q.get_mut(entity) {
-        if ahoy.speed <= cfg.player.movement.max_speed {
+        if ahoy.speed == cfg.player.movement.speed() {
             ahoy.speed *= cfg.player.movement.sprint_factor;
             player.animation.sprint(ahoy.speed);
             info!("Sprint started for entity: {entity}");
@@ -90,11 +77,76 @@ fn handle_sprint_out(
     mut player_q: Query<(&mut Player, &mut CharacterController)>,
 ) {
     if let Ok((mut player, mut ahoy)) = player_q.get_mut(on.context) {
-        if ahoy.speed > cfg.player.movement.max_speed {
+        if ahoy.speed > cfg.player.movement.speed() {
             player.animation.state.1 = AnimationState::Run(ahoy.speed);
+            ahoy.speed = cfg.player.movement.speed();
         }
     }
 }
+
+fn handle_dash(
+    on: On<Start<Dash>>,
+    navigate: Single<&Action<Movement>>,
+    camera: Query<&Transform, With<SceneCamera>>,
+    mut player_q: Query<&mut Player>,
+    mut commands: Commands,
+) -> Result {
+    let player = player_q.get_mut(on.context)?;
+    commands.entity(player.id).insert(Dashing(Instant::now()));
+
+    let cam_transform = camera.single()?;
+    let navigate = **navigate.into_inner();
+    let direction = cam_transform.movement_direction(navigate);
+
+    // TODO: dash
+
+    Ok(())
+}
+
+pub fn crouch_in(
+    on: On<Start<Crouch>>,
+    mut player: Query<(
+        &mut Player,
+        &mut Collider,
+        &mut Transform,
+        &CharacterController,
+    )>,
+) -> Result {
+    let (mut player, mut collider, mut transform, ahoy) = player.get_mut(on.context)?;
+
+    transform.scale = Vec3::new(1.0, 0.5, 1.0);
+    collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
+    player.animation.state.1 = AnimationState::Crouch(ahoy.speed);
+
+    // TODO: Handle slide
+
+    Ok(())
+}
+
+pub fn crouch_out(
+    on: On<Complete<Crouch>>,
+    mut player: Query<(
+        &mut Player,
+        &mut Collider,
+        &mut Transform,
+        &CharacterController,
+    )>,
+) -> Result {
+    let (mut player, mut collider, mut transform, ahoy) = player.get_mut(on.context)?;
+
+    transform.scale = Vec3::new(1.0, 1.0, 1.0);
+    collider.set_scale(Vec3::ONE, 4);
+    player.animation.state.1 = AnimationState::Run(ahoy.speed);
+
+    // TODO: Handle slide
+
+    Ok(())
+}
+
+// fn handle_attack(on: On<Start<Attack>>, mut commands: Commands) {
+//     let entity = on.target();
+//     // TODO: Hit
+// }
 
 fn handle_jump(
     on: On<Fire<Jump>>,
@@ -108,62 +160,6 @@ fn handle_jump(
 
     // if jump_timer.tick(time.delta()).just_finished() {
     // }
-
-    Ok(())
-}
-
-fn handle_dash(
-    on: On<Start<Dash>>,
-    navigate: Single<&Action<Movement>>,
-    camera: Query<&Transform, With<SceneCamera>>,
-    mut player_q: Query<&mut Player>,
-) -> Result {
-    let player = player_q.get_mut(on.context)?;
-    let cam_transform = camera.single()?;
-    let navigate = **navigate.into_inner();
-    let direction = cam_transform.movement_direction(navigate);
-
-    // TODO: dash
-
-    Ok(())
-}
-
-// fn handle_attack(on: On<Start<Attack>>, mut commands: Commands) {
-//     let entity = on.target();
-//     // TODO: Hit
-// }
-
-pub fn crouch_in(
-    on: On<Start<Crouch>>,
-    mut player: Query<(&mut Player, &mut Transform), With<PlayerInput>>,
-    mut collider: Query<&mut Collider, With<Player>>,
-) -> Result {
-    let mut collider = collider.single_mut()?;
-    let (mut player, mut transform) = player.get_mut(on.context)?;
-
-    transform.scale = Vec3::new(1.0, 0.5, 1.0);
-    collider.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
-    // avian_sensor.0.set_scale(Vec3::new(1.0, 0.5, 1.0), 4);
-    // ahoy.speed *= cfg.player.movement.crouch_factor;
-
-    // TODO: Handle slide
-
-    Ok(())
-}
-
-pub fn crouch_out(
-    on: On<Complete<Crouch>>,
-    mut player: Query<(&mut Player, &mut Transform), With<PlayerInput>>,
-    mut collider: Query<&mut Collider, (With<Player>, Without<SceneCamera>)>,
-) -> Result {
-    let mut collider = collider.get_mut(on.context)?;
-    let (mut player, mut transform) = player.get_mut(on.context)?;
-
-    collider.set_scale(Vec3::ONE, 4);
-    transform.scale = Vec3::new(1.0, 1.0, 1.0);
-    // avian_sensor.0.set_scale(Vec3::ONE, 4);
-
-    // TODO: Handle slide
 
     Ok(())
 }

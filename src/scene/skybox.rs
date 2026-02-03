@@ -1,6 +1,8 @@
 use super::*;
 use bevy::{
-    light::{CascadeShadowConfigBuilder, light_consts::lux},
+    light::{
+        AtmosphereEnvironmentMapLight, CascadeShadowConfigBuilder, VolumetricFog, light_consts::lux,
+    },
     pbr::{
         Atmosphere, AtmosphereMode, AtmosphereSettings, DistanceFog, FogFalloff, ScatteringMedium,
     },
@@ -56,7 +58,6 @@ pub fn add_skybox_to_camera(
         cascade_shadow_config,
     ));
 
-    // Lighting
     commands.entity(*camera).insert((
         // This is the component that enables atmospheric scattering for a camera
         // TODO: experiment with scattering medium
@@ -82,6 +83,7 @@ pub fn add_skybox_to_camera(
             rendering_method: AtmosphereMode::LookupTexture,
             ..Default::default()
         },
+        AtmosphereEnvironmentMapLight::default(),
     ));
 
     if cfg.physics.distance_fog {

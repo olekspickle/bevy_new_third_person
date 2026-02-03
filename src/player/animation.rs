@@ -7,17 +7,14 @@
 //! exponentially between frames based on input
 use super::*;
 use bevy::scene::SceneInstanceReady;
+use bevy_ahoy::CharacterControllerOutput;
+use std::time::Duration;
 
 /// Animation control knobs
 mod knobs {
-    pub const TRANSITION_DURATION: f32 = 0.15;
-    pub const NORMAL: f32 = 1.0;
-    pub const GENERAL_SPEED: f32 = 0.1;
-    pub const CROUCH_SPEED: f32 = 2.2;
+    // pub const TRANSITION_DURATION: f32 = 0.15;
+    pub const DAMPENING: f32 = 0.01;
     pub const JUMP_SPEED: f32 = 0.01;
-    pub const CLIMB_SPEED: f32 = 0.3;
-    /// sprint animation to sprint factor ratio
-    pub const SPRINT_SPEED: f32 = 3.0;
 }
 
 pub fn plugin(app: &mut App) {
@@ -35,7 +32,7 @@ pub fn prepare_animations(
     mut animation_players: Query<&mut AnimationPlayer>,
     mut animation_graphs: ResMut<Assets<AnimationGraph>>,
 ) {
-    info!("prepare_animations observer fired on: {}", spawned.entity);
+    info!("prepare_animations fired on: {}", spawned.entity);
 
     let Some(gltf) = gltf_assets.get(&models.player) else {
         return;
@@ -49,7 +46,6 @@ pub fn prepare_animations(
     let Ok(mut animation_player) = animation_players.get_mut(e) else {
         return;
     };
-    info!("found animation player: {}", e);
     let Ok(mut player) = player.single_mut() else {
         return;
     };
@@ -58,7 +54,7 @@ pub fn prepare_animations(
 
     // Create flat animation graph with one blend node
     for (name, clip) in gltf.named_animations.iter() {
-        let node_index = graph.add_clip(clip.clone(), 0.0, graph.root);
+        let node_index = graph.add_clip(clip.clone(), 1.0, graph.root);
         player.animation.map.insert(name.to_string(), node_index);
     }
 
@@ -76,13 +72,20 @@ pub fn prepare_animations(
 pub fn animating(
     cfg: Res<Config>,
     children_q: Query<&Children>,
+    player_q: Query<(
+        &mut Player,
+        &mut StepTimer,
+        &CharacterController,
+        &CharacterControllerOutput,
+    )>,
+    movement: Single<&Action<Movement>>,
+    camera: Query<&Transform, With<SceneCamera>>,
     animation_players_q: Query<Entity, With<AnimationPlayer>>,
-    mut player_q: Query<&mut Player>,
-    // mut player_q: Query<(&mut Player, &mut AnimationTransitions)>,
     mut animation_players: Query<&mut AnimationPlayer>,
-) {
-    // for (mut player, mut animation_transitions) in player_q {
-    for mut player in player_q {
+) -> Result {
+    let movement = *movement.into_inner();
+
+    for (mut player, mut step_timer, ahoy, ahoy_out) in player_q {
         let Some(e) = player
             .id
             .get_animation_player_e(children_q, animation_players_q)
@@ -93,34 +96,67 @@ pub fn animating(
             continue;
         };
 
-        animation_player.zero_all_animations();
+        let cam_transform = camera.single()?;
+        let input_dir = cam_transform.movement_direction(*movement);
 
+        let moving = input_dir.length_squared() > cfg.player.movement.idle_to_run_threshold;
+        match player.animation.state.0 {
+            AnimationState::StandIdle if moving => {
+                info!("moving from idle");
+
+                // update step timer dynamically based on actual speed
+                // Note: this is specific to the animation provided
+                // normal step: 0.475
+                // sprint step (x1.5): 0.354
+                // step on sprint timer: 0.317
+                let ratio = cfg.player.movement.speed() / ahoy.speed;
+                let adjusted_step_time_f32 = cfg.timers.step * ratio;
+                let adjusted_step_time = Duration::from_secs_f32(adjusted_step_time_f32);
+                // info!("step timer:{adjusted_step_time_f32}s");
+                step_timer.set_duration(adjusted_step_time);
+                player.animation.run(ahoy.speed);
+            }
+            AnimationState::Run(_) if !moving => {
+                info!("idling after run");
+                player.animation.idle()
+            }
+            // touching entities after jumping
+            anim if !ahoy_out.touching_entities.is_empty() && player.animation.is_jumping() => {
+                info!("landing after jump or fall");
+                match anim {
+                    AnimationState::JumpLoop => player.animation.jump_land(),
+                    _ => player.animation.jump_start(),
+                }
+            }
+            anim if ahoy_out.touching_entities.is_empty() && player.animation.is_jumping() => {
+                if matches!(anim, AnimationState::JumpStart)
+                    && !matches!(anim, AnimationState::JumpLoop)
+                {
+                    player.animation.jump_loop()
+                }
+            }
+            anim if ahoy_out.touching_entities.is_empty() && !player.animation.is_jumping() => {
+                player.animation.jump_start()
+            }
+            _ => (),
+        }
+        info!("next anim: {:?}", player.animation.state.1);
+
+        animation_player.zero_all_animations();
         if player.animation.alter() {
             match player.animation.next() {
                 AnimationState::StandIdle => {
                     if let Some(index) = player.animation.map.get("Idle_Loop") {
-                        // animation_transitions
-                        //     .start(
-                        //         &mut animation_player,
-                        //         *index,
-                        //         Duration::from_secs_f32(knobs::TRANSITION_DURATION),
-                        //     )
-                        //     .set_weight(1.0)
-                        //     .set_speed(knobs::NORMAL)
-                        //     .repeat();
-                        animation_player
-                            .start(*index)
-                            .set_weight(1.0)
-                            .set_speed(knobs::NORMAL)
-                            .repeat();
+                        animation_player.start(*index).set_weight(1.0).repeat();
                     }
                 }
                 AnimationState::Run(speed) => {
                     if let Some(index) = player.animation.map.get("Jog_Fwd_Loop") {
+                        info!("Running: {speed}, res speed: {}", speed * knobs::DAMPENING);
                         animation_player
                             .start(*index)
                             .set_weight(1.0)
-                            .set_speed(speed)
+                            .set_speed(speed * knobs::DAMPENING)
                             .repeat();
                     }
                 }
@@ -129,7 +165,7 @@ pub fn animating(
                         animation_player
                             .start(*index)
                             .set_weight(1.0)
-                            .set_speed(speed * knobs::SPRINT_SPEED)
+                            .set_speed(speed * knobs::DAMPENING)
                             .repeat();
                     }
                 }
@@ -157,7 +193,7 @@ pub fn animating(
                     if let Some(index) = player.animation.map.get("Jump_Loop") {
                         animation_player
                             .start(*index)
-                            .set_speed(knobs::NORMAL)
+                            .set_speed(knobs::DAMPENING)
                             .repeat();
                     }
                 }
@@ -165,7 +201,7 @@ pub fn animating(
                     if let Some(index) = player.animation.map.get("Jump_Loop") {
                         animation_player
                             .start(*index)
-                            .set_speed(knobs::NORMAL)
+                            .set_speed(knobs::DAMPENING)
                             .repeat();
                     }
                 }
@@ -173,7 +209,7 @@ pub fn animating(
                     if let Some(index) = player.animation.map.get("Crouch_Fwd_Loop") {
                         animation_player
                             .start(*index)
-                            .set_speed(speed * knobs::CROUCH_SPEED)
+                            .set_speed(speed * knobs::DAMPENING)
                             .repeat();
                     }
                 }
@@ -181,7 +217,7 @@ pub fn animating(
                     if let Some(index) = player.animation.map.get("Crouch_Idle_Loop") {
                         animation_player
                             .start(*index)
-                            .set_speed(knobs::NORMAL)
+                            .set_speed(knobs::DAMPENING)
                             .repeat();
                     }
                 }
@@ -192,7 +228,7 @@ pub fn animating(
                 }
                 AnimationState::Knockback => {
                     if let Some(index) = player.animation.map.get("Hit_Chest") {
-                        animation_player.start(*index).set_speed(knobs::NORMAL);
+                        animation_player.start(*index).set_speed(knobs::DAMPENING);
                     }
                 }
                 AnimationState::Climb(speed) => {
@@ -204,4 +240,6 @@ pub fn animating(
             player.animation.state.0 = player.animation.state.1;
         }
     }
+
+    Ok(())
 }
