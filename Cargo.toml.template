@@ -29,6 +29,7 @@ features = [
 ]
 
 [dependencies]
+bevy_perf_ui = { version = "0.6", optional = true }                     # performance UI
 bevy-inspector-egui = { version = "0.36", optional = true }             # entity inspector
 bevy_skein = "0.5"                                                      # blender integration
 
@@ -63,26 +64,29 @@ winit = { version = "0.30", default-features = false }
 # (see <https://github.com/bevyengine/bevy/blob/main/docs/profiling.md#tracy-profiler>)
 tracing = { version = "0.1", features = ["max_level_debug", "release_max_level_warn"] }
 
+
 [features]
 default = [ "dev_native", "third_person" ]
-native = []
-web = [ "bevy/webgpu", "bevy_seedling/web_audio" ]
 custom_cursor  = []
+native = [ "enhanced" ]
 top_down = ["bevy_top_down_camera"]
 third_person = ["bevy_third_person_camera"]
+web = [ "bevy/webgpu", "bevy_seedling/web_audio" ]
 dev = [
+    "bevy_perf_ui",
+    "bevy/bevy_dev_tools",
+    "bevy-inspector-egui",
     "bevy/bevy_ui_debug",
-    "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/track_location",          # Improve error messages coming from Bevy
+    "bevy/debug_glam_assert",       # when need to debug physics\collider issues
 ]
 dev_native = [
     "dev",
     "native",
-    "enhanced",
-    "custom_cursor",
-    "bevy-inspector-egui",
     "bevy/dev",                     # Enable aggressive file watcher
+    "custom_cursor",
     "bevy/bevy_remote",             # Enable remote protocol for 3rd party extensions and plugins
+    "bevy/dynamic_linking",         # Improve compile times for dev builds by linking Bevy as a dynamic library.
     "bevy/embedded_watcher",        # Enable embedded asset hot reloading for native dev builds.
 ]
 enhanced = [
@@ -148,4 +152,5 @@ avian3d = { git = "https://github.com/avianphysics/avian" }
 avian_pickup = { git = "https://github.com/janhohenheim/avian_pickup" }
 bevy_ahoy = { git = "https://github.com/janhohenheim/bevy_ahoy", rev = "51efcce" }
 bevy_third_person_camera = { git = "https://github.com/olekspickle/bevy_third_person_camera" }
+bevy_perf_ui = { git = "https://github.com/olekspickle/perf_ui" }
 

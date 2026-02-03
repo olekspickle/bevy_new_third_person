@@ -135,7 +135,7 @@ fn handle_dash(
 
 pub fn crouch_in(
     on: On<Start<Crouch>>,
-    mut player: Query<(&mut Player, &mut Transform), With<PlayerCtx>>,
+    mut player: Query<(&mut Player, &mut Transform), With<PlayerInput>>,
     mut collider: Query<&mut Collider, With<Player>>,
 ) -> Result {
     let mut collider = collider.single_mut()?;
@@ -153,7 +153,7 @@ pub fn crouch_in(
 
 pub fn crouch_out(
     on: On<Complete<Crouch>>,
-    mut player: Query<(&mut Player, &mut Transform), With<PlayerCtx>>,
+    mut player: Query<(&mut Player, &mut Transform), With<PlayerInput>>,
     mut collider: Query<&mut Collider, (With<Player>, Without<SceneCamera>)>,
 ) -> Result {
     let mut collider = collider.get_mut(on.context)?;

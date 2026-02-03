@@ -2,10 +2,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use avian3d::prelude::*;
-use bevy::log::tracing_subscriber::field::MakeExt;
+use bevy::log::tracing_subscriber::{field::MakeExt, fmt};
 use bevy::{
     app::App, asset::AssetMetaCheck, asset::load_internal_binary_asset, ecs::error::error, log,
-    pbr::DefaultOpaqueRendererMethod, prelude::*, window::PrimaryWindow, winit::WINIT_WINDOWS,
+    prelude::*, window::PrimaryWindow, winit::WINIT_WINDOWS,
 };
 use bevy_enhanced_input::EnhancedInputPlugin;
 use bevy_skein::SkeinPlugin;
@@ -38,7 +38,6 @@ fn main() {
     // Don't panic on Bevy system errors, just log them.
     app.set_error_handler(error);
 
-    app.insert_resource(DefaultOpaqueRendererMethod::deferred());
     app.add_plugins(
         DefaultPlugins
             .set(WindowPlugin {
@@ -56,13 +55,10 @@ fn main() {
             })
             .set(log::LogPlugin {
                 level: log::Level::TRACE,
-                filter: format!(
-                    concat!("info,", "{default},"),
-                    default = bevy::log::DEFAULT_FILTER
-                ),
+                filter: format!("info,{},", bevy::log::DEFAULT_FILTER),
                 fmt_layer: |_| {
                     Some(Box::new(
-                        bevy::log::tracing_subscriber::fmt::Layer::default()
+                        fmt::Layer::default()
                             .without_time()
                             .map_fmt_fields(MakeExt::debug_alt)
                             .with_writer(std::io::stderr),

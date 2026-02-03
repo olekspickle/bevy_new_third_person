@@ -1,6 +1,7 @@
 //! The screen state for the main gameplay.
 //!
 //! Place to all UI HUD, modal logic and other gameplay effects
+
 use super::*;
 
 pub(super) fn plugin(app: &mut App) {

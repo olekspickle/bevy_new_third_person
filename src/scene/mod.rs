@@ -26,7 +26,7 @@ pub fn plugin(app: &mut App) {
 }
 
 pub fn setup(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut commands: Commands) {
-    let Some(scene) = gltf_assets.get(&models.scene) else {
+    let Some(scene) = gltf_assets.get(&models.entry_scene) else {
         return;
     };
     commands.spawn((

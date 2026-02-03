@@ -34,12 +34,7 @@ pub fn plugin(app: &mut App) {
             .chain(),
     );
 
-    app.add_plugins((
-        settings::plugin,
-        states::plugin,
-        input::plugin,
-        event_dispatch::plugin,
-    ));
+    app.add_plugins((settings::plugin, states::plugin, event_dispatch::plugin));
 }
 
 /// High-level groupings of systems for the app in the [`Update`] schedule.

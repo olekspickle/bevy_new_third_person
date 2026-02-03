@@ -66,7 +66,7 @@ pub struct Models {
     #[dependency]
     pub player: Handle<Gltf>,
     #[dependency]
-    pub scene: Handle<Gltf>,
+    pub entry_scene: Handle<Gltf>,
 }
 
 impl FromWorld for Models {
@@ -74,7 +74,7 @@ impl FromWorld for Models {
         let assets = world.resource::<AssetServer>();
         Self {
             player: assets.load("models/player.glb"),
-            scene: assets.load("models/scene.glb"),
+            entry_scene: assets.load("models/scene.glb"),
         }
     }
 }

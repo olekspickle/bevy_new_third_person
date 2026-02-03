@@ -8,9 +8,9 @@ use bevy_inspector_egui::{bevy_egui::EguiPlugin, quick::WorldInspectorPlugin};
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(EguiPlugin::default())
-        .add_plugins(
+        .add_plugins((
             WorldInspectorPlugin::new().run_if(input_toggle_active(false, KeyCode::Backquote)),
-        )
+        ))
         .add_systems(
             Update,
             (
@@ -18,6 +18,7 @@ pub(super) fn plugin(app: &mut App) {
                 tab_trigger_system.run_if(input_just_pressed(KeyCode::Tab)),
             ),
         )
+        // .add_systems(OnEnter(Screen::Loading), log_adapter_and_system_info)
         .add_observer(toggle_debug_ui);
 }
 

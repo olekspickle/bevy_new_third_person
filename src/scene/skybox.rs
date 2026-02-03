@@ -8,7 +8,8 @@ use bevy::{
 use serde::{Deserialize, Serialize};
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, sun_cycle.run_if(in_state(Screen::Gameplay)));
+    app.add_systems(Update, sun_cycle.run_if(in_state(Screen::Gameplay)))
+        .add_observer(add_skybox_to_camera);
 }
 
 markers!(Sun, Moon);
@@ -16,13 +17,12 @@ markers!(Sun, Moon);
 /// Mainly this example:
 /// <https://bevyengine.org/examples/3d-rendering/atmosphere/>
 pub fn add_skybox_to_camera(
+    on: On<Add, SceneCamera>,
     cfg: Res<Config>,
     mut commands: Commands,
-    mut camera: Query<Entity, With<SceneCamera>>,
     mut scattering_mediums: ResMut<Assets<ScatteringMedium>>,
 ) -> Result {
-    let camera = camera.single_mut()?;
-
+    let camera = on.entity;
     let cascade_shadow_config = CascadeShadowConfigBuilder {
         first_cascade_far_bound: 0.3,
         maximum_distance: cfg.physics.shadow_distance,

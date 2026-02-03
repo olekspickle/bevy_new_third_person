@@ -6,16 +6,23 @@ use std::collections::HashMap;
 
 mod animation;
 mod control;
+mod input;
 mod sound;
 
 pub use animation::*;
+pub use input::*;
 
 /// This plugin handles player related stuff like movement, shooting
 /// Player logic is only active during the State `Screen::Playing`
 pub fn plugin(app: &mut App) {
-    app.add_plugins((control::plugin, sound::plugin, animation::plugin))
-        .add_systems(OnEnter(Screen::Gameplay), spawn_player)
-        .add_observer(player_post_spawn);
+    app.add_plugins((
+        control::plugin,
+        sound::plugin,
+        animation::plugin,
+        input::plugin,
+    ))
+    .add_systems(OnEnter(Screen::Gameplay), spawn_player)
+    .add_observer(player_post_spawn);
 }
 
 pub fn spawn_player(
@@ -44,7 +51,7 @@ pub fn spawn_player(
             Player::default(),
             // controller
             (
-                PlayerCtx,
+                PlayerInput,
                 CharacterController {
                     gravity: cfg.physics.gravity,
                     max_speed: cfg.player.movement.max_speed,
@@ -101,7 +108,11 @@ pub fn spawn_player(
     Ok(())
 }
 
-fn player_post_spawn(on: On<Add, Player>, mut players: Query<&mut Player>) {
+fn player_post_spawn(
+    on: On<Add, Player>,
+    modal_ctx: Query<Entity, With<ModalInput>>,
+    mut players: Query<&mut Player>,
+) {
     if let Ok(mut p) = players.get_mut(on.entity) {
         p.id = on.entity; // update player id with spawned entity
         info!("player entity: Player.id: {}", p.id);
