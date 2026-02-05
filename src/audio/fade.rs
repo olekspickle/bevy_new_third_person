@@ -39,6 +39,7 @@ fn crossfade_music(
         if node.volume.linear() <= 0.01 {
             audio.remove::<FadeOut>();
             pb.pause();
+            trace!("Paused music: {e}");
         }
 
         node.fade_to(Volume::SILENT, fade_duration, &mut events);

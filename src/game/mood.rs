@@ -3,10 +3,11 @@ use super::*;
 use crate::player::Player;
 use avian3d::prelude::Collisions;
 use bevy::time::common_conditions::on_timer;
-use std::time::Duration;
+use std::{collections::HashMap, time::Duration};
 
 pub fn plugin(app: &mut App) {
     app.init_state::<Mood>();
+    app.init_resource::<MusicPlaybacks>();
 
     app.add_systems(OnExit(Screen::Gameplay), stop_soundtrack)
         .add_systems(OnEnter(Screen::Gameplay), start_soundtrack)
@@ -16,7 +17,9 @@ pub fn plugin(app: &mut App) {
                 .run_if(in_state(Screen::Gameplay))
                 .run_if(on_timer(Duration::from_millis(200))),
         )
-        .add_observer(change_mood);
+        .add_observer(change_mood)
+        .add_observer(MusicPlaybacks::track_entity)
+        .add_observer(MusicPlaybacks::keep_playlist_playing);
 }
 
 #[derive(Component, States, Reflect, Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
@@ -76,27 +79,14 @@ fn trigger_mood_change(
         return;
     };
 
-    for (e, zone) in zones.iter() {
+    for (e, &mood) in zones.iter() {
         if collisions.contains(player, e) {
-            match zone {
-                Mood::Combat => {
-                    if current_mood != Mood::Combat {
-                        debug!("Trigger changing mood from:{:?}", current_mood);
-                        commands.trigger(ChangeMood {
-                            mood: Mood::Combat,
-                            entity: player,
-                        });
-                    }
-                }
-                Mood::Exploration => {
-                    if current_mood != Mood::Exploration {
-                        debug!("Trigger changing mood from:{:?}", current_mood);
-                        commands.trigger(ChangeMood {
-                            mood: Mood::Exploration,
-                            entity: player,
-                        })
-                    }
-                }
+            if current_mood != mood {
+                debug!("Trigger changing mood {current_mood:?} -> {mood:?}");
+                commands.trigger(ChangeMood {
+                    mood,
+                    entity: player,
+                });
             }
         }
     }
@@ -113,14 +103,15 @@ fn change_mood(
     mut next_mood: ResMut<NextState<Mood>>,
 ) {
     let mut rng = rand::rng();
-    for (z, track) in music_pbs.iter() {
-        if z != &on.mood {
+    for (mood, track) in music_pbs.iter() {
+        if mood != &on.mood {
             commands.entity(*track).insert(FadeOut);
         }
     }
+    next_mood.set(on.mood);
 
     if let Some(track) = music_pbs.get(&on.mood) {
-        debug!("found existing track, fading IN: {track}");
+        debug!("found existing track, fading IN: {track}",);
         commands.entity(*track).insert(FadeIn);
         return;
     }
@@ -145,5 +136,64 @@ fn change_mood(
         FadeIn,
         on.mood,
     ));
-    next_mood.set(on.mood);
+}
+
+/// Map of entities that are currently playing music for a specific mood
+/// Use them to keep track of [`PlaybackSettings`] and play/pause instead of spawning new ones
+#[derive(Resource, Reflect, Debug, Clone, Default, Deref, DerefMut)]
+#[reflect(Resource)]
+pub struct MusicPlaybacks(HashMap<Mood, Entity>);
+
+impl FromIterator<(Mood, Entity)> for MusicPlaybacks {
+    fn from_iter<T: IntoIterator<Item = (Mood, Entity)>>(iter: T) -> Self {
+        Self(iter.into_iter().collect())
+    }
+}
+
+impl MusicPlaybacks {
+    fn track_entity(
+        on: On<Add, (Mood, SamplePlayer)>,
+        moods: Query<&Mood>,
+        mut music_pbs: ResMut<MusicPlaybacks>,
+    ) {
+        if let Ok(&mood) = moods.get(on.entity) {
+            debug!("adding entity for {mood:?} {}", on.entity);
+            music_pbs.insert(mood, on.entity);
+        }
+    }
+
+    /// When [`SamplePlayer`] finishes playing, it spawnes next track in the list and inserts new
+    /// entity to the [`MusicPlaybacks`] resource as well
+    fn keep_playlist_playing(
+        _: On<Despawn, SamplePlayer>,
+        mood: Res<State<Mood>>,
+        settings: Res<Settings>,
+        mut commands: Commands,
+        mut sources: ResMut<AudioSources>,
+        mut music_pbs: ResMut<MusicPlaybacks>,
+    ) {
+        let mood = mood.get();
+        let mut rng = rand::rng();
+        let handle = match mood {
+            Mood::Exploration => sources.explore.pick(&mut rng),
+            Mood::Combat => sources.combat.pick(&mut rng),
+        };
+
+        let id = commands
+            .spawn((
+                MusicPool,
+                SamplePlayer::new(handle.clone())
+                    .with_volume(settings.music())
+                    .looping(),
+                sample_effects![VolumeNode {
+                    volume: Volume::SILENT,
+                    ..default()
+                }],
+                FadeIn,
+                *mood,
+            ))
+            .id();
+
+        music_pbs.insert(*mood, id);
+    }
 }

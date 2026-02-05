@@ -60,7 +60,6 @@
 //!
 use crate::*;
 pub use bevy_seedling::prelude::*;
-use std::collections::HashMap;
 
 mod fade;
 mod fdsp_host;
@@ -88,54 +87,11 @@ pub use fade::*;
 pub const CONVERTER: PerceptualVolume = PerceptualVolume::new();
 
 pub fn plugin(app: &mut App) {
-    app.init_resource::<MusicPlaybacks>();
-
     app.add_plugins((fdsp_host::plugin, fade::plugin));
 
-    app.add_systems(Startup, setup)
-        .add_observer(MusicPlaybacks::track_entity)
-        .add_observer(MusicPlaybacks::clear_entity_on_finish);
+    app.add_systems(Startup, setup);
 }
 
 fn setup(mut master: Single<&mut VolumeNode, With<MainBus>>, settings: Res<Settings>) {
     master.volume = CONVERTER.perceptual_to_volume(settings.general().linear());
-}
-
-/// Map of entities that are currently playing music for a specific mood
-/// Use them to keep track of [`PlaybackSettings`] and play/pause instead of spawning new ones
-#[derive(Resource, Reflect, Debug, Clone, Default, Deref, DerefMut)]
-#[reflect(Resource)]
-pub struct MusicPlaybacks(HashMap<Mood, Entity>);
-
-impl FromIterator<(Mood, Entity)> for MusicPlaybacks {
-    fn from_iter<T: IntoIterator<Item = (Mood, Entity)>>(iter: T) -> Self {
-        Self(iter.into_iter().collect())
-    }
-}
-
-impl MusicPlaybacks {
-    fn track_entity(
-        on: On<Add, (Mood, SamplePlayer)>,
-        moods: Query<&Mood>,
-        mut music_pbs: ResMut<MusicPlaybacks>,
-    ) {
-        if let Ok(&mood) = moods.get(on.entity) {
-            info!("adding entity for {mood:?} {}", on.entity);
-            music_pbs.insert(mood, on.entity);
-        }
-    }
-
-    /// When [`SamplePlayer`] finishes playing, it removes the entity, so we have to remove entity
-    /// from the [`MusicPlaybacks`] resource as well
-    fn clear_entity_on_finish(
-        on: On<Despawn, SamplePlayer>,
-        mut music_pbs: ResMut<MusicPlaybacks>,
-    ) {
-        music_pbs.retain(|z, e| {
-            if e == &on.entity {
-                info!("removing entity for {z:?} zone");
-            }
-            e != &on.entity
-        });
-    }
 }
