@@ -42,7 +42,6 @@ fn jump_sound(
     _: On<Start<Jump>>,
     state: Res<GameState>,
     settings: Res<Settings>,
-    // jump_timer: Query<&JumpTimer, With<Player>>,
     mut commands: Commands,
     mut sources: ResMut<AudioSources>,
 ) -> Result {
@@ -64,7 +63,6 @@ fn dash_sound(
     _: On<Start<Dash>>,
     state: Res<GameState>,
     settings: Res<Settings>,
-    // jump_timer: Query<&JumpTimer, With<Player>>,
     mut commands: Commands,
     mut sources: ResMut<AudioSources>,
 ) -> Result {
@@ -72,12 +70,9 @@ fn dash_sound(
         return Ok(());
     }
 
-    // let jump_timer = jump_timer.get(on.target())?;
-    // if jump_timer.just_finished() {
     let mut rng = rand::rng();
     let handle = sources.steps.pick(&mut rng);
     commands.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
-    // }
 
     Ok(())
 }

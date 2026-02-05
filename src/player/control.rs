@@ -1,10 +1,9 @@
 use super::*;
-use bevy_ahoy::{CharacterControllerOutput, CharacterLook};
-use std::time::Duration;
+use bevy_ahoy::CharacterLook;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(
-        PreUpdate,
+        FixedUpdate,
         movement
             .run_if(in_state(Screen::Gameplay))
             .in_set(AppSystems::UserInput),
@@ -25,30 +24,22 @@ pub struct Dashing(pub Instant);
 /// <https://github.com/idanarye/bevy-tnua/blob/main/demos/src/character_control_systems/platformer_control_systems.rs>
 fn movement(
     movement: Single<&Action<Movement>>,
-    camera: Query<&Transform, With<SceneCamera>>,
-    mut player_q: Query<
-        (
-            &mut Player,
-            &mut Transform,
-            &mut StepTimer,
-            &mut CharacterLook,
-            &CharacterController,
-            &CharacterControllerOutput,
-        ),
-        Without<SceneCamera>,
-    >,
+    camera: Single<&Transform, With<SceneCamera>>,
+    mut player_q: Query<(&Player, &mut Transform, &mut CharacterLook), Without<SceneCamera>>,
 ) -> Result {
     let movement = *movement.into_inner();
 
-    for (mut player, mut pos, mut step_timer, mut look, ahoy, ahoy_out) in player_q.iter_mut() {
-        let cam_transform = camera.single()?;
-        let input_dir = cam_transform.movement_direction(*movement);
-        let rotation = Quat::from_rotation_arc(
-            Vec3::NEG_Z,
-            Vec3::new(input_dir.x, 0.0, input_dir.z).normalize_or_zero(),
-        );
-        *look = CharacterLook::from_quat(rotation);
-        pos.rotation = rotation;
+    for (_p, mut pos, mut look) in player_q.iter_mut() {
+        let input_dir = camera.movement_direction(*movement);
+
+        if input_dir.length_squared() > 0.0 {
+            // set ahoy KCC direction
+            let (yaw, pitch, _) = camera.rotation.to_euler(EulerRot::YXZ);
+            *look = CharacterLook { yaw, pitch };
+            // rotate model
+            let rotation = Quat::from_rotation_y(input_dir.x.atan2(input_dir.z));
+            pos.rotation = pos.rotation.slerp(rotation, 0.2);
+        }
     }
 
     Ok(())
@@ -96,7 +87,7 @@ fn handle_dash(
 
     let cam_transform = camera.single()?;
     let navigate = **navigate.into_inner();
-    let direction = cam_transform.movement_direction(navigate);
+    let _direction = cam_transform.movement_direction(navigate);
 
     // TODO: dash
 
@@ -148,18 +139,18 @@ pub fn crouch_out(
 //     // TODO: Hit
 // }
 
-fn handle_jump(
-    on: On<Fire<Jump>>,
-    // cfg: Res<Config>,
-    // time: Res<Time>,
-    mut player_query: Query<(&mut Player, &CharacterController, &mut JumpTimer), With<Player>>,
-) -> Result {
-    let (mut player, ahoy, mut _jump_timer) = player_query.get_mut(on.context)?;
-
-    info!("jumping with speed: {}", ahoy.speed);
-
-    // if jump_timer.tick(time.delta()).just_finished() {
-    // }
-
-    Ok(())
-}
+// fn handle_jump(
+//     on: On<Fire<Jump>>,
+//     // cfg: Res<Config>,
+//     // time: Res<Time>,
+//     mut player_query: Query<(&mut Player, &CharacterController, &mut JumpTimer), With<Player>>,
+// ) -> Result {
+//     let (mut player, ahoy, mut _jump_timer) = player_query.get_mut(on.event_target())?;
+//
+//     info!("jumping with speed: {}", ahoy.speed);
+//
+//     // if jump_timer.tick(time.delta()).just_finished() {
+//     // }
+//
+//     Ok(())
+// }

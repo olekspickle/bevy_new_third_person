@@ -79,7 +79,6 @@ pub fn spawn_player(
             ),
             // other player related components
             (
-                JumpTimer(Timer::from_seconds(cfg.timers.jump, TimerMode::Repeating)),
                 StepTimer(Timer::from_seconds(cfg.timers.step, TimerMode::Repeating)),
                 InheritedVisibility::default(), // silence the warning because of adding SceneRoot as a child
             ),

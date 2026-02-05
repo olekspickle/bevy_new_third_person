@@ -140,7 +140,7 @@ pub fn animating(
             }
             _ => (),
         }
-        info!("next anim: {:?}", player.animation.state.1);
+        // info!("next anim: {:?}", player.animation.state.1);
 
         animation_player.zero_all_animations();
         if player.animation.alter() {

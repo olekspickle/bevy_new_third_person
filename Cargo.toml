@@ -43,7 +43,7 @@ bevy_top_down_camera = { version = "0.2", optional = true }             # top do
 
 avian3d = "0.6.0-dev"
 bevy_ahoy =  "0.0.3"                                                    # character controller
-bevy_enhanced_input = { version = "0.22", features = ["serialize"] }    # keyboard/gamepad input
+bevy_enhanced_input = { version = "0.23", features = ["serialize"] }    # keyboard/gamepad input
 
 # dialogue
 bevy_yarnspinner = "0.7"
@@ -81,7 +81,7 @@ custom_cursor  = []
 native = [ "enhanced" ]
 top_down = ["bevy_top_down_camera"]
 third_person = ["bevy_third_person_camera"]
-web = [ "bevy/webgpu", "bevy_seedling/web_audio" ]
+web = [ "bevy/webgpu", "bevy_seedling/web_audio", "third_person" ]
 dev = [
     "bevy_perf_ui",
     "bevy/bevy_dev_tools",
@@ -159,7 +159,7 @@ strip = "debuginfo"                 # Strip all debugging information from the b
 
 [patch.crates-io]
 avian3d = { git = "https://github.com/avianphysics/avian" }
-bevy_ahoy = { git = "https://github.com/olekspickle/bevy_ahoy" }
+bevy_ahoy = { git = "https://github.com/janhohenheim/bevy_ahoy" }
 bevy_third_person_camera = { git = "https://github.com/olekspickle/bevy_third_person_camera" }
 bevy_perf_ui = { git = "https://github.com/olekspickle/perf_ui" }
 
