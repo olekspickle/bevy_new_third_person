@@ -1,4 +1,5 @@
-//! An abstraction for changing music of the game depending on some triggers
+//! An abstraction for changing music of the game with playlist depending on some triggers:
+//! collisions, events, dramatic effect.
 use super::*;
 use crate::player::Player;
 use avian3d::prelude::Collisions;
@@ -15,9 +16,10 @@ pub fn plugin(app: &mut App) {
             Update,
             trigger_mood_change
                 .run_if(in_state(Screen::Gameplay))
+                // this should not be run that often, so we throttle it a bit
                 .run_if(on_timer(Duration::from_millis(200))),
         )
-        .add_observer(change_mood)
+        .add_observer(on_change_mood)
         .add_observer(MusicPlaybacks::track_entity)
         .add_observer(MusicPlaybacks::keep_playlist_playing);
 }
@@ -48,9 +50,11 @@ fn start_soundtrack(
                 volume: Volume::SILENT,
                 ..default()
             }],
+            Mood::default(),
             FadeIn,
         ))
         .id();
+    info!("spawned default track: {e}");
     let mp: MusicPlaybacks = [(Mood::default(), e)].into_iter().collect();
     commands.insert_resource(mp);
 }
@@ -92,9 +96,9 @@ fn trigger_mood_change(
     }
 }
 
-/// Every time the current mood in GameState resource changes,
-/// this system is run to trigger the song change
-fn change_mood(
+/// Every time the current [`Mood`] state changes,
+/// this oberver is fired to crossfade the music to the new mood
+fn on_change_mood(
     on: On<ChangeMood>,
     settings: Res<Settings>,
     music_pbs: ResMut<MusicPlaybacks>,
@@ -152,7 +156,7 @@ impl FromIterator<(Mood, Entity)> for MusicPlaybacks {
 
 impl MusicPlaybacks {
     fn track_entity(
-        on: On<Add, (Mood, SamplePlayer)>,
+        on: On<Add, SamplePlayer>,
         moods: Query<&Mood>,
         mut music_pbs: ResMut<MusicPlaybacks>,
     ) {
@@ -162,23 +166,30 @@ impl MusicPlaybacks {
         }
     }
 
-    /// When [`SamplePlayer`] finishes playing, it spawnes next track in the list and inserts new
-    /// entity to the [`MusicPlaybacks`] resource as well
+    /// When [`SamplePlayer`] finishes playing, it spawnes next track in the playlist and
+    /// inserts new entity to the [`MusicPlaybacks`] resource for the corresponding mood
     fn keep_playlist_playing(
-        _: On<Despawn, SamplePlayer>,
+        on: On<Despawn, SamplePlayer>,
         mood: Res<State<Mood>>,
         settings: Res<Settings>,
+        music_q: Query<Entity, With<MusicPool>>,
         mut commands: Commands,
         mut sources: ResMut<AudioSources>,
         mut music_pbs: ResMut<MusicPlaybacks>,
     ) {
         let mood = mood.get();
+        // we only want to continue gameplay music here
+        if music_q.get(on.entity).is_err() || music_pbs.get(mood).is_none() {
+            return;
+        }
+
         let mut rng = rand::rng();
         let handle = match mood {
             Mood::Exploration => sources.explore.pick(&mut rng),
             Mood::Combat => sources.combat.pick(&mut rng),
         };
 
+        debug!("new {mood:?} track ({} despawned)", on.entity);
         let id = commands
             .spawn((
                 MusicPool,

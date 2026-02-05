@@ -18,7 +18,6 @@ pub(super) fn plugin(app: &mut App) {
                 tab_trigger_system.run_if(input_just_pressed(KeyCode::Tab)),
             ),
         )
-        // .add_systems(OnEnter(Screen::Loading), log_adapter_and_system_info)
         .add_observer(toggle_debug_ui);
 }
 

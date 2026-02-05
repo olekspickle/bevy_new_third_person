@@ -55,7 +55,7 @@ fn main() {
             })
             .set(log::LogPlugin {
                 level: log::Level::TRACE,
-                filter: format!("info,{},", bevy::log::DEFAULT_FILTER),
+                filter: format!("info,bevy_new_3d_rpg=debug,{},", bevy::log::DEFAULT_FILTER),
                 fmt_layer: |_| {
                     Some(Box::new(
                         fmt::Layer::default()
