@@ -37,7 +37,7 @@ bevy new -t=olekspickle/bevy_new_3d_rpg my-rpg
 
 ### Hotpatching
 To set this up, follow the instructions in the [release announcement](https://bevy.org/news/bevy-0-17/#hot-patching-systems-in-a-running-app)
-- Linux: `make hot` or `bash BEVY_ASSET_ROOT="." dx serve --hot-patch`
+- Linux: `makers hot` or `cargo make hot` or `bash BEVY_ASSET_ROOT="." dx serve --hot-patch`
 - Windows PS:`$env:BEVY_ASSET_ROOT="." ; dx serve --hot-patch`
 
 ## Features:
@@ -51,15 +51,17 @@ To set this up, follow the instructions in the [release announcement](https://be
 - [x] simple skybox sun cycle using [bevy atmosphere example], with daynight and nimbus modes
 - [x] featuring rig and animations using [Universal Animation Library] from quaternius
 - [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio), with **highly** experimental audio stutter fix for web
+- [x] different music(exploration, combat) on zone change event with music crossfade and playback tracking
+- [x] setup for playing music from a list of tracks with deterministic never repeating playback (thx [bevy_shuffle_bag])
 - [x] consistent Esc back navigation in gameplay and menu via stacked modals (kudos for the idea to skyemakesgames)
 - [x] serialize and save settings
 - [x] audio, video and keys rebind tabs in settings (currently broken)
 - [x] easy drop in scene integration using awesome [skein] with a simple scene
-- [x] different music(exploration, combat) on zone change event with music crossfade and playback tracking
 - [x] custom font replace example using pre-loaded font
 
 ### TODOs
-- [ ] adapt bevy_ahoy with animations
+- [ ] adapt bevy_ahoy
+- [ ] simple animation transition state machine
 - [ ] 3d and 2d particles demo: shooting magic balls, fireplace, step dust
 - [ ] pool with light textures
 - [ ] spatial audio demo: boombox emitting background music
@@ -72,8 +74,6 @@ To set this up, follow the instructions in the [release announcement](https://be
 - [ ] basic fighting: punch, kick, take weapon
 - [ ] rifle
 - [ ] bow
-- [ ] Jump with timer(tricky with tnua jump in air counter)
-- [ ] do not rotate player on aim(silly bug, if you release aim looking to the floor - player model left rotated parallel to the floor)
 
 ## Run your game
 
@@ -91,11 +91,13 @@ To run a **web** dev build to run audio in separate thread to avoid audio stutte
 </details>
 
 <details>
-    <summary><ins>with cmake</ins></summary>
+    <summary><ins>with cargo-make</ins></summary>
 
-- Dev: `make run` to run a **native** dev build
-- Release: `make build` to build a **native** release build
-- Web: `make run-web` to run a **web** dev build to run audio in separate thread to avoid audio stuttering
+- Install [cargo-make]: `cargo install cargo-make`
+
+- Dev: `makers run` or `cargo make run` to run a **native** dev build
+- Release: `makers build` or `cargo make build` to build a **native** release build
+- Web: `makers run-web` or `cargo make run-web` to run a **web** dev build to run audio in separate thread to avoid audio stuttering
 </details>
 
 <details>
@@ -136,7 +138,7 @@ The source code in this repository is licensed under any of the following at you
 
 | bevy | bevy_new_3d_rpg  |
 | ---- | ---------------------- |
-| 0.18 |       0.18.*            |
+| 0.18 |       0.18.*           |
 | 0.17 |       0.2.*            |
 | 0.16 |       0.1.4            |
 
@@ -151,10 +153,12 @@ The source code in this repository is licensed under any of the following at you
 [bevy_third_person_camera]: https://github.com/The-DevBlog/bevy_third_person_camera
 [bevy_top_down_camera]: https://github.com/olekspickle/bevy_top_down_camera
 [bevy_ahoy]: https://github.com/jannhohenheim/bevy_ahoy
+[bevy_shuffle_bag]: https://github.com/jannhohenheim/bevy_shuffle_bag
 [Bevy Cheat Book]: https://bevy-cheatbook.github.io/introduction.html
 [BevyFlock]: https://github.com/TheBevyFlock/bevy_new_2d
 [bevy_enhanced_input]: https://github.com/projectharmonia/bevy_enhanced_input
 [cargo-generate]: https://github.com/cargo-generate/cargo-generate
+[cargo-make]: https://github.com/sagiegurari/cargo-make
 [GitHub workflows]: https://docs.github.com/en/actions/using-workflows
 [Linux dependencies]: https://github.com/bevyengine/bevy/blob/main/docs/linux_dependencies.md
 [skein]: https://bevyskein.dev

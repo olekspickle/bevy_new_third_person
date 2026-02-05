@@ -20,6 +20,7 @@ pub fn plugin(app: &mut App) {
         credits::plugin,
         gameplay::plugin,
     ))
+    .add_systems(OnEnter(Screen::Gameplay), unpause_on_enter)
     .add_systems(Update, track_last_screen.run_if(state_changed::<Screen>))
     .add_observer(on_back)
     .add_observer(on_go_to);
@@ -43,6 +44,13 @@ pub enum Screen {
     Title,
     // During this State the actual game logic is executed
     Gameplay,
+}
+
+fn unpause_on_enter(mut state: ResMut<GameState>, mut time: ResMut<Time<Virtual>>) {
+    if time.is_paused() || state.paused {
+        time.unpause();
+        state.reset();
+    }
 }
 
 // TODO: figure out how to make it a cool observer
