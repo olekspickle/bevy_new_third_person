@@ -5,6 +5,7 @@ pub fn plugin(app: &mut App) {
     app.init_state::<Modal>()
         .add_input_context::<ModalInput>()
         .init_resource::<Modals>()
+        .add_systems(OnEnter(Screen::Title), spawn_ctx)
         .add_observer(add_new_modal)
         .add_observer(pop_modal)
         .add_observer(clear_modals)

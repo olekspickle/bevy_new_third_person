@@ -36,12 +36,14 @@ fn crossfade_music(
         // I prefer FadeOut to not cause a cacophony of sounds
         // TODO: figure out cleaner way to do this
         audio.remove::<FadeIn>();
+
         if node.volume.linear() <= 0.01 {
             audio.remove::<FadeOut>();
             pb.pause();
-            trace!("Paused music: {e}");
+            debug!("Paused music, rm FadeOut: {e}");
         }
 
+        debug!("fading out: {e}");
         node.fade_to(Volume::SILENT, fade_duration, &mut events);
     }
 
@@ -51,12 +53,14 @@ fn crossfade_music(
         };
         if node.volume.linear() >= settings.music().linear() {
             commands.entity(e).remove::<FadeIn>();
+            debug!("rm fade in: {e}");
             continue;
         }
 
         let Ok(mut pb) = pb_settings.get_mut(e) else {
             continue;
         };
+        debug!("fading in: {e}");
         node.fade_to(settings.music(), fade_duration, &mut events);
         pb.play();
     }

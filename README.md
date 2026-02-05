@@ -1,20 +1,8 @@
 
-# 3D RPG Bevy game template (WIP)
-<style>
-table, td, th {
-   border: none!important;
-}
-</style>
-<table>
-    <tr>
-        <td><video src="https://github.com/user-attachments/assets/6533b1d9-5971-41fd-acc4-5d2f567266be" controls="controls"></video></td>
-        <td><video src="https://github.com/user-attachments/assets/3aadf8fc-7bb2-477d-82c6-44dc1d56ed08" controls="controls"></video></td>
-    </tr>
-    <tr>
-        <td><video src="https://github.com/user-attachments/assets/7f470899-29b0-44c5-b418-6fdf240d130c" controls="controls"></video></td>
-        <td><video src="https://github.com/user-attachments/assets/ea236931-6c59-456f-98de-447d3f6eb287" controls="controls"></video></td>
-    </tr>
-</table>
+# 3D Bevy game template
+![settings UI demo](./assets/gifs/settings-ui.gif)
+![ahoy KCC demo](./assets/gifs/ahoy-kcc.gif)
+![seedling mood zones demo](./assets/gifs/seedling-skein-crossfade.gif)
 
 This template is based on the awesome [BevyFlock 2D template][BevyFlock] featuring out of the box builds for:
 - Windows
@@ -30,9 +18,9 @@ You can [try this template in your browser!](https://olekspickle.itch.io/bevy-3d
 ## Best way to start
 Install [cargo-generate] or [bevy_cli] and run:
 ```bash
-cargo generate olekspickle/bevy_new_3d_rpg -n my-rpg
+cargo generate olekspickle/bevy_new_3d_rpg -n my-3d-game
 # or with bevy_cli
-bevy new -t=olekspickle/bevy_new_3d_rpg my-rpg
+bevy new -t=olekspickle/bevy_new_3d_rpg my-3d-game
 ```
 
 ### Hotpatching
@@ -48,9 +36,10 @@ To set this up, follow the instructions in the [release announcement](https://be
 - [x] top down camera with [bevy_top_down_camera]
 - [x] solid keyboard & gamepad mapping to ui & game actions using [bevy_enhanced_input]
 - [x] simple scene with colliders and rigid bodies using [avian3d]
+- [x] kinematic character controller using [bevy_ahoy] adapted to third person
 - [x] simple skybox sun cycle using [bevy atmosphere example], with daynight and nimbus modes
 - [x] featuring rig and animations using [Universal Animation Library] from quaternius
-- [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably replace bevy_audio), with **highly** experimental audio stutter fix for web
+- [x] experimental sound with [bevy_seedling] based on Firewheel audio engine (which will probably be upstreamed), with improved audio for web
 - [x] different music(exploration, combat) on zone change event with music crossfade and playback tracking
 - [x] setup for playing music from a list of tracks with deterministic never repeating playback (thx [bevy_shuffle_bag])
 - [x] consistent Esc back navigation in gameplay and menu via stacked modals (kudos for the idea to skyemakesgames)
@@ -60,13 +49,12 @@ To set this up, follow the instructions in the [release announcement](https://be
 - [x] custom font replace example using pre-loaded font
 
 ### TODOs
-- [ ] adapt bevy_ahoy
 - [ ] simple animation transition state machine
 - [ ] 3d and 2d particles demo: shooting magic balls, fireplace, step dust
-- [ ] pool with light textures
 - [ ] spatial audio demo: boombox emitting background music
+- [ ] modern PS/SteamDeck like item select wheel
 - [ ] small door/portal demo
-- [ ] modern weapon select wheel
+- [ ] pool with light textures
 - [ ] split screen for local coop
 - [ ] flying around suit/mode
 - [ ] vault on objects if they are reachable

@@ -55,7 +55,11 @@ fn main() {
             })
             .set(log::LogPlugin {
                 level: log::Level::TRACE,
-                filter: format!("info,bevy_new_3d_rpg=debug,{},", bevy::log::DEFAULT_FILTER),
+                filter: format!(
+                    // bevy_math spams `Dir3::new_unchecked` on extreme vectors
+                    "info,bevy_new_3d_rpg=debug,bevy_math=error,{},",
+                    bevy::log::DEFAULT_FILTER
+                ),
                 fmt_layer: |_| {
                     Some(Box::new(
                         fmt::Layer::default()

@@ -1,5 +1,4 @@
 use super::*;
-use avian3d::prelude::*;
 use bevy::gltf::GltfMesh;
 use easy_ext::ext;
 

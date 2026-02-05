@@ -12,7 +12,6 @@ use bevy::{
     ui_widgets::Button,
     window::Window,
 };
-use serde::{Deserialize, Serialize};
 
 mod constants;
 mod interaction;

@@ -54,7 +54,7 @@ fn start_soundtrack(
             FadeIn,
         ))
         .id();
-    info!("spawned default track: {e}");
+    debug!("spawned default track: {e}");
     let mp: MusicPlaybacks = [(Mood::default(), e)].into_iter().collect();
     commands.insert_resource(mp);
 }

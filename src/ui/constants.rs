@@ -117,17 +117,17 @@ impl Default for PaletteSet {
     fn default() -> Self {
         Self {
             none: Palette::new(
-                colors::WHITEISH,
+                colors::WHITE,
                 colors::TRANSPARENT,
                 BorderColor::all(colors::WHITEISH),
             ),
-            pressed: Palette::new(
+            pressed: Palette::new(colors::TRANSPARENT, colors::WHITEISH, BorderColor::DEFAULT),
+            hovered: Palette::new(colors::WHITE, colors::TRANSLUCENT, BorderColor::DEFAULT),
+            disabled: Palette::new(
                 colors::TRANSPARENT,
-                colors::BRIGHT_BLUE,
+                colors::WARM_GRAY_1,
                 BorderColor::DEFAULT,
             ),
-            hovered: Palette::new(colors::WHITEISH, colors::TRANSPARENT, BorderColor::DEFAULT),
-            disabled: Palette::new(colors::TRANSPARENT, colors::DIM_BLUE, BorderColor::DEFAULT),
         }
     }
 }

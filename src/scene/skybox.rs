@@ -1,8 +1,6 @@
 use super::*;
 use bevy::{
-    light::{
-        AtmosphereEnvironmentMapLight, CascadeShadowConfigBuilder, VolumetricFog, light_consts::lux,
-    },
+    light::{AtmosphereEnvironmentMapLight, CascadeShadowConfigBuilder, light_consts::lux},
     pbr::{
         Atmosphere, AtmosphereMode, AtmosphereSettings, DistanceFog, FogFalloff, ScatteringMedium,
     },

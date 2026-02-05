@@ -20,7 +20,7 @@ args = ["build", "--locked", "--release", "--features=web", "--yes", "web", "--b
 
 [tasks.run-web]
 command = "bevy"
-args = ["run", "--features", "web", "web", "-U", "multi-threading"]
+args = ["run", "--release", "--features", "web", "web", "-U", "multi-threading"]
 
 [tasks.hot]
 install_crate = "dioxus-cli"
