@@ -15,7 +15,7 @@ env:
   RUSTFLAGS: -Dwarnings -Zshare-generics=y -Zthreads=0
   RUSTDOCFLAGS: -Dwarnings -Zshare-generics=y -Zthreads=0
   # Use the same Rust toolchain across jobs so they can share a cache.
-  toolchain: nightly-2025-06-26
+  toolchain: stable
 
 jobs:
   # Check formatting.
@@ -49,6 +49,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.toolchain }}
+          components: rust-src,rust-docs
 
       - name: Restore Rust cache
         id: cache
@@ -77,7 +78,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.toolchain }}
-          components: clippy
+          components: rust-src,clippy
 
       - name: Restore Rust cache
         id: cache
@@ -103,10 +104,16 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Rust toolchain (plus bevy_lint)
-        uses: TheBevyFlock/bevy_cli/bevy_lint@lint-v0.4.0
+        uses: TheBevyFlock/bevy_cli/bevy_lint@lint-v0.6.0
         with:
           cache: true
           save-cache-if: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.toolchain }}
+          components: rust-src
 
       - name: Restore Rust cache
         id: cache
@@ -138,7 +145,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.toolchain }}
-          components: rustc-codegen-cranelift-preview
+          components: rust-src,rustc-codegen-cranelift-preview
 
       - name: Restore Rust cache
         uses: Swatinem/rust-cache@v2

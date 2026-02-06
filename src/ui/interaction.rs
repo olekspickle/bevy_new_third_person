@@ -5,8 +5,8 @@ use bevy::window::CursorOptions;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_observer(apply_palette_on_over)
-        .add_observer(apply_palette_on_click)
         .add_observer(apply_palette_on_out)
+        .add_observer(apply_palette_on_click)
         .add_observer(apply_palette_on_release)
         .add_observer(play_sound_effect_on_click)
         .add_observer(play_sound_effect_on_over);

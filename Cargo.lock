@@ -1944,7 +1944,7 @@ checksum = "7ef8e4b7e61dfe7719bb03c884dc270cd46a82efb40f93e9933b990c5c190c59"
 
 [[package]]
 name = "bevy_new_3d_rpg"
-version = "0.1.6"
+version = "0.1.7"
 dependencies = [
  "avian3d",
  "bevy 0.18.0",

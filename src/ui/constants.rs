@@ -121,8 +121,12 @@ impl Default for PaletteSet {
                 colors::TRANSPARENT,
                 BorderColor::all(colors::WHITEISH),
             ),
-            pressed: Palette::new(colors::TRANSPARENT, colors::WHITEISH, BorderColor::DEFAULT),
-            hovered: Palette::new(colors::WHITE, colors::TRANSLUCENT, BorderColor::DEFAULT),
+            pressed: Palette::new(
+                colors::TRANSPARENT,
+                colors::BRIGHT_BLUE,
+                BorderColor::DEFAULT,
+            ),
+            hovered: Palette::new(colors::WHITE, colors::BLUE, BorderColor::DEFAULT),
             disabled: Palette::new(
                 colors::TRANSPARENT,
                 colors::WARM_GRAY_1,

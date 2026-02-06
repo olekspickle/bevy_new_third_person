@@ -1,12 +1,12 @@
 [package]
 name = "bevy_new_3d_rpg"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2024"
 exclude = ["assets"]
 repository = "https://github.com/olekspickle/bevy_new_3d_rpg"
-description = "Simple but comprehensive 3D RPG game template with gamepad support"
+description = "Simple but comprehensive 3D game template with gamepad support"
 keywords = ["bevy", "game", "template", "devkit", "third person", "topdown", "gamedev"]
 
 [dependencies.bevy]
@@ -35,9 +35,6 @@ bevy_perf_ui = { version = "0.6", optional = true }                     # perfor
 bevy-inspector-egui = { version = "0.36", optional = true }             # entity inspector
 bevy_skein = "0.5"                                                      # blender integration
 
-bevy_seedling = { version = "0.7", features = ["hrtf"] }                # audio plugin using firewheel
-bevy_shuffle_bag = "0.4"                                                # deterministically random container
-
 bevy_third_person_camera = { version = "0.4", optional = true }         # 3rd person camera
 bevy_top_down_camera = { version = "0.2", optional = true }             # top down camera
 
@@ -57,10 +54,12 @@ bevy_yarnspinner_example_dialogue_view = "0.7"
 #     "gpu_tests",
 # ] }
 
+bevy_shuffle_bag = "0.4"                                                # deterministically random container
+bevy_seedling = { version = "0.7", features = ["hrtf"] }                # audio plugin using firewheel
+firewheel = "0.10"
 
 # misc
 easy-ext = "1"
-firewheel = "0.10"
 fundsp = "0.20"
 image = "0.25.6"
 ron = "0.10"
