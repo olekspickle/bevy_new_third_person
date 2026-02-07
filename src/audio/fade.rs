@@ -41,6 +41,7 @@ fn crossfade_music(
             audio.remove::<FadeOut>();
             pb.pause();
             debug!("Paused music, rm FadeOut: {e}");
+            continue;
         }
 
         debug!("fading out: {e}");
@@ -53,7 +54,7 @@ fn crossfade_music(
         };
         if node.volume.linear() >= settings.music().linear() {
             commands.entity(e).remove::<FadeIn>();
-            debug!("rm fade in: {e}");
+            debug!("rm FadeIn: {e}");
             continue;
         }
 

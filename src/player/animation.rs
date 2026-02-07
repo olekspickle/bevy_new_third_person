@@ -20,9 +20,10 @@ mod knobs {
 pub fn plugin(app: &mut App) {
     app.add_systems(Update, animating.run_if(in_state(Screen::Gameplay)));
 }
-
 pub fn prepare_animations(
     spawned: On<SceneInstanceReady>,
+    // TODO: try this
+    // spawned: On<Add, AnimationPlayer>,
     models: Res<Models>,
     gltf_assets: Res<Assets<Gltf>>,
     children_q: Query<&Children>,

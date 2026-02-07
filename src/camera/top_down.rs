@@ -10,7 +10,7 @@ fn add_td_cam(
     cfg: Res<Config>,
     mut commands: Commands,
     mut camera: Query<Entity, With<SceneCamera>>,
-    mut tpv_cam: Query<Entity, With<TopDownCamera>>,
+    mut tpv_cam: Query<Entity, With<TopDownCameraTarget>>,
 ) -> Result {
     let Ok(cam) = camera.single_mut() else {
         return Ok(());
@@ -22,8 +22,7 @@ fn add_td_cam(
 
     commands.entity(cam).insert((
         TopDownCamera {
-            zoom_enabled: true,
-            zoom: cfg.player.zoom.into(),
+            zoom: Some(cfg.player.zoom.into()),
             ..default()
         },
         Projection::from(PerspectiveProjection {

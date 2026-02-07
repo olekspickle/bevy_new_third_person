@@ -34,9 +34,16 @@ pub enum Mood {
 
 fn start_soundtrack(
     settings: Res<Settings>,
+    mood: Res<State<Mood>>,
+    music_pbs: ResMut<MusicPlaybacks>,
     mut commands: Commands,
     mut sources: ResMut<AudioSources>,
 ) {
+    if let Some(pb) = music_pbs.get(mood.get()) {
+        commands.entity(*pb).insert(FadeIn);
+        return;
+    }
+
     let mut rng = rand::rng();
     let handle = sources.explore.pick(&mut rng);
 
@@ -130,6 +137,7 @@ fn on_change_mood(
 
     commands.spawn((
         MusicPool,
+        DespawnOnExit(Screen::Gameplay),
         SamplePlayer::new(handle.clone())
             .with_volume(settings.music())
             .looping(),
@@ -170,16 +178,23 @@ impl MusicPlaybacks {
     /// inserts new entity to the [`MusicPlaybacks`] resource for the corresponding mood
     fn keep_playlist_playing(
         on: On<Despawn, SamplePlayer>,
-        mood: Res<State<Mood>>,
         settings: Res<Settings>,
+        mood: Res<State<Mood>>,
+        screen: Res<State<Screen>>,
         music_q: Query<Entity, With<MusicPool>>,
+        samplers_q: Query<Entity, With<SamplePlayer>>,
         mut commands: Commands,
         mut sources: ResMut<AudioSources>,
         mut music_pbs: ResMut<MusicPlaybacks>,
     ) {
         let mood = mood.get();
         // we only want to continue gameplay music here
-        if music_q.get(on.entity).is_err() || music_pbs.get(mood).is_none() {
+        if screen.get() != &Screen::Gameplay || music_q.get(on.entity).is_err() {
+            return;
+        }
+        if let Some(e) = music_pbs.get(mood)
+            && samplers_q.get(*e).is_err()
+        {
             return;
         }
 
@@ -193,9 +208,8 @@ impl MusicPlaybacks {
         let id = commands
             .spawn((
                 MusicPool,
-                SamplePlayer::new(handle.clone())
-                    .with_volume(settings.music())
-                    .looping(),
+                DespawnOnExit(Screen::Gameplay),
+                SamplePlayer::new(handle.clone()).with_volume(settings.music()),
                 sample_effects![VolumeNode {
                     volume: Volume::SILENT,
                     ..default()
