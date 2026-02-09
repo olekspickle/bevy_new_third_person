@@ -67,10 +67,10 @@ impl Commands<'_, '_> {
 ///     mut camera: Query<&mut Camera3d>,
 ///     input: Res<Input<KeyCode>>,
 /// ) {
-///     if let Ok(mut player) = player.single_mut() {
-///         if input.just_pressed(KeyCode::W) {
+///     if let Ok(mut player) = player.single_mut() &&
+///         input.just_pressed(KeyCode::W) {
 ///             player.movement.direction += player.movement.direction.movement_direction(Vec2::new(0.0, 1.0));
-///         }
+///     }
 /// }
 /// ```
 #[ext(TransformExt)]

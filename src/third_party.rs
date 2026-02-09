@@ -2,9 +2,9 @@ use crate::*;
 use bevy_ahoy::prelude::*;
 use bevy_fix_cursor_unlock_web::prelude::*;
 #[cfg(feature = "third_person")]
-pub use bevy_third_person_camera::*;
+pub use bevy_third_person_camera::{ThirdPersonCameraPlugin, ThirdPersonCameraTarget};
 #[cfg(feature = "top_down")]
-pub use bevy_top_down_camera::*;
+pub use bevy_top_down_camera::{TopDownCameraPlugin, TopDownCameraTarget};
 
 pub fn plugin(app: &mut App) {
     app.add_plugins((

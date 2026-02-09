@@ -136,7 +136,7 @@ pub fn animating(
                     player.animation.jump_loop()
                 }
             }
-            anim if ahoy_out.touching_entities.is_empty() && !player.animation.is_jumping() => {
+            _anim if ahoy_out.touching_entities.is_empty() && !player.animation.is_jumping() => {
                 player.animation.jump_start()
             }
             _ => (),

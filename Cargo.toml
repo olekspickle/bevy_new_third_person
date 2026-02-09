@@ -116,13 +116,6 @@ type_complexity = "allow"           # Queries may access many components, which 
 collapsible_if = "allow"           # Queries may access many components, which would undesirably trigger this lint.
 nonstandard_macro_braces = "warn"   # Make sure macros use their standard braces, such as `[]` for `bevy_ecs::children!`.
 
-[package.metadata.bevy_cli.release] # Disable dev features for release builds.
-default-features = false
-[package.metadata.bevy_cli.web]     # Disable native features for web builds.
-default-features = false
-[package.metadata.bevy_cli.web.dev]
-features = ["dev"]
-
 [patch.crates-io]
 avian3d = { git = "https://github.com/avianphysics/avian" }
 bevy_ahoy = { git = "https://github.com/janhohenheim/bevy_ahoy" }

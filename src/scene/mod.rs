@@ -13,7 +13,7 @@
 //! blender --background -b art/tunic.blend -c change_component_path --old_path tunic_bush::BushSensor --new_path api::BushSensor
 //!
 //! ```
-//! more on that here: https://bevyskein.dev/docs/migration-tools
+//! more on that here: <https://bevyskein.dev/docs/migration-tools>
 //! Scene logic is only active during the State `Screen::Playing`
 use crate::*;
 

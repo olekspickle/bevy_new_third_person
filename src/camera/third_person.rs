@@ -1,5 +1,5 @@
 use super::*;
-use bevy_third_person_camera::*;
+use bevy_third_person_camera::{CustomGamepadSettings, ThirdPersonCamera, Zoom};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Gameplay), add_tpv_cam)

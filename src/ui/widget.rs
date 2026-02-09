@@ -88,7 +88,7 @@ where
 }
 
 /// A simple button with text and an action defined as an [`Observer`]. The button's layout is provided by `button_bundle`.
-/// Background color is set by [`UiPalette`]
+/// Background color is set by [`PaletteSet`]
 pub fn btn<E, B, M, I>(opts: impl Into<Props>, action: I) -> impl Bundle
 where
     E: EntityEvent,
@@ -118,7 +118,7 @@ where
                 .spawn((
                     opts.bg_color,
                     opts.border_color,
-                    opts.palette_set.clone(),
+                    opts.palette_set,
                     Name::new("Button Content"),
                 ))
                 .insert(opts.node)

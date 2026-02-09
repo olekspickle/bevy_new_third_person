@@ -137,6 +137,13 @@ rustflags = [
 build-std = ["std", "core", "alloc", "panic_abort"]
 
 # BUILD
+[package.metadata.bevy_cli.release] # Disable dev features for release builds.
+default-features = false
+[package.metadata.bevy_cli.web]     # Disable native features for web builds.
+default-features = false
+[package.metadata.bevy_cli.web.dev]
+features = ["dev"]
+
 [profile.dev]                       # Less optimization in the dev profile.
 opt-level = 1
 [profile.dev.package."*"]           # More optimization in the dev profile for dependencies.

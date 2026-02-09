@@ -1,5 +1,5 @@
 use super::*;
-use bevy_top_down_camera::*;
+use bevy_top_down_camera::{TopDownCamera, TopDownCameraTarget};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Gameplay), add_td_cam)
