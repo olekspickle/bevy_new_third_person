@@ -40,8 +40,8 @@ bevy_shuffle_bag = "0.4"                                                # determ
 bevy_third_person_camera = { version = "0.4", optional = true }         # 3rd person camera
 bevy_top_down_camera = { version = "0.2", optional = true }             # top down camera
 
-avian3d = "0.6.0-dev"
-bevy_ahoy =  "0.0.3"                                                    # character controller
+avian3d = "0.6.0-rc.1"
+bevy_ahoy =  "0.1.0-rc.1"                                               # character controller
 bevy_enhanced_input = { version = "0.23", features = ["serialize"] }    # keyboard/gamepad input
 
 # dialogue

@@ -31,11 +31,11 @@ on:
         description: "itch.io project (user/project)"
         type: string
       upload_to_github:
-        description: "Upload to GitHub releases"
+        description: "upload to GitHub releases"
         default: false
         type: boolean
       deploy_to_github_pages:
-        description: "Deploy web build to GitHub Pages"
+        description: "deploy web build to GitHub Pages"
         default: false
         type: boolean
       deny_warnings:
@@ -98,7 +98,7 @@ env:
   # This is most useful in combination with
   use_github_cache: true
 
-  toolchain: nightly-2026-01-20
+  toolchain: nightly-2026-01-22
 
 jobs:
   get-version:
@@ -156,7 +156,7 @@ jobs:
           - platform: web
             targets: wasm32-unknown-unknown
             package_ext: .zip
-            features: web
+            features: web,third_person
             runner: ubuntu-latest
 
           - platform: linux

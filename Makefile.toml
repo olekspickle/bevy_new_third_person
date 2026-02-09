@@ -2,8 +2,9 @@
 clean = { command = "cargo", args = ["clean"] }
 build = { command = "cargo", args = ["build"] }
 fmt = { command = "cargo", args = ["fmt", "--all", "--", "--check"] }
+doc = { command = "cargo", args = ["doc", "--locked", "--profile","ci", "--document-private-items", "--no-deps"] }
 clippy = { command = "cargo", args = ["clippy", "--all-targets", "--", "-D", "warnings"] }
-lint = { dependencies = ["clippy", "fmt"] }
+lint = { dependencies = ["clippy", "fmt", "doc"] }
 clean-build = { dependencies = ["clean", "build", "lint"] }
 
 [tasks.check-web]
