@@ -43,7 +43,7 @@ pub(super) fn plugin(app: &mut App) {
 
 fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn((
-        ui_root("Splash screen"),
+        widget::ui_root("Splash screen"),
         children![
             (
                 Node {
@@ -67,7 +67,7 @@ fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
                     t: 0.0,
                 }
             ),
-            label("Made with BEVY and love")
+            widget::label("Made with BEVY and love")
         ],
         DespawnOnExit(Screen::Splash),
     ));

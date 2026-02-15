@@ -20,7 +20,7 @@ fn spawn_gameplay_ui(mut commands: Commands, textures: Res<Textures>, _settings:
     commands.spawn((
         DespawnOnExit(Screen::Gameplay),
         GameplayUi,
-        ui_root("Gameplay Ui"),
+        widget::ui_root("Gameplay Ui"),
         children![
             // mute/pause icons
             (
@@ -34,8 +34,11 @@ fn spawn_gameplay_ui(mut commands: Commands, textures: Res<Textures>, _settings:
                     ..Default::default()
                 },
                 children![
-                    (icon(ico.clone().image(textures.pause.clone())), PauseIcon),
-                    (icon(ico.image(textures.mute.clone())), MuteIcon),
+                    (
+                        widget::icon(ico.clone().image(textures.pause.clone())),
+                        PauseIcon
+                    ),
+                    (widget::icon(ico.image(textures.mute.clone())), MuteIcon),
                 ]
             ),
         ],
@@ -43,9 +46,7 @@ fn spawn_gameplay_ui(mut commands: Commands, textures: Res<Textures>, _settings:
 }
 
 fn toggle_pause(
-    on: On<TogglePause>,
-    modals: ResMut<Modals>,
-    mut commands: Commands,
+    _: On<TogglePause>,
     mut state: ResMut<GameState>,
     mut time: ResMut<Time<Virtual>>,
     mut pause_label: Query<&mut Node, With<PauseIcon>>,
@@ -61,11 +62,7 @@ fn toggle_pause(
     }
 
     state.paused = !state.paused;
-    if modals.is_empty() {
-        commands.entity(on.event_target()).trigger(CamCursorToggle);
-    }
-
-    info!("paused: {}", state.paused);
+    trace!("paused: {}", state.paused);
 }
 
 fn toggle_mute(
@@ -88,7 +85,7 @@ fn toggle_mute(
         }
     }
     state.muted = !state.muted;
-    info!("muted: {}", state.muted);
+    debug!("muted: {}", state.muted);
 }
 
 // ============================ UI ============================
@@ -99,16 +96,23 @@ fn trigger_menu_toggle_on_esc(
     screen: Res<State<Screen>>,
     modals: If<ResMut<Modals>>,
 ) {
-    if *screen.get() != Screen::Gameplay {
+    if !screen.get().is_gameplay() {
         return;
     }
 
+    debug!(
+        "on back and in gameplay: e-{}, modals:{modals:?}",
+        on.entity
+    );
+
     if modals.is_empty() {
+        info!("triggering main menu");
         commands.trigger(NewModal {
             entity: on.entity,
             modal: Modal::Main,
         });
     } else {
+        info!("popping modal");
         commands.entity(on.entity).trigger(PopModal);
     }
 }

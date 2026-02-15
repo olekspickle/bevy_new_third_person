@@ -1,6 +1,7 @@
 //! The game's main screen states and transitions between them.
 use crate::*;
 use bevy::ui::Val::*;
+use bevy_enhanced_input::prelude::Start;
 
 mod credits;
 mod gameplay;
@@ -22,6 +23,7 @@ pub fn plugin(app: &mut App) {
     ))
     .add_systems(OnEnter(Screen::Gameplay), unpause_on_enter)
     .add_systems(Update, track_last_screen.run_if(state_changed::<Screen>))
+    .add_observer(on_esc)
     .add_observer(on_back)
     .add_observer(on_go_to);
 }
@@ -46,6 +48,12 @@ pub enum Screen {
     Gameplay,
 }
 
+impl Screen {
+    pub fn is_gameplay(&self) -> bool {
+        matches!(self, Self::Gameplay)
+    }
+}
+
 fn unpause_on_enter(mut state: ResMut<GameState>, mut time: ResMut<Time<Virtual>>) {
     if time.is_paused() || state.paused {
         time.unpause();
@@ -65,13 +73,52 @@ fn track_last_screen(
     state.last_screen = transition.clone().exited.unwrap_or(Screen::Title);
 }
 
+#[derive(Event)]
+pub struct GoTo(pub Screen);
+#[derive(EntityEvent)]
+pub struct Back {
+    pub entity: Entity,
+    pub screen: Screen,
+}
+
+pub fn click_go_to(
+    on: On<Pointer<Click>>,
+    screens: Query<&Screen>,
+    parent_q: Query<&ChildOf>,
+    mut commands: Commands,
+) {
+    if let Ok(screen) = parent_q.get(on.entity)
+        && let Ok(screen) = screens.get(screen.parent())
+    {
+        commands.trigger(GoTo(screen.clone()));
+    }
+}
+
+fn on_esc(
+    on: On<Start<Escape>>,
+    state: Res<GameState>,
+    screen: Res<State<Screen>>,
+    mut commands: Commands,
+) {
+    match screen.get() {
+        Screen::Splash | Screen::Title | Screen::Loading => {}
+        _ => {
+            let last = state.last_screen.clone();
+            commands.trigger(Back {
+                entity: on.event_target(),
+                screen: last,
+            });
+        }
+    }
+}
+
 fn on_back(
     trigger: On<Back>,
     screen: Res<State<Screen>>,
     mut next_screen: ResMut<NextState<Screen>>,
 ) {
     // Do not go to the title on back, we'd rather handle it in gameplay observers
-    if *screen.get() == Screen::Gameplay {
+    if screen.get().is_gameplay() {
         return;
     }
 
@@ -81,44 +128,4 @@ fn on_back(
 
 pub fn on_go_to(goto: On<GoTo>, mut next_screen: ResMut<NextState<Screen>>) {
     next_screen.set(goto.event().0.clone());
-}
-
-pub mod to {
-    use super::*;
-
-    pub fn title(
-        _: On<Pointer<Click>>,
-        mut commands: Commands,
-        mut state: ResMut<GameState>,
-        mut modals: ResMut<Modals>,
-    ) {
-        state.reset();
-        modals.clear();
-        commands.trigger(GoTo(Screen::Title));
-    }
-
-    // pub fn go_to(on: On<Pointer<Click>>, screen_q: Query<&Screen>, mut commands: Commands) {
-    //     info!("going to");
-    //     if let Ok(screen) = screen_q.get(on.entity) {
-    //         info!("going to {screen:?}");
-    //         commands.trigger(GoTo(screen.clone()));
-    //     }
-    // }
-    pub fn settings(_: On<Pointer<Click>>, mut commands: Commands) {
-        commands.trigger(GoTo(Screen::Settings));
-    }
-    pub fn credits(_: On<Pointer<Click>>, mut commands: Commands) {
-        commands.trigger(GoTo(Screen::Credits));
-    }
-    pub fn gameplay_or_loading(
-        _: On<Pointer<Click>>,
-        resource_handles: Res<ResourceHandles>,
-        mut next_screen: ResMut<NextState<Screen>>,
-    ) {
-        if resource_handles.is_all_done() {
-            next_screen.set(Screen::Gameplay);
-        } else {
-            next_screen.set(Screen::Loading);
-        }
-    }
 }

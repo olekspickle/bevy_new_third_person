@@ -2,36 +2,44 @@
 use super::*;
 use bevy::ecs::spawn::SpawnIter;
 
+const SCROLL_SPEED: f32 = 5.0; // 10px/s
+
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
         OnEnter(Screen::Credits),
         (start_credits_music, spawn_credits_screen),
-    );
+    )
+    .add_systems(Update, roll_the_credits.run_if(in_state(Screen::Credits)));
 }
+
+markers!(CreditsRoot);
 
 fn spawn_credits_screen(mut commands: Commands, credits: Res<CreditsPreset>) {
     commands.spawn((
         DespawnOnExit(Screen::Credits),
-        Name::new("Credits Screen"),
-        Node {
-            width: Percent(100.0),
-            height: Percent(100.0),
-            position_type: PositionType::Absolute,
-            flex_direction: FlexDirection::Column,
-            justify_content: JustifyContent::Center,
-            align_items: AlignItems::Center,
-            overflow: Overflow::scroll_y(),
-            row_gap: Vh(5.0),
-            ..default()
-        },
+        widget::ui_root("credits screen"),
         BackgroundColor(colors::TRANSLUCENT),
-        children![
-            header("Breated by"),
-            flatten(&credits.devs),
-            header("Assets"),
-            flatten(&credits.assets),
-            btn_big("Back", to::title),
-        ],
+        children![(
+            CreditsRoot,
+            Node {
+                width: Percent(100.0),
+                position_type: PositionType::Absolute,
+                bottom: Percent(-100.0),
+                flex_direction: FlexDirection::Column,
+                justify_content: JustifyContent::Center,
+                align_items: AlignItems::Center,
+                overflow: Overflow::scroll_y(),
+                row_gap: Vh(5.0),
+                ..default()
+            },
+            children![
+                widget::header("Created by"),
+                flatten(&credits.devs),
+                widget::header("Assets"),
+                flatten(&credits.assets),
+                (widget::btn_big("Back", click_go_to), Screen::Title),
+            ]
+        )],
     ));
 }
 
@@ -87,4 +95,12 @@ fn start_credits_music(
             .with_volume(settings.music())
             .looping(),
     ));
+}
+
+fn roll_the_credits(time: Res<Time>, mut node: Single<&mut Node, With<CreditsRoot>>) {
+    if let Percent(bottom) = node.bottom
+        && bottom < 0.0
+    {
+        node.bottom = Percent(bottom + SCROLL_SPEED * time.delta_secs());
+    }
 }
