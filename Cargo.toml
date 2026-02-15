@@ -77,9 +77,10 @@ tracing = { version = "0.1", features = ["max_level_debug", "release_max_level_w
 [features]
 default = [ "dev_native", "third_person" ]
 custom_cursor  = []
-native = [ "enhanced" ]
+fpv = []
 top_down = ["bevy_top_down_camera"]
 third_person = ["bevy_third_person_camera"]
+native = [ "enhanced" ]
 web = [ "bevy/webgpu", "bevy_seedling/web_audio", "third_person" ]
 dev = [
     "bevy_perf_ui",
@@ -105,6 +106,10 @@ enhanced = [
     "bevy/pbr_specular_textures",   # PBR specular maps
 
 ]
+debug = [
+    "bevy/trace_tracy",
+    "bevy/debug"
+]
 
 
 # LINT
@@ -117,7 +122,6 @@ collapsible_if = "allow"           # Queries may access many components, which w
 nonstandard_macro_braces = "warn"   # Make sure macros use their standard braces, such as `[]` for `bevy_ecs::children!`.
 
 [patch.crates-io]
-avian3d = { git = "https://github.com/avianphysics/avian" }
 bevy_ahoy = { git = "https://github.com/janhohenheim/bevy_ahoy" }
 bevy_third_person_camera = { git = "https://github.com/olekspickle/bevy_third_person_camera" }
 bevy_perf_ui = { git = "https://github.com/olekspickle/perf_ui" }

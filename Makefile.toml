@@ -28,3 +28,7 @@ install_crate = "dioxus-cli"
 command = "dx"
 args = ["serve", "--hot-patch", "--features", "dev_native"]
 
+[tasks.tracy]
+command = "cargo"
+args = ["run", "--features", "debug", "--release"]
+

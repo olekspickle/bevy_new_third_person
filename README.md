@@ -9,7 +9,7 @@ This template is based on the awesome [BevyFlock 2D template][BevyFlock] featuri
 - Linux
 - macOS
 - Web (Wasm)
-This template is a great way to get started if you aim to build new 3D RPG [Bevy] game!
+This template is a great way to get started if you aim to build new 3D [Bevy] game!
 It is not as simple as bevy_new_2d which is aimed to an easy start and no dependencies.
 It focuses instead to a rather solid starting template with some basic bells and whistles to be able to carry the weight of big projects and tries to follow the [flat architercture](#project-structure) principle.
 Start with a [basic project](#write-your-game) and [CI / CD](#release-your-game) that can deploy to [itch.io](https://itch.io).
@@ -22,6 +22,9 @@ cargo generate olekspickle/bevy_new_3d_rpg -n my-3d-game
 # or with bevy_cli
 bevy new -t=olekspickle/bevy_new_3d_rpg my-3d-game
 ```
+
+If you already know what camera mode do you want you probably should delete everything related to other camera setups, e.g. if you want FPV, remove code related to `top_down` and `third_person` features and use [bevy_ahoy] for camera handling. This will shave off some dependencies.
+You can of course leave it all and delete all features if you want camera setup be toggleable in settings or different modes: for example FPV by foot but third person in vehicles or vice versa.
 
 ### Hotpatching
 To set this up, follow the instructions in the [release announcement](https://bevy.org/news/bevy-0-17/#hot-patching-systems-in-a-running-app)

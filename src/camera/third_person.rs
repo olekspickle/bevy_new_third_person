@@ -3,8 +3,7 @@ use bevy_third_person_camera::{CustomGamepadSettings, ThirdPersonCamera, Zoom};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Gameplay), add_tpv_cam)
-        .add_systems(OnExit(Screen::Gameplay), rm_tpv_cam)
-        .add_observer(toggle_cam_cursor);
+        .add_systems(OnExit(Screen::Gameplay), rm_tpv_cam);
 }
 
 fn add_tpv_cam(
@@ -22,6 +21,8 @@ fn add_tpv_cam(
     }
 
     commands.entity(cam).insert((
+        RigidBody::Kinematic,
+        Collider::sphere(1.0),
         ThirdPersonCamera {
             // aim_speed: 3.0,
             // aim_zoom: 0.7,
@@ -53,11 +54,4 @@ fn rm_tpv_cam(mut commands: Commands, mut camera: Query<Entity, With<ThirdPerson
             .remove::<RigidBody>()
             .remove::<ThirdPersonCamera>();
     }
-}
-
-fn toggle_cam_cursor(_: On<CamCursorToggle>, mut cam: Query<&mut ThirdPersonCamera>) {
-    let Ok(mut cam) = cam.single_mut() else {
-        return;
-    };
-    cam.cursor_lock_active = !cam.cursor_lock_active;
 }
