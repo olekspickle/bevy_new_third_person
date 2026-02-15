@@ -7,36 +7,21 @@ mod tracking;
 
 use bevy_shuffle_bag::ShuffleBag;
 pub use ron::*;
-pub use tracking::*;
+pub(crate) use tracking::*;
 
 pub fn plugin(app: &mut App) {
     // start asset loading
     app.add_plugins(tracking::plugin)
-        .add_plugins(RonAssetPlugin::<Config>::default())
+        .add_plugins(RonLoad::<Config>::default())
+        .add_plugins(RonLoad::<CreditsPreset>::default())
         .load_resource_from_path::<Config>("config.ron")
-        .add_plugins(RonAssetPlugin::<CreditsPreset>::default())
         .load_resource_from_path::<CreditsPreset>("credits.ron")
         .load_resource::<AudioSources>()
         .load_resource::<Textures>()
-        // .load_resource::<Fonts>()
         .load_resource::<Models>();
+    // .load_resource::<ShaderAssets>()
+    // .load_resource::<Fonts>();
 }
-
-// #[derive(Asset, Clone, Reflect, Resource)]
-// #[reflect(Resource)]
-// pub struct Fonts {
-//     #[dependency]
-//     pub custom: Handle<Font>,
-// }
-//
-// impl FromWorld for Fonts {
-//     fn from_world(world: &mut World) -> Self {
-//         let assets = world.resource::<AssetServer>();
-//         Self {
-//             custom: assets.load("fonts/custom.ttf"),
-//         }
-//     }
-// }
 
 #[derive(Asset, Clone, Reflect, Resource)]
 #[reflect(Resource)]
@@ -135,3 +120,56 @@ impl FromWorld for AudioSources {
         }
     }
 }
+
+// #[derive(Asset, Clone, Reflect, Resource)]
+// #[reflect(Resource)]
+// pub struct PreLoad {
+//     #[dependency]
+//     pub cfg: Handle<Ron>,
+//     #[dependency]
+//     pub credits: Handle<Ron>,
+// }
+//
+// impl FromWorld for PreLoad {
+//     fn from_world(world: &mut World) -> Self {
+//         let assets = world.resource::<AssetServer>();
+//         Self {
+//             cfg: assets.load("config.ron"),
+//             credits: assets.load("credits.ron"),
+//         }
+//     }
+// }
+
+// /// A [`Resource`] that contains all the assets needed to spawn the level.
+// /// We use this to preload assets before the level is spawned.
+// #[derive(Resource, Asset, Clone, TypePath)]
+// pub(crate) struct ShaderAssets {
+//     #[dependency]
+//     alpha_pattern: Handle<Shader>,
+// }
+//
+// impl FromWorld for ShaderAssets {
+//     fn from_world(world: &mut World) -> Self {
+//         let assets = world.resource::<AssetServer>();
+//
+//         Self {
+//             alpha_pattern: assets.load("shaders/alpha_pattern.wgsl"),
+//         }
+//     }
+// }
+
+// #[derive(Asset, Clone, Reflect, Resource)]
+// #[reflect(Resource)]
+// pub struct Fonts {
+//     #[dependency]
+//     pub custom: Handle<Font>,
+// }
+//
+// impl FromWorld for Fonts {
+//     fn from_world(world: &mut World) -> Self {
+//         let assets = world.resource::<AssetServer>();
+//         Self {
+//             custom: assets.load("fonts/custom.ttf"),
+//         }
+//     }
+// }

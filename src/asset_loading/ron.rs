@@ -10,37 +10,39 @@ use bevy::{
 use std::marker::PhantomData;
 use thiserror::Error;
 
+#[derive(Debug, Error)]
+#[non_exhaustive]
+pub enum RonLoaderError {
+    /// An [IO Error](std::io::Error)
+    #[error("Could not read the file: {0}")]
+    Io(#[from] std::io::Error),
+    /// A [conversion Error](std::str::Utf8Error)
+    #[error("Could not interpret as UTF-8: {0}")]
+    FormatError(#[from] std::str::Utf8Error),
+    /// A [Ron Error](ron::de::SpannedError)
+    #[error("Could not parse RON: {0}")]
+    RonError(#[from] ron::de::SpannedError),
+}
+
 /// Plugin to load your asset type `A` from ron files.
 #[derive(Default)]
-pub struct RonAssetPlugin<A>(PhantomData<A>);
+pub struct RonLoad<A>(PhantomData<A>);
 
-impl<A> Plugin for RonAssetPlugin<A>
+impl<A> Plugin for RonLoad<A>
 where
     for<'de> A: serde::Deserialize<'de> + Asset,
 {
     fn build(&self, app: &mut App) {
         app.init_asset::<A>()
-            .register_asset_loader(RonAssetLoader::<A>(PhantomData));
+            .register_asset_loader(RonLoader::<A>(PhantomData));
     }
 }
 
 /// Loads your asset type `A` from ron files
 #[derive(TypePath)]
-pub struct RonAssetLoader<A>(PhantomData<A>);
+pub struct RonLoader<A>(PhantomData<A>);
 
-/// Possible errors that can be produced by [`RonAssetLoader`]
-#[non_exhaustive]
-#[derive(Debug, Error)]
-pub enum RonLoaderError {
-    /// An [IO Error](std::io::Error)
-    #[error("Could not read the file: {0}")]
-    Io(#[from] std::io::Error),
-    /// A [RON Error](ron::error::SpannedError)
-    #[error("Could not parse RON: {0}")]
-    RonError(#[from] ron::error::SpannedError),
-}
-
-impl<A> AssetLoader for RonAssetLoader<A>
+impl<A> AssetLoader for RonLoader<A>
 where
     for<'de> A: serde::Deserialize<'de> + Asset,
 {
@@ -61,19 +63,11 @@ where
     }
 }
 
-// attempt on any ron
-//
+// // attempt on any ron
+// use bevy::app::Plugin;
+// use bevy::reflect::Reflect;
 // use std::ops::{Deref, DerefMut};
 // use std::str::from_utf8;
-//
-// use bevy::app::Plugin;
-// use bevy::asset::AssetApp;
-// use bevy::asset::io::Reader;
-// use bevy::{
-//     asset::{Asset, AssetLoader},
-//     reflect::Reflect,
-// };
-// use thiserror::Error;
 //
 // pub type RonValue = ron::Value;
 //
@@ -83,12 +77,6 @@ where
 //     // Wrapped with option due to need for default implementation
 //     #[reflect(ignore)] Option<RonValue>,
 // );
-//
-// impl Ron {
-//     pub fn into_inner(self) -> RonValue {
-//         self.0.unwrap()
-//     }
-// }
 //
 // impl Deref for Ron {
 //     type Target = RonValue;
@@ -104,19 +92,7 @@ where
 //     }
 // }
 //
-// #[derive(Debug, Error)]
-// pub enum RonLoaderError {
-//     /// An [IO Error](std::io::Error)
-//     #[error("Could not read the file: {0}")]
-//     Io(#[from] std::io::Error),
-//     /// A [conversion Error](std::str::Utf8Error)
-//     #[error("Could not interpret as UTF-8: {0}")]
-//     FormatError(#[from] std::str::Utf8Error),
-//     /// A [Ron Error](ron::de::SpannedError)
-//     #[error("Could not parse RON: {0}")]
-//     RonError(#[from] ron::de::SpannedError),
-// }
-//
+// #[derive(Default)]
 // pub struct RonAssetPlugin;
 // impl Plugin for RonAssetPlugin {
 //     fn build(&self, app: &mut bevy::prelude::App) {
@@ -124,8 +100,9 @@ where
 //     }
 // }
 //
-// #[derive(Default)]
+// #[derive(TypePath)]
 // struct RonLoader;
+//
 // impl AssetLoader for RonLoader {
 //     type Asset = Ron;
 //     type Settings = ();

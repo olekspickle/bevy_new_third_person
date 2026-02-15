@@ -1,6 +1,5 @@
 //! A high-level way to load collections of asset handles as resources.
-
-use super::*;
+use bevy::prelude::*;
 use std::collections::VecDeque;
 
 pub(super) fn plugin(app: &mut App) {
@@ -8,7 +7,7 @@ pub(super) fn plugin(app: &mut App) {
     app.add_systems(PreUpdate, load_resource_assets);
 }
 
-pub trait LoadResource {
+pub(crate) trait LoadResource {
     /// This will load the [`Resource`] as an [`Asset`]. When all of its asset dependencies
     /// have been loaded, it will be inserted as a resource. This ensures that the resource only
     /// exists when the assets are ready.
@@ -31,20 +30,14 @@ impl LoadResource for App {
         self
     }
 
+    /// courtesy of caudiciform
     fn load_resource_from_path<T: Resource + Asset + Clone>(
         &mut self,
         path: impl Into<String>,
     ) -> &mut Self {
-        self.init_asset::<T>();
-        let _handle = {
-            let world = self.world_mut();
-            let assets = world.resource::<AssetServer>();
-            let handle: Handle<T> = assets.load::<T>(path.into());
-            let src_handle = handle.clone();
-            let mut handles = world.resource_mut::<ResourceHandles>();
-            handles.push_handle(handle);
-            src_handle
-        };
+        let _handle: Handle<T> = self.world().load_asset(path.into());
+        let mut handles = self.world_mut().resource_mut::<ResourceHandles>();
+        handles.push_handle(_handle.clone());
 
         // If we are running in dev mode on desktop where hot-reloading of assets is possible
         // then watch the asset and update the resource if it changes.
@@ -66,7 +59,6 @@ impl LoadResource for App {
                 }
             },
         );
-
         self
     }
 }
@@ -84,13 +76,21 @@ pub struct ResourceHandles {
 
 impl ResourceHandles {
     /// Returns true if all requested [`Asset`]s have finished loading and are available as [`Resource`]s.
-    pub fn is_all_done(&self) -> bool {
+    pub(crate) fn is_all_done(&self) -> bool {
         self.waiting.is_empty()
+    }
+
+    pub(crate) fn total_count(&self) -> usize {
+        self.waiting.len() + self.finished.len()
+    }
+
+    pub(crate) fn finished_count(&self) -> usize {
+        self.finished.len()
     }
 
     /// Adds an asset handle to the list of pending assets to be tracked and converted to resources
     /// on load.
-    pub fn push_handle<T: Asset + Resource + Clone>(&mut self, handle: Handle<T>) {
+    pub(crate) fn push_handle<T: Asset + Resource + Clone>(&mut self, handle: Handle<T>) {
         self.waiting.push_back((handle.untyped(), |world, handle| {
             let assets = world.resource::<Assets<T>>();
             if let Some(value) = assets.get(handle.id().typed::<T>()) {
@@ -105,10 +105,13 @@ fn load_resource_assets(world: &mut World) {
         world.resource_scope(|world, assets: Mut<AssetServer>| {
             for _ in 0..resource_handles.waiting.len() {
                 let (handle, insert_fn) = resource_handles.waiting.pop_front().unwrap();
+                // let name = handle.path().map(|p| p.to_string()).unwrap_or_default();
                 if assets.is_loaded_with_dependencies(&handle) {
+                    // debug!("loaded: {name}");
                     insert_fn(world, &handle);
                     resource_handles.finished.push(handle);
                 } else {
+                    // debug!("pushed back: {name}");
                     resource_handles.waiting.push_back((handle, insert_fn));
                 }
             }

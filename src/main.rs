@@ -26,13 +26,14 @@ pub mod ui;
 
 use asset_loading::{AudioSources, Models, ResourceHandles, Textures};
 use audio::*;
-use game::*;
 use models::*;
 use scene::*;
 use screens::*;
 #[cfg(not(target_arch = "wasm32"))]
 use third_party::*;
 use ui::*;
+
+const NAME: &str = env!("CARGO_PKG_NAME");
 
 fn main() {
     let mut app = App::new();
@@ -58,7 +59,8 @@ fn main() {
                 level: log::Level::TRACE,
                 filter: format!(
                     // bevy_math spams `Dir3::new_unchecked` on extreme vectors
-                    "info,bevy_new_3d_rpg=debug,bevy_math=error,{},",
+                    "info,{}=debug,bevy_math=error,{},",
+                    NAME.replace("-", "_"),
                     bevy::log::DEFAULT_FILTER
                 ),
                 fmt_layer: |_| {
@@ -73,6 +75,8 @@ fn main() {
             })
             .set(ImagePlugin::default_nearest()),
     );
+
+    info!("Starting {}", NAME);
 
     app.add_plugins(third_party::plugin);
 
