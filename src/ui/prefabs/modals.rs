@@ -1,7 +1,6 @@
 use super::*;
 
-pub fn click_to_menu(_: On<Pointer<Click>>, mut commands: Commands, mut state: ResMut<GameState>) {
-    state.reset();
+pub fn click_to_menu(_: On<Pointer<Click>>, mut commands: Commands) {
     commands.trigger(GoTo(Screen::Title));
 }
 pub fn click_spawn_settings(on: On<Pointer<Click>>, mut commands: Commands) {
@@ -26,7 +25,7 @@ pub fn menu_modal() -> impl Bundle {
     (
         DespawnOnExit(Screen::Gameplay),
         Modal::Main,
-        ui_root("In game menu"),
+        widget::ui_root("In game menu"),
         children![(
             BorderColor::all(colors::WHITEISH),
             BackgroundColor(colors::TRANSLUCENT),
@@ -45,7 +44,7 @@ pub fn menu_modal() -> impl Bundle {
                         bottom: Px(0.0),
                         ..Default::default()
                     },
-                    children![btn_small(
+                    children![widget::btn_small(
                         Props::new("back").width(Vw(5.0)).border(UiRect::DEFAULT),
                         ui::click_pop_modal
                     )]
@@ -59,8 +58,8 @@ pub fn menu_modal() -> impl Bundle {
                         ..default()
                     },
                     children![
-                        btn(opts.clone(), click_spawn_settings),
-                        btn(opts.text("Main Menu"), click_to_menu)
+                        widget::btn(opts.clone(), click_spawn_settings),
+                        widget::btn(opts.text("Main Menu"), click_to_menu)
                     ]
                 )
             ]

@@ -2,6 +2,7 @@ use super::*;
 #[cfg(feature = "dev")]
 use bevy::ui::Display as NodeDisplay;
 use bevy::window::{PresentMode, PrimaryWindow};
+use bevy_enhanced_input::prelude::Start;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_systems(
@@ -13,7 +14,9 @@ pub(super) fn plugin(app: &mut App) {
             update_fov_label,
             update_tab_content.run_if(resource_changed::<ActiveTab>),
         ),
-    );
+    )
+    .add_observer(to_the_left_tab)
+    .add_observer(to_the_right_tab);
 }
 
 markers!(
@@ -244,6 +247,22 @@ fn switch_to_tab(tab: UiTab) -> impl Fn(On<Pointer<Click>>, ResMut<ActiveTab>) +
     }
 }
 
+fn to_the_left_tab(_: On<Start<CycleTabBack>>, mut active_tab: ResMut<ActiveTab>) {
+    match active_tab.0 {
+        UiTab::Audio => active_tab.0 = UiTab::Keybindings,
+        UiTab::Video => active_tab.0 = UiTab::Audio,
+        UiTab::Keybindings => active_tab.0 = UiTab::Video,
+    }
+}
+
+fn to_the_right_tab(_: On<Start<CycleTab>>, mut active_tab: ResMut<ActiveTab>) {
+    match active_tab.0 {
+        UiTab::Audio => active_tab.0 = UiTab::Video,
+        UiTab::Video => active_tab.0 = UiTab::Keybindings,
+        UiTab::Keybindings => active_tab.0 = UiTab::Audio,
+    }
+}
+
 fn click_toggle_vsync(
     _: On<Pointer<Click>>,
     mut windows: Query<&mut Window, With<PrimaryWindow>>,
@@ -299,7 +318,7 @@ fn click_toggle_debug_ui(
         label.replace_recursive(
             children,
             commands,
-            (btn(s, click_toggle_debug_ui), DebugUiLabel),
+            (widget::btn(s, click_toggle_debug_ui), DebugUiLabel),
         );
     }
 }
@@ -321,7 +340,7 @@ fn click_toggle_sun_cycle(
             children,
             commands,
             (
-                btn(settings.sun_cycle.as_str(), click_toggle_sun_cycle),
+                widget::btn(settings.sun_cycle.as_str(), click_toggle_sun_cycle),
                 SunCycleLabel,
             ),
         );
@@ -345,7 +364,7 @@ fn click_toggle_settings(
 
 pub fn settings_ui() -> impl Bundle {
     (
-        ui_root("Settings Screen"),
+        widget::ui_root("Settings Screen"),
         BackgroundColor(colors::TRANSLUCENT),
         children![(
             Node {
@@ -377,7 +396,7 @@ fn tab_bar() -> impl Bundle {
             ..default()
         },
         children![
-            header("Settings"),
+            widget::header("Settings"),
             (
                 Node {
                     flex_direction: FlexDirection::Row,
@@ -388,15 +407,15 @@ fn tab_bar() -> impl Bundle {
                 TabBar,
                 children![
                     (
-                        btn(opts.clone().text("Audio"), switch_to_tab(UiTab::Audio)),
+                        widget::btn(opts.clone().text("Audio"), switch_to_tab(UiTab::Audio)),
                         UiTab::Audio
                     ),
                     (
-                        btn(opts.clone().text("Video"), switch_to_tab(UiTab::Video)),
+                        widget::btn(opts.clone().text("Video"), switch_to_tab(UiTab::Video)),
                         UiTab::Video
                     ),
                     (
-                        btn(opts.text("Keybindings"), switch_to_tab(UiTab::Keybindings)),
+                        widget::btn(opts.text("Keybindings"), switch_to_tab(UiTab::Keybindings)),
                         UiTab::Keybindings
                     ),
                 ],
@@ -416,8 +435,8 @@ fn bottom_row() -> impl Bundle {
             ..default()
         },
         children![
-            (btn("Save", save_settings), SaveSettingsLabel),
-            btn("Back", click_toggle_settings),
+            (widget::btn("Save", save_settings), SaveSettingsLabel),
+            widget::btn("Back", click_toggle_settings),
         ],
     )
 }
@@ -436,27 +455,36 @@ fn video_grid(cycle: &SunCycle) -> impl Bundle {
         },
         #[cfg(not(feature = "dev"))]
         children![
-            label("Sun cycle"),
-            (btn(cycle.as_str(), click_toggle_sun_cycle), SunCycleLabel),
-            label("FOV"),
-            plus_minus_bar(FovLabel, fov_lower, fov_raise),
+            widget::label("Sun cycle"),
+            (
+                widget::btn(cycle.as_str(), click_toggle_sun_cycle),
+                SunCycleLabel
+            ),
+            widget::label("FOV"),
+            widget::plus_minus_bar(FovLabel, fov_lower, fov_raise),
             // TODO: do checkboxes when feathers
-            label("VSync"),
-            (btn("on", click_toggle_vsync), VsyncLabel),
+            widget::label("VSync"),
+            (widget::btn("on", click_toggle_vsync), VsyncLabel),
         ],
         #[cfg(feature = "dev")]
         children![
-            label("Sun cycle"),
-            (btn(cycle.as_str(), click_toggle_sun_cycle), SunCycleLabel),
-            label("FOV"),
-            plus_minus_bar(FovLabel, fov_lower, fov_raise),
+            widget::label("Sun cycle"),
+            (
+                widget::btn(cycle.as_str(), click_toggle_sun_cycle),
+                SunCycleLabel
+            ),
+            widget::label("FOV"),
+            widget::plus_minus_bar(FovLabel, fov_lower, fov_raise),
             // TODO: do checkboxes when feathers
-            label("VSync"),
-            (btn("on", click_toggle_vsync), VsyncLabel),
-            label("diagnostics"),
-            (btn("on", click_toggle_diagnostics), DiagnosticsLabel),
-            label("debug ui"),
-            (btn("off", click_toggle_debug_ui), DebugUiLabel),
+            widget::label("VSync"),
+            (widget::btn("on", click_toggle_vsync), VsyncLabel),
+            widget::label("diagnostics"),
+            (
+                widget::btn("on", click_toggle_diagnostics),
+                DiagnosticsLabel
+            ),
+            widget::label("debug ui"),
+            (widget::btn("off", click_toggle_debug_ui), DebugUiLabel),
         ],
     )
 }
@@ -472,12 +500,12 @@ fn audio_grid() -> impl Bundle {
             ..default()
         },
         children![
-            label("general"),
-            plus_minus_bar(GeneralVolumeLabel, general_lower, general_raise),
-            label("music"),
-            plus_minus_bar(MusicVolumeLabel, music_lower, music_raise),
-            label("sfx"),
-            plus_minus_bar(SfxVolumeLabel, sfx_lower, sfx_raise),
+            widget::label("general"),
+            widget::plus_minus_bar(GeneralVolumeLabel, general_lower, general_raise),
+            widget::label("music"),
+            widget::plus_minus_bar(MusicVolumeLabel, music_lower, music_raise),
+            widget::label("sfx"),
+            widget::plus_minus_bar(SfxVolumeLabel, sfx_lower, sfx_raise),
         ],
     )
 }

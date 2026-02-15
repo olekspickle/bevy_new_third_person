@@ -3,7 +3,7 @@ use bevy_enhanced_input::prelude::*;
 use serde::Serialize;
 
 mod config;
-mod event_dispatch;
+mod events;
 mod ext_traits;
 mod input;
 mod keybinding;
@@ -12,7 +12,7 @@ mod settings;
 mod states;
 
 pub use config::*;
-pub use event_dispatch::*;
+pub use events::*;
 pub use ext_traits::*;
 pub use input::*;
 pub use keybinding::*;
@@ -34,7 +34,7 @@ pub fn plugin(app: &mut App) {
             .chain(),
     );
 
-    app.add_plugins((settings::plugin, states::plugin, event_dispatch::plugin));
+    app.add_plugins((settings::plugin, states::plugin, events::plugin));
 }
 
 /// High-level groupings of systems for the app in the [`Update`] schedule.

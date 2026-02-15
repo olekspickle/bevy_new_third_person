@@ -2,7 +2,7 @@ use super::*;
 
 #[derive(InputAction)]
 #[action_output(bool)]
-pub struct Attack;
+pub struct ZoomView;
 
 #[derive(InputAction)]
 #[action_output(bool)]
@@ -36,9 +36,9 @@ pub struct Select;
 /// Controller tab switch right
 #[derive(Debug, InputAction)]
 #[action_output(bool)]
-pub struct RightTab;
+pub struct CycleTab;
 
 /// Controller tab switch left
 #[derive(Debug, InputAction)]
 #[action_output(bool)]
-pub struct LeftTab;
+pub struct CycleTabBack;

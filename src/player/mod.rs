@@ -30,6 +30,7 @@ pub fn spawn_player(
     cfg: Res<Config>,
     models: Res<Models>,
     gltf_assets: Res<Assets<Gltf>>,
+    camera: Single<Entity, With<SceneCamera>>,
     mut commands: Commands,
     // DEBUG
     mut meshes: ResMut<Assets<Mesh>>,
@@ -45,7 +46,7 @@ pub fn spawn_player(
     let hitbox = Capsule3d::new(cfg.player.hitbox.radius, cfg.player.hitbox.height);
     let collider = Collider::from(hitbox);
 
-    commands
+    let _player = commands
         .spawn((
             DespawnOnExit(Screen::Gameplay),
             pos,
@@ -100,25 +101,21 @@ pub fn spawn_player(
                 Transform::from_xyz(0.0, -0.1, 0.0),
             ));
             // DEBUG
-        });
+        })
+        .id();
+
+    #[cfg(feature = "fpv")]
+    commands
+        .entity(*camera)
+        .insert(CharacterControllerCameraOf::new(_player));
 
     Ok(())
 }
 
-fn player_post_spawn(
-    on: On<Add, Player>,
-    modal_input_q: Query<Entity, With<ModalInput>>,
-    mut players: Query<&mut Player>,
-    mut commands: Commands,
-) {
+fn player_post_spawn(on: On<Add, Player>, mut players: Query<&mut Player>) {
     if let Ok(mut p) = players.get_mut(on.entity) {
         p.id = on.entity; // update player id with spawned entity
-        info!("player entity: Player.id: {}", p.id);
-    }
-
-    // remove placeholder modal ctx
-    if let Ok(modal_ctx) = modal_input_q.single() {
-        commands.entity(modal_ctx).remove::<ModalInput>();
+        info!("NEW PLAYER ID: {}", p.id);
     }
 }
 
@@ -132,6 +129,9 @@ pub struct Player {
     pub animation: Animation,
 }
 
+/// Its fine until we have 10 mil entities on spawn I guess
+const PLACEHOLDER_ENTITY: Entity = Entity::from_raw_u32(10_000_000).unwrap();
+
 impl Default for Player {
     fn default() -> Self {
         Self {
@@ -139,9 +139,9 @@ impl Default for Player {
             // u32::MAX is Entity::PLACEHOLDER and using placeholder leads to issues and using option
             // here while being idiomatic will unnecessary complicate handling it in systems
             // We replace it with real id when the player entity is spawned anyway
-            id: Entity::from_raw_u32(1_000_000).unwrap(),
-            last_input_change: Instant::now(),
+            id: PLACEHOLDER_ENTITY,
             animation: Animation::default(),
+            last_input_change: Instant::now(),
         }
     }
 }

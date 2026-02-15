@@ -38,10 +38,7 @@ pub fn prepare_animations(
     let Some(gltf) = gltf_assets.get(&models.player) else {
         return;
     };
-    let Some(e) = spawned
-        .entity
-        .get_animation_player_e(children_q, animation_player_q)
-    else {
+    let Some(e) = spawned.entity.get_recursive(children_q, animation_player_q) else {
         return;
     };
     let Ok(mut animation_player) = animation_players.get_mut(e) else {
@@ -87,10 +84,7 @@ pub fn animating(
     let movement = *movement.into_inner();
 
     for (mut player, mut step_timer, ahoy, ahoy_out) in player_q {
-        let Some(e) = player
-            .id
-            .get_animation_player_e(children_q, animation_players_q)
-        else {
+        let Some(e) = player.id.get_recursive(children_q, animation_players_q) else {
             continue;
         };
         let Ok(mut animation_player) = animation_players.get_mut(e) else {

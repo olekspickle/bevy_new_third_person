@@ -63,6 +63,7 @@ pub use bevy_seedling::prelude::*;
 
 mod fade;
 mod fdsp_host;
+mod loop_region;
 mod radio;
 
 pub use fade::*;
@@ -87,9 +88,8 @@ pub use fade::*;
 pub const CONVERTER: PerceptualVolume = PerceptualVolume::new();
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins((fdsp_host::plugin, fade::plugin));
-
-    app.add_systems(Startup, setup);
+    app.add_plugins((fdsp_host::plugin, fade::plugin, loop_region::plugin))
+        .add_systems(Startup, setup);
 }
 
 fn setup(mut master: Single<&mut VolumeNode, With<MainBus>>, settings: Res<Settings>) {

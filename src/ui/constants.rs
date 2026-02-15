@@ -12,7 +12,7 @@ pub mod fonts {
     /// Bold italic font path
     pub const BOLD_ITALIC: &str = "embedded://bevy_new_3d_rpg/assets/fonts/FiraSans-BoldItalic.ttf";
     /// Monospace font path
-    pub const MONO: &str = "embedded://bevt_new_3d_rpg/assets/fonts/FiraMono-Medium.ttf";
+    pub const MONO: &str = "embedded://bevy_new_3d_rpg/assets/fonts/FiraMono-Medium.ttf";
 }
 
 /// Size constants
@@ -42,7 +42,9 @@ pub mod size {
 }
 
 pub mod colors {
+    pub use bevy::color::palettes::{css::*, tailwind::*};
     use bevy::prelude::Color;
+
     /// #00000000
     pub const TRANSPARENT: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
     /// #332666b3

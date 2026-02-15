@@ -103,19 +103,19 @@ impl Entity {
         }
     }
 
-    pub fn get_animation_player_e(
+    pub fn get_recursive<T: Component>(
         &self,
         children_q: Query<&Children>,
-        animation_player_q: Query<Entity, With<AnimationPlayer>>,
+        component_q: Query<Entity, With<T>>,
     ) -> Option<Entity> {
-        if animation_player_q.get(*self).is_ok() {
+        if component_q.get(*self).is_ok() {
             return Some(*self);
         }
 
         if let Ok(children) = children_q.get(*self) {
             for child in children.iter() {
-                if let Some(anim) = child.get_animation_player_e(children_q, animation_player_q) {
-                    return Some(anim);
+                if let Some(e) = child.get_recursive(children_q, component_q) {
+                    return Some(e);
                 }
             }
         }

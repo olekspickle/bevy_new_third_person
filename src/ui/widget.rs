@@ -5,6 +5,7 @@ use std::borrow::Cow;
 /// A root UI node that fills the window and centers its content.
 pub fn ui_root(name: impl Into<Cow<'static, str>>) -> impl Bundle {
     (
+        GlobalZIndex(-1), // to see bevy-egui
         Name::new(name),
         Node {
             width: Percent(100.0),
