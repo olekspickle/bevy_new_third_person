@@ -2,6 +2,7 @@ use crate::*;
 
 #[cfg(feature = "dev_native")]
 mod dev_tools;
+mod dialogue;
 mod mood;
 
 pub use mood::*;

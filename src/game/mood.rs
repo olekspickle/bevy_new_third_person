@@ -32,6 +32,12 @@ pub enum Mood {
     Combat,
 }
 
+#[derive(EntityEvent)]
+pub struct ChangeMood {
+    pub entity: Entity,
+    pub mood: Mood,
+}
+
 fn start_soundtrack(
     settings: Res<Settings>,
     mood: Res<State<Mood>>,
@@ -61,7 +67,7 @@ fn start_soundtrack(
             FadeIn,
         ))
         .id();
-    debug!("spawned default track: {e}");
+    trace!("spawned default track: {e}");
     let mp: MusicPlaybacks = [(Mood::default(), e)].into_iter().collect();
     commands.insert_resource(mp);
 }
@@ -169,7 +175,7 @@ impl MusicPlaybacks {
         mut music_pbs: ResMut<MusicPlaybacks>,
     ) {
         if let Ok(&mood) = moods.get(on.entity) {
-            debug!("adding entity for {mood:?} {}", on.entity);
+            trace!("adding entity for {mood:?} {}", on.entity);
             music_pbs.insert(mood, on.entity);
         }
     }
@@ -180,21 +186,15 @@ impl MusicPlaybacks {
         on: On<Despawn, SamplePlayer>,
         settings: Res<Settings>,
         mood: Res<State<Mood>>,
-        screen: Res<State<Screen>>,
-        music_q: Query<Entity, With<MusicPool>>,
-        samplers_q: Query<Entity, With<SamplePlayer>>,
         mut commands: Commands,
         mut sources: ResMut<AudioSources>,
         mut music_pbs: ResMut<MusicPlaybacks>,
     ) {
         let mood = mood.get();
-        // we only want to continue gameplay music here
-        if screen.get() != &Screen::Gameplay || music_q.get(on.entity).is_err() {
+        let Some(current) = music_pbs.get(mood) else {
             return;
-        }
-        if let Some(e) = music_pbs.get(mood)
-            && samplers_q.get(*e).is_err()
-        {
+        };
+        if *current != on.entity {
             return;
         }
 

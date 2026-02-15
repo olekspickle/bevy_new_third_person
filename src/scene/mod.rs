@@ -16,16 +16,23 @@
 //! more on that here: <https://bevyskein.dev/docs/migration-tools>
 //! Scene logic is only active during the State `Screen::Playing`
 use crate::*;
+use bevy_enhanced_input::prelude::*;
 
+mod screen_fade;
 mod skybox;
+pub use screen_fade::*;
 pub use skybox::*;
 
 pub fn plugin(app: &mut App) {
-    app.add_plugins(skybox::plugin)
-        .add_systems(OnEnter(Screen::Title), setup);
+    app.add_plugins((skybox::plugin, screen_fade::plugin))
+        .add_systems(OnEnter(Screen::Title), spawn_level)
+        .add_systems(
+            OnEnter(Screen::Gameplay),
+            deactivate_modal_ctx_and_hide_cursor,
+        );
 }
 
-pub fn setup(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut commands: Commands) {
+pub fn spawn_level(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut commands: Commands) {
     let Some(scene) = gltf_assets.get(&models.entry_scene) else {
         return;
     };
@@ -40,4 +47,15 @@ pub fn setup(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut commands: 
         brightness: 500.0,
         ..Default::default()
     });
+}
+
+fn deactivate_modal_ctx_and_hide_cursor(
+    mut commands: Commands,
+    main_menu_ctx: Single<Entity, With<MainMenuCtx>>,
+) {
+    commands
+        .entity(*main_menu_ctx)
+        .insert(ContextActivity::<ModalInput>::INACTIVE);
+    #[cfg(not(feature = "third_person"))]
+    commands.entity(*main_menu_ctx).trigger(ToggleCamCursor);
 }
