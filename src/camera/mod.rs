@@ -9,7 +9,7 @@ use bevy::{
     post_process::bloom::Bloom, render::view::Hdr,
 };
 
-mod gamepad_cursor;
+// mod gamepad_cursor;
 mod hdr;
 #[cfg(feature = "third_person")]
 mod third_person;

@@ -1,12 +1,14 @@
 //! This plugin demonstrates how to create a loop region.
 //!
 //! # Example of spawning a loop region.
+//! ```rust,no_run
 //! pub fn start_region(server: Res<AssetServer>, mut commands: Commands) {
 //!     commands.spawn((
 //!         SamplePlayer::new(server.load("midir-chip.ogg")),
 //!         LoopRegion(8.391..11.437),
 //!     ));
 //! }
+//! ```
 
 use super::*;
 use bevy_seedling::pool::Sampler;

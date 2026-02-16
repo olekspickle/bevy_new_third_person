@@ -30,7 +30,7 @@ pub fn spawn_player(
     cfg: Res<Config>,
     models: Res<Models>,
     gltf_assets: Res<Assets<Gltf>>,
-    camera: Single<Entity, With<SceneCamera>>,
+    #[cfg(feature = "fpv")] camera: Single<Entity, With<SceneCamera>>,
     mut commands: Commands,
     // DEBUG
     mut meshes: ResMut<Assets<Mesh>>,

@@ -12,5 +12,6 @@ pub fn plugin(app: &mut App) {
         mood::plugin,
         #[cfg(feature = "dev_native")]
         dev_tools::plugin,
+        dialogue::plugin,
     ));
 }
