@@ -17,11 +17,11 @@ args = ["binstall", "--locked", "-y", "--force", "wasm-bindgen-cli", "wasm-opt"]
 
 [tasks.build-web]
 command = "bevy"
-args = ["build", "--locked", "--release", "--features=web", "--yes", "web", "--bundle"]
+args = ["build", "--locked", "--release", "--no-default-features", "--features=web", "--yes", "web", "--bundle"]
 
-[tasks.run-web]
+[tasks.web]
 command = "bevy"
-args = ["run", "--release", "--features", "web", "web", "-U", "multi-threading"]
+args = ["run", "--release", "--no-default-features", "--features", "web", "web", "-U", "multi-threading"]
 
 [tasks.hot]
 install_crate = "dioxus-cli"

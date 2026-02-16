@@ -84,7 +84,7 @@ opt-level = "s"
 codegen-units = 1
 strip = true
 
-[profile.web]
+[profile.web-release]
 inherits = "release"
 strip = "debuginfo"                 # Strip all debugging information from the binary to slightly reduce file size.
 

@@ -1,19 +1,17 @@
 use crate::*;
 use bevy::asset::Asset;
 use bevy_seedling::sample::AudioSample;
+use bevy_shuffle_bag::ShuffleBag;
 
 mod ron;
 mod tracking;
-
-use bevy_shuffle_bag::ShuffleBag;
-pub use ron::*;
 pub(crate) use tracking::*;
 
 pub fn plugin(app: &mut App) {
     // start asset loading
     app.add_plugins(tracking::plugin)
-        .add_plugins(RonLoad::<Config>::default())
-        .add_plugins(RonLoad::<CreditsPreset>::default())
+        .add_plugins(ron::RonLoadPlugin::<Config>::default())
+        .add_plugins(ron::RonLoadPlugin::<CreditsPreset>::default())
         .load_resource_from_path::<Config>("config.ron")
         .load_resource_from_path::<CreditsPreset>("credits.ron")
         .load_resource::<AudioSources>()
@@ -120,25 +118,6 @@ impl FromWorld for AudioSources {
         }
     }
 }
-
-// #[derive(Asset, Clone, Reflect, Resource)]
-// #[reflect(Resource)]
-// pub struct PreLoad {
-//     #[dependency]
-//     pub cfg: Handle<Ron>,
-//     #[dependency]
-//     pub credits: Handle<Ron>,
-// }
-//
-// impl FromWorld for PreLoad {
-//     fn from_world(world: &mut World) -> Self {
-//         let assets = world.resource::<AssetServer>();
-//         Self {
-//             cfg: assets.load("config.ron"),
-//             credits: assets.load("credits.ron"),
-//         }
-//     }
-// }
 
 // /// A [`Resource`] that contains all the assets needed to spawn the level.
 // /// We use this to preload assets before the level is spawned.

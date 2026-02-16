@@ -29,7 +29,6 @@ use audio::*;
 use models::*;
 use scene::*;
 use screens::*;
-#[cfg(not(target_arch = "wasm32"))]
 use third_party::*;
 use ui::*;
 

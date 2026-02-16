@@ -1,11 +1,10 @@
 use crate::*;
-#[cfg(feature = "native")]
-use bevy::pbr::ScreenSpaceAmbientOcclusion;
 #[cfg(not(feature = "third_person"))]
 use bevy::window::{CursorGrabMode, CursorOptions, PrimaryWindow};
+#[cfg(feature = "native")]
+use bevy::{anti_alias::taa::TemporalAntiAliasing, pbr::ScreenSpaceAmbientOcclusion};
 use bevy::{
-    anti_alias::taa::TemporalAntiAliasing, camera::Exposure,
-    core_pipeline::tonemapping::Tonemapping, light::ShadowFilteringMethod,
+    camera::Exposure, core_pipeline::tonemapping::Tonemapping, light::ShadowFilteringMethod,
     post_process::bloom::Bloom, render::view::Hdr,
 };
 

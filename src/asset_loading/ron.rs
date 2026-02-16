@@ -26,9 +26,9 @@ pub enum RonLoaderError {
 
 /// Plugin to load your asset type `A` from ron files.
 #[derive(Default)]
-pub struct RonLoad<A>(PhantomData<A>);
+pub struct RonLoadPlugin<A>(PhantomData<A>);
 
-impl<A> Plugin for RonLoad<A>
+impl<A> Plugin for RonLoadPlugin<A>
 where
     for<'de> A: serde::Deserialize<'de> + Asset,
 {
