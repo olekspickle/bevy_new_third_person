@@ -43,7 +43,7 @@ pub fn spawn_camera(mut commands: Commands) {
         // performance critical
         (
             Msaa::Off,
-            #[cfg(not(feature = "web"))] // breaks wasm
+            #[cfg(feature = "native")] // breaks wasm
             TemporalAntiAliasing::default(),
             ShadowFilteringMethod::Temporal,
             #[cfg(feature = "native")] // See https://github.com/bPluginevyengine/bevy/issues/20459

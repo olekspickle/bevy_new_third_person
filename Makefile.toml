@@ -4,12 +4,19 @@ build = { command = "cargo", args = ["build"] }
 fmt = { command = "cargo", args = ["fmt", "--all", "--", "--check"] }
 doc = { command = "cargo", args = ["doc", "--locked", "--profile","ci", "--document-private-items", "--no-deps"] }
 clippy = { command = "cargo", args = ["clippy", "--all-targets", "--", "-D", "warnings"] }
-lint = { dependencies = ["clippy", "fmt", "doc"] }
+lint = { dependencies = ["clippy", "fmt", "doc", "check-web"] }
 clean-build = { dependencies = ["clean", "build", "lint"] }
 
 [tasks.check-web]
 command = "cargo"
-args = ["check", "--profile", "ci", "--no-default-features", "--features", "web", "--target", "wasm32-unknown-unknown"]
+args = [
+    "check",
+    "--config", "profile.web.inherits='dev'",
+    "--profile", "ci",
+    "--no-default-features",
+    "--features", "web",
+    "--target", "wasm32-unknown-unknown"
+]
 
 [tasks.install-wasm-deps]
 command = "cargo"

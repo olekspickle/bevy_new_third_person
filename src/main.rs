@@ -29,6 +29,7 @@ use audio::*;
 use models::*;
 use scene::*;
 use screens::*;
+#[cfg(feature = "native")]
 use third_party::*;
 use ui::*;
 
