@@ -1,3 +1,4 @@
+
 # # CRANELIFT speedup: https://bevy.org/learn/quick-start/getting-started/setup/#cranelift
 # [unstable]
 # build-std = ["std", "core", "alloc", "panic_abort"]
@@ -84,7 +85,6 @@ opt-level = "s"
 codegen-units = 1
 strip = true
 
-[profile.web-release]
+[profile.web]
 inherits = "release"
 strip = "debuginfo"                 # Strip all debugging information from the binary to slightly reduce file size.
-

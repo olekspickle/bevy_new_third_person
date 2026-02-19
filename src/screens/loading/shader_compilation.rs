@@ -83,10 +83,10 @@ impl LoadedPipelineCount {
             }
             #[cfg(feature = "web")]
             {
-                7
+                5
             }
         };
-        #[cfg(feature = "dev")]
+        #[cfg(debug_assertions)]
         {
             count
         }

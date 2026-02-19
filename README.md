@@ -52,10 +52,12 @@ To set this up, follow the instructions in the [release announcement](https://be
 - [x] custom font replace example using pre-loaded font
 
 ### TODOs
+- [ ] shader demo
 - [ ] simple animation transition state machine
 - [ ] 3d and 2d particles demo: shooting magic balls, fireplace, step dust
 - [ ] spatial audio demo: boombox emitting background music
 - [ ] modern PS/SteamDeck like item select wheel
+- [ ] steamworks integration
 - [ ] small door/portal demo
 - [ ] pool with light textures
 - [ ] split screen for local coop

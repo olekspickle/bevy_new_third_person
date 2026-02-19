@@ -30,6 +30,10 @@ args = ["build", "--locked", "--release", "--no-default-features", "--features=w
 command = "bevy"
 args = ["run", "--release", "--no-default-features", "--features", "web", "web", "-U", "multi-threading"]
 
+[tasks.web-dev]
+command = "bevy"
+args = ["run", "--no-default-features", "--features", "web,dev", "web", "-U", "multi-threading"]
+
 [tasks.hot]
 install_crate = "dioxus-cli"
 command = "dx"
