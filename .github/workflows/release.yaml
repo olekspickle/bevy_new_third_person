@@ -1,3 +1,4 @@
+---
 name: release
 
 on:
@@ -114,6 +115,7 @@ jobs:
             echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
           else
             echo "version=$(cargo pkgid | sed 's/.*#//')" >> "$GITHUB_OUTPUT"
+          fi
 
   # Forward some environment variables as outputs of this job.
   # This is needed because the `env` context can't be used in the `if:` condition of a job:
