@@ -33,7 +33,7 @@ on:
         type: string
       upload_to_github:
         description: "upload to GitHub releases"
-        default: false
+        default: true
         type: boolean
       deploy_to_github_pages:
         description: "deploy web build to GitHub Pages"

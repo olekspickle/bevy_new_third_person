@@ -1,6 +1,6 @@
 use super::*;
 use crate::{
-    player::{Player, modal_ctx_active, player_ctx_active},
+    player::{modal_ctx_active, player_ctx_active},
     scene::ScreenFadePhase,
 };
 use bevy_yarnspinner::{
@@ -8,29 +8,24 @@ use bevy_yarnspinner::{
     prelude::*,
 };
 
+/// fn spawn_start_dialogue(
+///     mut commands: Commands,
+///     project: Res<YarnProject>,
+///     player_q: Query<Entity, With<Player>>,
+/// ) {
+///     for player in player_q.iter() {
+///         let mut dialogue_runner = project.create_dialogue_runner(&mut commands);
+///         dialogue_runner.start_node("Start");
+///         commands.entity(player).insert(dialogue_runner);
+///     }
+/// }
 pub fn plugin(app: &mut App) {
     app.add_systems(
-        OnEnter(Screen::Gameplay),
-        spawn_start_dialogue.after(crate::player::spawn_player),
-    )
-    .add_systems(
         Update,
         start_cutscene.run_if(any_with_component::<DialogueRunner>),
     )
     .add_observer(on_dialogue_start)
     .add_observer(on_dialogue_complete);
-}
-
-fn spawn_start_dialogue(
-    mut commands: Commands,
-    project: Res<YarnProject>,
-    player_q: Query<Entity, With<Player>>,
-) {
-    for player in player_q.iter() {
-        let mut dialogue_runner = project.create_dialogue_runner(&mut commands);
-        dialogue_runner.start_node("Start");
-        commands.entity(player).insert(dialogue_runner);
-    }
 }
 
 fn start_cutscene(mut commands: Commands, mut dialogue_runner_q: Query<&mut DialogueRunner>) {
