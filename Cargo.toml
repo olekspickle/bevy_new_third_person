@@ -1,6 +1,6 @@
 [package]
 name = "bevy_new_3d_rpg"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["Oleks Pickle <22867443+olekspickle@users.noreply.github.com>"]
 license = "MIT OR Apache-2.0"
 edition = "2024"
