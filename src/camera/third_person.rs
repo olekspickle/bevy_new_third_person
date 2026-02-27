@@ -29,7 +29,7 @@ fn add_tpv_cam(
             zoom: Zoom::new(cfg.player.zoom.0, cfg.player.zoom.1),
             offset_enabled: true,
             offset_toggle_enabled: true,
-            cursor_lock_key: KeyCode::KeyL,
+            cursor_lock_key: KeyCode::KeyL.into(),
             // bounds: vec![Bound::NO_FLIP, Bound::ABOVE_FLOOR],
             ..default()
         },

@@ -13,6 +13,12 @@ keywords = ["bevy", "game", "template", "devkit", "third person", "topdown", "ga
 version = "0.18"
 default-features = false
 features = [
+    # TODO: change to this on 0.19 (thx Jan!)
+    # "3d",
+    # "jpeg",
+    # "serialize",
+    # "hotpatching",
+    # "reflect_auto_register",
     # opinionated list without bevy_audio
     "default_app",
     "default_platform",
@@ -40,23 +46,20 @@ bevy_top_down_camera = { version = "0.3", optional = true }             # top do
 
 avian3d = "0.6.0-rc.1"
 bevy_ahoy =  "0.1.0-rc.1"                                               # character controller
-bevy_enhanced_input = { version = "0.23", features = ["serialize"] }    # keyboard/gamepad input
-
-# dialogue
-bevy_yarnspinner = "0.7"
-bevy_yarnspinner_example_dialogue_view = "0.7"
-
-# to play with
-# bevy_open_vat
-# bevy_wind_waker_shader
-# bevy_hanabi = { version = "0.18", default-features = false, features = [
-#     "3d",
-#     "gpu_tests",
-# ] }
+bevy_enhanced_input = { version = "0.24", features = ["serialize"] }    # keyboard/gamepad input
 
 bevy_shuffle_bag = "0.4"                                                # deterministically random container
 bevy_seedling = { version = "0.7", features = ["hrtf"] }                # audio plugin using firewheel
 firewheel = "0.10"
+
+# dialogue
+bevy_yarnspinner = "0.7"
+
+# to play with
+# bevy_open_vat
+# bevy_wind_waker_shader
+# bevy_wind_waker_shader
+
 
 # misc
 easy-ext = "1"

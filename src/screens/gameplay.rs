@@ -3,10 +3,14 @@
 //! Place to all UI HUD, modal logic and other gameplay effects
 
 use super::*;
+use bevy_enhanced_input::prelude::*;
 
 pub(super) fn plugin(app: &mut App) {
     app.add_plugins(ui::modal::plugin)
-        .add_systems(OnEnter(Screen::Gameplay), spawn_gameplay_ui)
+        .add_systems(
+            OnEnter(Screen::Gameplay),
+            (spawn_gameplay_ui, deactivate_global_modal_ctx),
+        )
         .add_observer(toggle_mute)
         .add_observer(toggle_pause)
         .add_observer(trigger_menu_toggle_on_esc);
@@ -115,4 +119,15 @@ fn trigger_menu_toggle_on_esc(
         info!("popping modal");
         commands.entity(on.entity).trigger(PopModal);
     }
+}
+
+fn deactivate_global_modal_ctx(
+    mut commands: Commands,
+    main_menu_ctx: Single<Entity, With<MainMenuCtx>>,
+) {
+    commands
+        .entity(*main_menu_ctx)
+        .insert(ContextActivity::<ModalInput>::INACTIVE);
+    #[cfg(not(feature = "third_person"))]
+    commands.entity(*main_menu_ctx).trigger(ToggleCamCursor);
 }
