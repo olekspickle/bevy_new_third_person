@@ -2,7 +2,7 @@
 # 3D Bevy game template
 ![settings UI demo](./assets/gifs/settings-ui.gif)
 ![ahoy KCC demo](./assets/gifs/ahoy-kcc.gif)
-![seedling mood zones demo](./assets/gifs/seedling-skein-crossfade.gif)
+![animation graph demo](./assets/gifs/animation-graph.gif)
 
 This template is based on the awesome [BevyFlock 2D template][BevyFlock] featuring out of the box builds for:
 - Windows
@@ -50,10 +50,10 @@ To set this up, follow the instructions in the [release announcement](https://be
 - [x] audio, video and keys rebind tabs in settings (currently broken)
 - [x] easy drop in scene integration using awesome [skein] with a simple scene
 - [x] custom font replace example using pre-loaded font
+- [x] simple animation setup with AnimationGraph & smooth AnimationTransitions
 
 ### TODOs
 - [ ] shader demo
-- [ ] simple animation transition state machine
 - [ ] 3d and 2d particles demo: shooting magic balls, fireplace, step dust
 - [ ] spatial audio demo: boombox emitting background music
 - [ ] modern PS/SteamDeck like item select wheel
@@ -63,8 +63,8 @@ To set this up, follow the instructions in the [release announcement](https://be
 - [ ] split screen for local coop
 - [ ] flying around suit/mode
 - [ ] vault on objects if they are reachable
-- [ ] climbing
 - [ ] basic fighting: punch, kick, take weapon
+- [ ] climbing
 - [ ] rifle
 - [ ] bow
 
