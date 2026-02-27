@@ -7,234 +7,361 @@
 //! exponentially between frames based on input
 use super::*;
 use bevy::scene::SceneInstanceReady;
-use bevy_ahoy::CharacterControllerOutput;
 use std::time::Duration;
 
 /// Animation control knobs
 mod knobs {
-    // pub const TRANSITION_DURATION: f32 = 0.15;
-    pub const DAMPENING: f32 = 0.01;
-    pub const JUMP_SPEED: f32 = 0.01;
+    /// General damping factor to slow down animations using speed
+    pub const DAMPING: f32 = 0.05;
+    pub const TRANSITION: f32 = 0.2;
+    /// Use a slightly faster transition for jumps to make them feel "snappy"
+    pub const JUMP_TRANSITION: f32 = 0.1;
 }
 
 pub fn plugin(app: &mut App) {
-    app.add_systems(Update, animating.run_if(in_state(Screen::Gameplay)));
+    app.add_systems(
+        Update,
+        (calcucate_animations, animate)
+            .chain()
+            .run_if(in_state(Screen::Gameplay)),
+    );
 }
+
+/// Build animation graph when scene loads
 pub fn prepare_animations(
-    spawned: On<SceneInstanceReady>,
-    // TODO: try this
-    // spawned: On<Add, AnimationPlayer>,
+    on: On<SceneInstanceReady>,
     models: Res<Models>,
-    gltf_assets: Res<Assets<Gltf>>,
+    gltfs: Res<Assets<Gltf>>,
     children_q: Query<&Children>,
     animation_player_q: Query<Entity, With<AnimationPlayer>>,
-    mut commands: Commands,
-    mut player: Query<&mut Player>,
     mut animation_players: Query<&mut AnimationPlayer>,
-    mut animation_graphs: ResMut<Assets<AnimationGraph>>,
+    mut graphs: ResMut<Assets<AnimationGraph>>,
+    mut players: Query<&mut Player>,
+    mut commands: Commands,
 ) {
-    info!("prepare_animations fired on: {}", spawned.entity);
-
-    let Some(gltf) = gltf_assets.get(&models.player) else {
+    let Some(animation_player_e) = on.entity.get_recursive(children_q, animation_player_q) else {
         return;
     };
-    let Some(e) = spawned.entity.get_recursive(children_q, animation_player_q) else {
-        return;
-    };
-    let Ok(mut animation_player) = animation_players.get_mut(e) else {
-        return;
-    };
-    let Ok(mut player) = player.single_mut() else {
+    let Ok(mut animation_player) = animation_players.get_mut(animation_player_e) else {
         return;
     };
 
-    let mut graph = AnimationGraph::new();
+    let Some(gltf) = gltfs.get(&models.player) else {
+        return;
+    };
 
-    // Create flat animation graph with one blend node
-    for (name, clip) in gltf.named_animations.iter() {
-        let node_index = graph.add_clip(clip.clone(), 1.0, graph.root);
-        player.animation.map.insert(name.to_string(), node_index);
-    }
+    // we list acnimations here in the same order they are listed in AnimationState enum
+    let clips = vec![
+        gltf.named_animations["Idle_Loop"].clone(),
+        gltf.named_animations["Jog_Fwd_Loop"].clone(),
+        gltf.named_animations["Sprint_Loop"].clone(),
+        gltf.named_animations["Jump_Start"].clone(),
+        gltf.named_animations["Jump_Loop"].clone(),
+        gltf.named_animations["Jump_Land"].clone(),
+        gltf.named_animations["Crouch_Fwd_Loop"].clone(),
+        gltf.named_animations["Crouch_Idle_Loop"].clone(),
+        gltf.named_animations["Roll"].clone(),
+    ];
 
-    // TODO: check if it still works on the second gamepad
-    // Add animation graph to animation player
+    let (graph, nodes) = AnimationGraph::from_clips(clips);
+    let graph_handle = graphs.add(graph);
+
     commands
-        .entity(e)
-        .insert(AnimationGraphHandle(animation_graphs.add(graph)));
+        .entity(animation_player_e)
+        .insert(AnimationGraphHandle(graph_handle))
+        .insert(AnimationTransitions::default());
 
-    for i in player.animation.map.values() {
-        animation_player.start(*i).repeat();
+    let idle_node = nodes[0];
+    animation_player.play(idle_node).repeat();
+
+    if let Ok(mut player) = players.single_mut() {
+        debug!("adding animations to player: {}", player.id);
+        player.animation = Animations {
+            // state: (AnimationState::StandIdle, AnimationState::StandIdle),
+            current: AnimationState::StandIdle,
+            requested: None,
+            nodes,
+            animation_player_e,
+        };
     }
 }
 
-pub fn animating(
+pub fn calcucate_animations(
+    time: Res<Time>,
     cfg: Res<Config>,
-    children_q: Query<&Children>,
-    player_q: Query<(
-        &mut Player,
-        &mut StepTimer,
+    mut players: Query<(
         &CharacterController,
-        &CharacterControllerOutput,
+        &CharacterControllerState,
+        &Transform,
+        &mut PreviousPosition,
+        &mut Player,
     )>,
-    movement: Single<&Action<Movement>>,
-    camera: Query<&Transform, With<SceneCamera>>,
-    animation_players_q: Query<Entity, With<AnimationPlayer>>,
-    mut animation_players: Query<&mut AnimationPlayer>,
-) -> Result {
-    let movement = *movement.into_inner();
+) {
+    let idle_to_run_ani = cfg.player.movement.idle_to_run_threshold * 1000.0;
 
-    for (mut player, mut step_timer, ahoy, ahoy_out) in player_q {
-        let Some(e) = player.id.get_recursive(children_q, animation_players_q) else {
+    for (ahoy, ahoy_state, pos, mut prev_pos, mut player) in players.iter_mut() {
+        let animation = &mut player.animation;
+
+        let displacement = pos.translation - prev_pos.0;
+        let velocity = displacement / time.delta_secs();
+        let h_speed = Vec3::new(velocity.x, 0.0, velocity.z).length().abs();
+        let v_speed = velocity.y;
+        prev_pos.0 = pos.translation;
+        // debug!("v_speed: {v_speed}, h_speed: {h_speed}");
+
+        let grounded = ahoy_state.grounded.is_some();
+
+        // MANTLE
+        if ahoy_state.mantle.is_some() {
+            animation.request(AnimationState::Dash); // or Mantle
             continue;
-        };
-        let Ok(mut animation_player) = animation_players.get_mut(e) else {
-            continue;
-        };
-
-        let cam_transform = camera.single()?;
-        let input_dir = cam_transform.movement_direction(*movement);
-
-        let moving = input_dir.length_squared() > cfg.player.movement.idle_to_run_threshold;
-        match player.animation.state.0 {
-            AnimationState::StandIdle if moving => {
-                info!("moving from idle");
-
-                // update step timer dynamically based on actual speed
-                // Note: this is specific to the animation provided
-                // normal step: 0.475
-                // sprint step (x1.5): 0.354
-                // step on sprint timer: 0.317
-                let ratio = cfg.player.movement.speed() / ahoy.speed;
-                let adjusted_step_time_f32 = cfg.timers.step * ratio;
-                let adjusted_step_time = Duration::from_secs_f32(adjusted_step_time_f32);
-                // info!("step timer:{adjusted_step_time_f32}s");
-                step_timer.set_duration(adjusted_step_time);
-                player.animation.run(ahoy.speed);
-            }
-            AnimationState::Run(_) if !moving => {
-                info!("idling after run");
-                player.animation.idle()
-            }
-            // touching entities after jumping
-            anim if !ahoy_out.touching_entities.is_empty() && player.animation.is_jumping() => {
-                info!("landing after jump or fall");
-                match anim {
-                    AnimationState::JumpLoop => player.animation.jump_land(),
-                    _ => player.animation.jump_start(),
-                }
-            }
-            anim if ahoy_out.touching_entities.is_empty() && player.animation.is_jumping() => {
-                if matches!(anim, AnimationState::JumpStart)
-                    && !matches!(anim, AnimationState::JumpLoop)
-                {
-                    player.animation.jump_loop()
-                }
-            }
-            _anim if ahoy_out.touching_entities.is_empty() && !player.animation.is_jumping() => {
-                player.animation.jump_start()
-            }
-            _ => (),
         }
-        // info!("next anim: {:?}", player.animation.state.1);
 
-        animation_player.zero_all_animations();
-        if player.animation.alter() {
-            match player.animation.next() {
-                AnimationState::StandIdle => {
-                    if let Some(index) = player.animation.map.get("Idle_Loop") {
-                        animation_player.start(*index).set_weight(1.0).repeat();
-                    }
-                }
-                AnimationState::Run(speed) => {
-                    if let Some(index) = player.animation.map.get("Jog_Fwd_Loop") {
-                        info!("Running: {speed}, res speed: {}", speed * knobs::DAMPENING);
-                        animation_player
-                            .start(*index)
-                            .set_weight(1.0)
-                            .set_speed(speed * knobs::DAMPENING)
-                            .repeat();
-                    }
-                }
-                AnimationState::Sprint(speed) => {
-                    if let Some(index) = player.animation.map.get("Sprint_Loop") {
-                        animation_player
-                            .start(*index)
-                            .set_weight(1.0)
-                            .set_speed(speed * knobs::DAMPENING)
-                            .repeat();
-                    }
-                }
-                AnimationState::JumpStart => {
-                    if let Some(index) = player.animation.map.get("Jump_Start") {
-                        animation_player.start(*index).set_speed(knobs::JUMP_SPEED);
-                    }
-                }
-                AnimationState::JumpLand => {
-                    if let Some(index) = player.animation.map.get("Jump_Land") {
-                        animation_player.start(*index).set_speed(knobs::JUMP_SPEED);
-                    }
-                }
-                AnimationState::JumpLoop => {
-                    if let Some(index) = player.animation.map.get("Jump_Loop") {
-                        animation_player.start(*index).set_speed(0.5).repeat();
-                    }
-                }
-                AnimationState::WallJump => {
-                    if let Some(index) = player.animation.map.get("Jump_Start") {
-                        animation_player.start(*index).set_speed(2.0);
-                    }
-                }
-                AnimationState::WallSlide => {
-                    if let Some(index) = player.animation.map.get("Jump_Loop") {
-                        animation_player
-                            .start(*index)
-                            .set_speed(knobs::DAMPENING)
-                            .repeat();
-                    }
-                }
-                AnimationState::Fall => {
-                    if let Some(index) = player.animation.map.get("Jump_Loop") {
-                        animation_player
-                            .start(*index)
-                            .set_speed(knobs::DAMPENING)
-                            .repeat();
-                    }
-                }
-                AnimationState::Crouch(speed) => {
-                    if let Some(index) = player.animation.map.get("Crouch_Fwd_Loop") {
-                        animation_player
-                            .start(*index)
-                            .set_speed(speed * knobs::DAMPENING)
-                            .repeat();
-                    }
-                }
-                AnimationState::CrouchIdle => {
-                    if let Some(index) = player.animation.map.get("Crouch_Idle_Loop") {
-                        animation_player
-                            .start(*index)
-                            .set_speed(knobs::DAMPENING)
-                            .repeat();
-                    }
-                }
-                AnimationState::Dash => {
-                    if let Some(index) = player.animation.map.get("Roll") {
-                        animation_player.start(*index).set_speed(3.0);
-                    }
-                }
-                AnimationState::Knockback => {
-                    if let Some(index) = player.animation.map.get("Hit_Chest") {
-                        animation_player.start(*index).set_speed(knobs::DAMPENING);
-                    }
-                }
-                AnimationState::Climb(speed) => {
-                    if let Some(index) = player.animation.map.get("Jump_Loop") {
-                        animation_player.start(*index).set_speed(speed).repeat();
-                    }
+        // in the air animation
+        if !grounded {
+            if !animation.current.is_jumping() {
+                debug!(
+                    "jumping,v_speed: {v_speed}, h_speed: {h_speed}, elapsed: {:?}",
+                    ahoy_state.last_ground.elapsed().as_secs_f32()
+                );
+                if v_speed > 0.1 {
+                    animation.request(AnimationState::Jump);
+                } else {
+                    animation.request(AnimationState::JumpLoop);
                 }
             }
-            player.animation.state.0 = player.animation.state.1;
+            continue;
+        }
+
+        // at this point we are grounded
+        if grounded && animation.current.is_jumping() {
+            if h_speed > idle_to_run_ani {
+                // Landed while running? Skip the thud, go to Run
+                animation.request(AnimationState::Run(h_speed));
+            } else {
+                animation.request(AnimationState::Land);
+            }
+            continue;
+        }
+
+        // CROUCH
+        if ahoy_state.crouching {
+            if h_speed > idle_to_run_ani {
+                animation.request(AnimationState::Crouch(h_speed));
+            } else {
+                animation.request(AnimationState::CrouchIdle);
+            }
+            continue;
+        }
+
+        // SPRINT
+        let is_sprinting = ahoy.speed > cfg.player.movement.speed();
+        if is_sprinting {
+            animation.request(AnimationState::Sprint(h_speed));
+            continue;
+        }
+
+        // and finally RUN\IDLE
+        if h_speed > idle_to_run_ani {
+            animation.request(AnimationState::Run(h_speed));
+        } else {
+            animation.request(AnimationState::StandIdle);
+        }
+    }
+}
+
+pub fn animate(
+    mut players: Query<&mut Player>,
+    mut animation_players: Query<&mut AnimationPlayer>,
+    mut transitions_query: Query<&mut AnimationTransitions>,
+) {
+    for mut player in players.iter_mut() {
+        let ani = &mut player.animation;
+        let Ok(mut animation_player) = animation_players.get_mut(ani.animation_player_e) else {
+            continue;
+        };
+
+        let Ok(mut transitions) = transitions_query.get_mut(ani.animation_player_e) else {
+            continue;
+        };
+
+        if let Some(next) = ani.requested.take() {
+            let node = ani.nodes[next.clip_index()];
+
+            let duration = if next.is_jumping() {
+                knobs::JUMP_TRANSITION
+            } else {
+                knobs::TRANSITION
+            };
+
+            transitions
+                .play(
+                    &mut animation_player,
+                    node,
+                    Duration::from_secs_f32(duration),
+                )
+                .repeat();
+
+            let current_node = ani.nodes[ani.current.clip_index()];
+            if let Some(active) = animation_player.animation_mut(current_node) {
+                match ani.current {
+                    AnimationState::Run(s)
+                    | AnimationState::Sprint(s)
+                    | AnimationState::Crouch(s) => active.set_speed(s * knobs::DAMPING),
+                    _ => active.set_speed(1.0),
+                };
+            }
+
+            debug!("current: {:?}, next: {next:?}", ani.current);
+            ani.current = next;
+        }
+
+        if ani.current.is_locked() {
+            let node = ani.nodes[ani.current.clip_index()];
+
+            if let Some(active) = animation_player.animation(node)
+                && active.elapsed() >= active.seek_time() * 0.85
+            {
+                let chained = match ani.current {
+                    AnimationState::Jump => Some(AnimationState::JumpLoop),
+                    AnimationState::Land => Some(AnimationState::StandIdle),
+                    _ => None,
+                };
+
+                if let Some(next) = chained {
+                    debug!("chained: {next:?}");
+                    ani.requested = Some(next);
+                }
+            }
+        }
+    }
+}
+
+#[derive(Component, Reflect, Clone, Debug)]
+#[reflect(Component)]
+pub struct Animations {
+    /// (current, next)
+    // pub state: (AnimationState, AnimationState),
+    pub current: AnimationState,
+    pub requested: Option<AnimationState>,
+    /// AnimationState → Graph node
+    pub nodes: Vec<AnimationNodeIndex>,
+    /// Entity that owns AnimationPlayer
+    pub animation_player_e: Entity,
+}
+
+impl Default for Animations {
+    fn default() -> Self {
+        Self {
+            // state: (AnimationState::StandIdle, AnimationState::StandIdle),
+            current: AnimationState::StandIdle,
+            requested: None,
+            nodes: Vec::new(),
+            animation_player_e: Entity::PLACEHOLDER,
+        }
+    }
+}
+
+/// State change helpers
+impl Animations {
+    fn request(&mut self, state: AnimationState) {
+        if self.current.is_locked() {
+            return;
+        }
+
+        if self.current.clip_index() != state.clip_index() {
+            self.requested = Some(state);
+        } else {
+            self.current = state;
         }
     }
 
-    Ok(())
+    pub fn idle(&mut self) {
+        self.request(AnimationState::StandIdle);
+    }
+
+    pub fn run(&mut self, speed: f32) {
+        self.request(AnimationState::Run(speed));
+    }
+
+    pub fn sprint(&mut self, speed: f32) {
+        self.request(AnimationState::Sprint(speed));
+    }
+
+    pub fn crouch(&mut self, speed: f32) {
+        self.request(AnimationState::Crouch(speed));
+    }
+
+    pub fn crouch_idle(&mut self) {
+        self.request(AnimationState::CrouchIdle);
+    }
+
+    pub fn dash(&mut self) {
+        self.request(AnimationState::Dash);
+    }
+
+    pub fn fall(&mut self) {
+        self.request(AnimationState::JumpLoop);
+    }
+
+    pub fn start_jump(&mut self) {
+        self.request(AnimationState::Jump);
+    }
+    pub fn end_jump(&mut self) {
+        self.request(AnimationState::Land);
+    }
+
+    pub fn is_jumping(&self) -> bool {
+        self.current.is_jumping()
+    }
+    pub fn is_falling(&self) -> bool {
+        self.current.is_falling()
+    }
+}
+
+/// The order is important here because we use it as indexes for animation node vec
+#[derive(Component, Default, Reflect, Clone, Copy, PartialEq, Debug)]
+#[reflect(Component)]
+pub enum AnimationState {
+    #[default]
+    StandIdle,
+    Run(f32),
+    Sprint(f32),
+    Jump,
+    JumpLoop,
+    Land,
+    Crouch(f32),
+    CrouchIdle,
+    Dash,
+}
+impl AnimationState {
+    pub fn clip_index(&self) -> usize {
+        match self {
+            AnimationState::StandIdle => 0,
+            AnimationState::Run(_) => 1,
+            AnimationState::Sprint(_) => 2,
+            AnimationState::Jump => 3,
+            AnimationState::JumpLoop => 4,
+            AnimationState::Land => 5,
+            AnimationState::Crouch(_) => 6,
+            AnimationState::CrouchIdle => 7,
+            AnimationState::Dash => 8,
+        }
+    }
+    /// Animations that should not be interrupted by other animations
+    pub fn is_locked(&self) -> bool {
+        matches!(
+            self,
+            AnimationState::Jump | AnimationState::Land | AnimationState::Dash
+        )
+    }
+    pub fn is_jumping(&self) -> bool {
+        matches!(self, AnimationState::Jump | AnimationState::JumpLoop)
+    }
+    pub fn is_running(&self) -> bool {
+        matches!(self, AnimationState::Run(_))
+    }
+    pub fn is_falling(&self) -> bool {
+        matches!(self, AnimationState::JumpLoop)
+    }
 }

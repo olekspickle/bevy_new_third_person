@@ -8,6 +8,9 @@ use bevy_yarnspinner::{
     prelude::*,
 };
 
+/// # Example
+///
+/// ```rust,no_run
 /// fn spawn_start_dialogue(
 ///     mut commands: Commands,
 ///     project: Res<YarnProject>,
@@ -19,6 +22,7 @@ use bevy_yarnspinner::{
 ///         commands.entity(player).insert(dialogue_runner);
 ///     }
 /// }
+/// ```
 pub fn plugin(app: &mut App) {
     app.add_systems(
         Update,

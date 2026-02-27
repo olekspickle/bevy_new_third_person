@@ -68,6 +68,12 @@ impl MovementPreset {
     pub fn speed(&self) -> f32 {
         self.max_speed / 2.0
     }
+    pub fn sprint_speed(&self) -> f32 {
+        self.speed() * self.sprint_factor
+    }
+    pub fn crouch_speed(&self) -> f32 {
+        self.speed() * self.crouch_factor
+    }
 }
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize, Reflect)]

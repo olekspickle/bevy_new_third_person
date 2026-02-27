@@ -1,5 +1,5 @@
 use super::*;
-use bevy_third_person_camera::{CustomGamepadSettings, ThirdPersonCamera, Zoom};
+use bevy_third_person_camera::{ThirdPersonCamera, Zoom};
 
 pub fn plugin(app: &mut App) {
     app.add_systems(OnEnter(Screen::Gameplay), add_tpv_cam)
@@ -21,8 +21,6 @@ fn add_tpv_cam(
     }
 
     commands.entity(cam).insert((
-        RigidBody::Kinematic,
-        Collider::sphere(1.0),
         ThirdPersonCamera {
             // aim_speed: 3.0,
             // aim_zoom: 0.7,
@@ -32,12 +30,9 @@ fn add_tpv_cam(
             offset_enabled: true,
             offset_toggle_enabled: true,
             cursor_lock_key: KeyCode::KeyL,
-            gamepad_settings: CustomGamepadSettings::default(),
             // bounds: vec![Bound::NO_FLIP, Bound::ABOVE_FLOOR],
             ..default()
         },
-        // RigidBody::Kinematic,
-        // Collider::sphere(1.0),
         Projection::from(PerspectiveProjection {
             fov: cfg.player.fov.to_radians(),
             ..Default::default()
