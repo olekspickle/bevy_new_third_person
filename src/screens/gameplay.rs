@@ -128,6 +128,5 @@ fn deactivate_global_modal_ctx(
     commands
         .entity(*main_menu_ctx)
         .insert(ContextActivity::<ModalInput>::INACTIVE);
-    #[cfg(not(feature = "third_person"))]
-    commands.entity(*main_menu_ctx).trigger(ToggleCamCursor);
+    // commands.entity(*main_menu_ctx).trigger(ToggleCamCursor);
 }

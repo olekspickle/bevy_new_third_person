@@ -32,44 +32,44 @@ impl ModalInput {
             .commands()
             .entity(ctx.entity)
             .insert(actions!(ModalInput[
-                        (
-                            Action::<CycleTabBack>::new(),
-                            ActionSettings {
-                                consume_input: true,
-                                ..Default::default()
-                            },
-                            bindings![
-                                (KeyCode::Tab).with_mod_keys(ModKeys::SHIFT),
-                                GamepadButton::LeftTrigger
-                            ],
-                        ),
-                        (
-                            Action::<CycleTab>::new(),
-                            bindings![KeyCode::Tab, GamepadButton::RightTrigger],
-                        ),
-                        (
-                            Action::<NavigateModal>::new(),
-                            ActionSettings {
-                                require_reset: true,
-                                ..Default::default()
-                            },
-                            Bindings::spawn((
-                                Spawn((Binding::mouse_motion(), Scale::splat(0.1), Negate::all())),
-                                Axial::right_stick().with((Scale::splat(2.0), Negate::x())),
-                            )),
-                        ),
-                        (
-                            Action::<Select>::new(),
-                            bindings![KeyCode::Enter, GamepadButton::South, MouseButton::Left],
-                        ),
-                        (
-                            Action::<Escape>::new(),
-                            ActionSettings {
-                                require_reset: true,
-                                ..Default::default()
-                            },
-                            bindings![KeyCode::Escape, GamepadButton::West],
-                        )
+                (
+                    Action::<CycleTab>::new(),
+                    bindings![KeyCode::Tab, GamepadButton::RightTrigger],
+                ),
+                (
+                    Action::<CycleTabBack>::new(),
+                    ActionSettings {
+                        consume_input: true,
+                        ..Default::default()
+                    },
+                    bindings![
+                        (KeyCode::Tab).with_mod_keys(ModKeys::SHIFT),
+                        GamepadButton::LeftTrigger
+                    ],
+                ),
+                (
+                    Action::<NavigateModal>::new(),
+                    ActionSettings {
+                        require_reset: true,
+                        ..Default::default()
+                    },
+                    Bindings::spawn((
+                        Spawn((Binding::mouse_motion(), Scale::splat(0.1), Negate::all())),
+                        Axial::right_stick().with((Scale::splat(2.0), Negate::x())),
+                    )),
+                ),
+                (
+                    Action::<Select>::new(),
+                    bindings![KeyCode::Enter, GamepadButton::South, MouseButton::Left],
+                ),
+                (
+                    Action::<Escape>::new(),
+                    ActionSettings {
+                        require_reset: true,
+                        ..Default::default()
+                    },
+                    bindings![KeyCode::Escape, GamepadButton::West],
+                )
             ]));
     }
 }

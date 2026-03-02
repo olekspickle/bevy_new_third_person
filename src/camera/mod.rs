@@ -52,6 +52,7 @@ pub fn spawn_camera(mut commands: Commands) {
     ));
 }
 
+// TODO: make it work in a local split screen
 fn on_toggle_cam_cursor(
     _: On<ToggleCamCursor>,
     #[cfg(feature = "third_person")] mut cam: Query<&mut ThirdPersonCamera>,

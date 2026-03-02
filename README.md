@@ -56,6 +56,10 @@ To set this up, follow the instructions in the [release announcement](https://be
 - [ ] shader demo
 - [ ] 3d and 2d particles demo: shooting magic balls, fireplace, step dust
 - [ ] spatial audio demo: boombox emitting background music
+- [ ] remove different camera features and introduce game modes that use them automatically:
+        - default to first person,
+        - go third_person on some kind of transportation
+        - top_down in certain ares perhaps?
 - [ ] modern PS/SteamDeck like item select wheel
 - [ ] steamworks integration
 - [ ] small door/portal demo

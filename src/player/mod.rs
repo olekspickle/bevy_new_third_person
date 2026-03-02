@@ -67,7 +67,6 @@ pub fn spawn_player(
         // spawn character mesh as child to adjust mesh position relative to the player origin
         .with_children(|parent| {
             let mut e = parent.spawn((mesh, Transform::from_xyz(0.0, -1.0, 0.0)));
-            info!("spawning player: {}", e.id());
             e.observe(prepare_animations);
 
             // DEBUG
@@ -90,11 +89,21 @@ pub fn spawn_player(
         .insert(CharacterControllerCameraOf::new(_player));
 }
 
-fn player_post_spawn(on: On<Add, Player>, mut players: Query<&mut Player>) {
+fn player_post_spawn(
+    on: On<Add, Player>,
+    mut players: Query<&mut Player>,
+    // mut commands: &mut Commands,
+) {
     if let Ok(mut p) = players.get_mut(on.entity) {
         p.id = on.entity; // update player id with spawned entity
         info!("NEW PLAYER ID: {}", p.id);
     }
+
+    // #[cfg(not(feature = "third_person"))]
+    // for player in players.iter() {
+    //     debug!("triggering cam cursor on player: {}", player.id);
+    //     commands.entity(player.id).trigger(ToggleCamCursor);
+    // }
 }
 
 #[derive(Component, Reflect, Clone, Debug)]
@@ -106,7 +115,7 @@ fn player_post_spawn(on: On<Add, Player>, mut players: Query<&mut Player>) {
     Mass(10.0),
     Collider::cylinder(0.7, 1.8),
     CharacterLook::default(),
-    InheritedVisibility::default()
+    Visibility::default() // because we add mesh as child
 )]
 #[cfg_attr(feature = "third_person", require(ThirdPersonCameraTarget))]
 #[cfg_attr(feature = "top_down", require(TopDownCameraTarget))]

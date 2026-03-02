@@ -2002,8 +2002,8 @@ dependencies = [
 
 [[package]]
 name = "bevy_third_person_camera"
-version = "0.4.0"
-source = "git+https://github.com/olekspickle/bevy_third_person_camera#be869d615fa1a5ca04d53086dd7e798ac689a6a1"
+version = "0.4.1"
+source = "git+https://github.com/olekspickle/bevy_third_person_camera#7555ae7335650e250ce185874f7dc683cb1cae72"
 dependencies = [
  "avian3d",
  "bevy",
@@ -4773,6 +4773,15 @@ dependencies = [
 
 [[package]]
 name = "itertools"
+version = "0.12.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ba291022dbbd398a455acf126c1e341954079855bc60dfdda641363bd6922569"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itertools"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
@@ -6372,7 +6381,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "81bddcdb20abf9501610992b6759a4c888aef7d1a7247ef75e2404275ac24af1"
 dependencies = [
  "anyhow",
- "itertools 0.10.5",
+ "itertools 0.12.1",
  "proc-macro2",
  "quote",
  "syn",
