@@ -659,7 +659,7 @@ dependencies = [
 [[package]]
 name = "bevy_ahoy"
 version = "0.1.0-rc.6"
-source = "git+https://github.com/janhohenheim/bevy_ahoy#eda6f519fb8625c97b615eddcdebb888ee1fdf9e"
+source = "git+https://github.com/janhohenheim/bevy_ahoy#c805a61f4334514acc9f0dbd6186fc20429706fd"
 dependencies = [
  "avian3d",
  "avian_pickup",
@@ -2002,8 +2002,8 @@ dependencies = [
 
 [[package]]
 name = "bevy_third_person_camera"
-version = "0.4.1"
-source = "git+https://github.com/olekspickle/bevy_third_person_camera#7555ae7335650e250ce185874f7dc683cb1cae72"
+version = "0.4.2"
+source = "git+https://github.com/olekspickle/bevy_third_person_camera#29585e67881802e3b03eaa6b8309de1bd9f83546"
 dependencies = [
  "avian3d",
  "bevy",
@@ -2027,11 +2027,12 @@ dependencies = [
 
 [[package]]
 name = "bevy_top_down_camera"
-version = "0.3.1"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0a63d8e9203cf5f15bcb863546cbad7f1d005098ceb4d8ae7374b62dccc1ab35"
+checksum = "46116e6c2eccb7229a62eeb8e8a5c3cccaa2efebf2c7f2b4a895cc1635b5e24f"
 dependencies = [
  "bevy",
+ "bevy_unified_input",
  "tracing",
 ]
 
@@ -2150,9 +2151,9 @@ dependencies = [
 
 [[package]]
 name = "bevy_unified_input"
-version = "0.1.0"
+version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6bd4e9d52161afee66bf44ba51c9fcf54448955060e69420ba0fd6dd26d75c9"
+checksum = "4903c27a7beba8dba63cac570cfd105eaa4dcf400112c04d76bce3b415fd75f8"
 dependencies = [
  "bevy_ecs",
  "bevy_input",
@@ -6389,12 +6390,9 @@ dependencies = [
 
 [[package]]
 name = "pxfm"
-version = "0.1.27"
+version = "0.1.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7186d3822593aa4393561d186d1393b3923e9d6163d3fbfd6e825e3e6cf3e6a8"
-dependencies = [
- "num-traits",
-]
+checksum = "b5a041e753da8b807c9255f28de81879c78c876392ff2469cde94799b2896b9d"
 
 [[package]]
 name = "qoi"
@@ -9092,9 +9090,9 @@ checksum = "d6bbff5f0aada427a1e5a6da5f1f98158182f26556f345ac9e04d36d0ebed650"
 
 [[package]]
 name = "winit"
-version = "0.30.12"
+version = "0.30.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c66d4b9ed69c4009f6321f762d6e61ad8a2389cd431b97cb1e146812e9e6c732"
+checksum = "a6755fa58a9f8350bd1e472d4c3fcc25f824ec358933bba33306d0b63df5978d"
 dependencies = [
  "ahash",
  "android-activity",
