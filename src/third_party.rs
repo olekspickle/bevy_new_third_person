@@ -1,6 +1,8 @@
 use crate::*;
 use bevy_ahoy::prelude::*;
-use bevy_fix_cursor_unlock_web::prelude::*;
+// use bevy_fix_cursor_unlock_web::prelude::*;
+use bevy_prng::WyRand;
+use bevy_rand::prelude::EntropyPlugin;
 use bevy_sprinkles::SprinklesPlugin;
 #[cfg(feature = "third_person")]
 pub use bevy_third_person_camera::{
@@ -10,8 +12,10 @@ pub use bevy_third_person_camera::{
 pub use bevy_top_down_camera::{TopDownCameraPlugin, TopDownCameraTarget};
 
 pub fn plugin(app: &mut App) {
+    let seed: u64 = 256;
+
     app.add_plugins((
-        FixPointerUnlockPlugin,
+        // FixPointerUnlockPlugin,
         #[cfg(feature = "native")]
         SeedlingPlugin::default(),
         #[cfg(feature = "web")]
@@ -21,6 +25,7 @@ pub fn plugin(app: &mut App) {
         PhysicsPlugins::default(),
         SprinklesPlugin,
         AhoyPlugins::default(),
+        EntropyPlugin::<WyRand>::with_seed(seed.to_ne_bytes()),
     ));
 
     #[cfg(feature = "third_person")]
