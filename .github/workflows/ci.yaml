@@ -49,7 +49,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.toolchain }}
-          components: rust-src,rust-docs
+          components: rust-src,rust-docs,rustc-codegen-cranelift-preview
 
       - name: Restore Rust cache
         id: cache
@@ -78,7 +78,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.toolchain }}
-          components: rust-src,clippy
+          components: rust-src,clippy,rustc-codegen-cranelift-preview
 
       - name: Restore Rust cache
         id: cache
@@ -116,7 +116,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.toolchain }}
-          components: rust-src
+          components: rust-src,rustc-codegen-cranelift-preview
 
       - name: Restore Rust cache
         id: cache
@@ -180,7 +180,7 @@ jobs:
         uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.toolchain }}
-          components: rust-src
+          components: rust-src,rustc-codegen-cranelift-preview
           targets: wasm32-unknown-unknown
 
       - name: Restore Rust cache
